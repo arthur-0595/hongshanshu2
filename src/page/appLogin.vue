@@ -1,8 +1,8 @@
 <template>
   <div id="login">
-    <loginHead></loginHead>
-    <loginMain></loginMain>
-    <loginFoot></loginFoot>
+    <login-head></login-head>
+    <login-main></login-main>
+    <login-foot></login-foot>
   </div>
 </template>
 
@@ -19,9 +19,7 @@
     },
     methods: {},
     mounted() {
-      // this.$api.get('topics', null, r => {
-      //   console.log(r)
-      // })
+
     }
   }
 </script>

@@ -3,13 +3,18 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
 
 // 引用API文件
-import api from './api/index.js'
+import axios from './api/index'
+import url_ from './api/url'
 // 将API方法绑定到全局
-Vue.prototype.$api = api
+Vue.prototype.$url = url_;
+Vue.prototype.$ajax = axios;
 
-Vue.config.productionTip = false
+Vue.use(ElementUI);
+Vue.config.productionTip = false;
 
 /* eslint-disable no-new */
 new Vue({
@@ -17,4 +22,4 @@ new Vue({
   router,
   components: { App },
   template: '<App/>'
-})
+});

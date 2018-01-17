@@ -74,5 +74,6 @@
     line-height: 28px;
     font-size: 14px;
     border-radius: 12px;
+    cursor: pointer;
   }
 </style>
