@@ -268,7 +268,7 @@
     float: left;
     width: 254px;
     height: 100%;
-    background: url(../assets/img/remember.png) no-repeat center center;
+    background: url(../../static/img/remember.png) no-repeat center center;
     opacity: .9;
     position: relative;
   }

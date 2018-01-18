@@ -34,6 +34,12 @@
     },
     methods: {
       fnToLogin() {
+        let loading = this.$loading({
+          lock: true,
+          text: 'Loading',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
         this.$ajax({
           method: 'GET',
           url: this.$url.url1,
@@ -59,6 +65,9 @@
               break;
             case 2:
               sessionStorage.userMsg = JSON.stringify(data.info[0]);
+              this.$router.afterEach( (to,from,next) => {
+                loading.close();
+              } );
               this.$router.push('./home');
               break;
             case 3:
@@ -76,6 +85,7 @@
               this.password = '';
               break;
           }
+          loading.close();
         })
         // this.$ajax.get(this.$url.url1, {
         //   params: {
@@ -99,7 +109,7 @@
   .loginMain {
     width: 100%;
     height: 650px;
-    background: url("../assets/img/443d96bd-7661-4ec9-a6d8-6f16f1bc7810.jpg") no-repeat center;
+    background: url("../../static/img/443d96bd-7661-4ec9-a6d8-6f16f1bc7810.jpg") no-repeat center;
   }
 
   .content {
@@ -149,14 +159,14 @@
   .loginBox .username .leftImg, .loginBox .password .leftImg {
     width: 40px;
     height: 40px;
-    background: url("../assets/img/man.jpg") no-repeat center;
+    background: url("../../static/img/man.jpg") no-repeat center;
     position: absolute;
     left: 0;
     top: 0;
   }
 
   .loginBox .password .leftImg {
-    background: url("../assets/img/lock.jpg") no-repeat center;
+    background: url("../../static/img/lock.jpg") no-repeat center;
   }
 
   .loginBox .username input, .loginBox .password input {

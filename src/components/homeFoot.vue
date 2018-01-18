@@ -56,7 +56,7 @@
     float: left;
     width: 268px;
     height: 100%;
-    background: url(../assets/img/foot-logo.png) no-repeat center left;
+    background: url(../../static/img/foot-logo.png) no-repeat center left;
   }
 
   .footer > .footer2 > .footer-con > .footer-txt {

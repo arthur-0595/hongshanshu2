@@ -4,60 +4,109 @@
       <div class="header1 clearfix">
         <div class="left clearfix">
           <div class="topLogo"></div>
-          <div class="courseBtn" id="courseBtn" @click="fncourseCenter()">课程中心<span>▼</span>
+          <div class="courseBtn" id="courseBtn"
+               :class="{clickthis:showCourse}"
+               @click="fncourseCenter(1)">课程中心<span>▼</span>
             <!--点击头部课程中心-->
             <home-course-center :showCourse="showCourse"></home-course-center>
           </div>
         </div>
         <div class="right clearfix">
-          <div class="person" id="person">
+          <div class="person" id="person"
+               :class="{clickPerson:showPerson}"
+               @click="fncourseCenter(2)">
+            <img :src="personImg" alt=""/>
             <!--点击头像-->
-            <div class="personCon clearfix" id="personCon" style="display: none;">
-              <div class="perLeft">
-                <img src="../assets/img/portrait-1.png" alt=""/>
-                <h4>等级 <i class="red">2</i></h4>
-              </div>
-              <div class="personInfo">
-                <h4>sheep</h4>
-                <div class="gray">sheep</div>
-                <div class="line">智能记忆已学生词：<i class="red">15</i></div>
-                <div class="line">
-                  <span class="goldNum">总金币数：<i class="red">208</i></span>
-                  <span>今日金币：<i class="red">5</i></span>
-                </div>
-                <div class="line">距离下一个等级还差<i class="red">112</i>学分哦！</div>
-              </div>
-              <div class="exit"><span></span>安全退出</div>
-            </div>
+            <home-person-con :showPerson="showPerson" :userInfo="userInfo"></home-person-con>
           </div>
           <div class="abilityBtn">更多功能<span>▼</span></div>
         </div>
       </div>
     </div>
     <div class="top2">
-      <div class="header2">您所在位置：智能单词-学习中心</div>
+      <div class="header2">
+        您所在位置：智能单词-学习中心
+        <div class="toStudyCenter">返回学习中心</div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
   import homeCourseCenter from '../components/homeCourseCenter'
+  import homePersonCon from '../components/homePersonCon'
 
   export default {
     name: 'home-head',
-    components: {homeCourseCenter},
+    components: {homeCourseCenter , homePersonCon},
     data() {
       return {
         showCourse: false ,
+        showPerson: false ,
+        userInfo: {
+          info: [
+            {
+              S_sex: 0,
+              ID: 1,
+              S_code: "yy",
+              S_name: "尹彦",
+              S_picurl: "/images/默认头像.png",
+              Remark: "",
+              Today_Integral: 0,
+              Integral: 0,
+              Grade: 1,
+              Learn_words: 0,
+              New_words: 0,
+              CreateTime: "2018-01-17T08:59:41",
+              S_phone: "11111111111",
+              S_qq: null,
+              S_email: null,
+              S_address: null,
+              S_longtime: "2019-01-12T10:23:15"
+            }
+          ],
+          next_level: 128
+        },
       }
     },
     methods: {
-      fncourseCenter(){
-        this.showCourse = !this.showCourse;
+      fncourseCenter(type_){
+        if(type_ === 1){
+          this.showCourse = !this.showCourse;
+        }else if(type_ === 2){
+          this.fnGetUserInfo();
+          this.showPerson = !this.showPerson;
+        }
+      },
+      fnGetUserInfo(){
+        //获取用户ID
+        let userMsg = JSON.parse(sessionStorage.userMsg);
+        if(!userMsg){
+          return
+        }
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'UserInte',
+            user_id: userMsg.ID
+          }
+        }).then(res => {
+          // console.log( JSON.stringify(res.data) );
+          this.userInfo = res.data;
+          sessionStorage.userMsg = JSON.stringify(res.data.info[0]);
+        })
       }
     },
     mounted() {
-
+    },
+    created(){
+      this.fnGetUserInfo();
+    },
+    computed:{
+      personImg(){
+        return  this.userInfo.info?(this.$url.url2 + this.userInfo.info[0].S_picurl):'../../static/img/portrait-1.png'
+      }
     }
   }
 </script>
@@ -84,7 +133,7 @@
     float: left;
     height: 100%;
     width: 180px;
-    background: url(../assets/img/logo.png) no-repeat center left;
+    background: url(../../static/img/logo.png) no-repeat center left;
   }
 
   .top1 > .header1 .left .courseBtn {
@@ -108,11 +157,18 @@
     float: right;
     height: 100%;
     width: 80px;
-    background: url(../assets/img/portrait-1.png) no-repeat center center;
-    background-size: 40px 40px;
     position: relative;
   }
-
+  .top1 > .header1 .right .person img{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    -webkit-transform: translate(-50%,-50%);
+  }
   .top1 > .header1 .right .abilityBtn {
     float: right;
     height: 100%;
@@ -129,7 +185,9 @@
   .top1 > .header1 .left .courseBtn:hover,
   .top1 > .header1 .right .courseBtn.active,
   .top1 > .header1 .right .person:hover,
-  .top1 > .header1 .right .person.active {
+  .top1 > .header1 .right .person.active,
+  .top1 > .header1 .left .courseBtn.clickthis,
+  .top1 > .header1 .right .person.clickPerson{
     background-color: #fff;
     cursor: pointer;
     color: #000;
@@ -149,6 +207,17 @@
     color: #fff;
     line-height: 40px;
     text-align: left;
+    position: relative;
+  }
+
+  .top2 .toStudyCenter{
+    position: absolute;
+    right: 0;
+    top: 0;
+    cursor: pointer;
+  }
+  .top2 .toStudyCenter:hover{
+    color: #ff7676;
   }
 
 </style>

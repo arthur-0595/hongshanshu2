@@ -2,7 +2,7 @@
   <div id="loginHead" class="loginHead">
     <div class="content">
       <div class="logo">
-        <img src="../assets/img/logo.png" alt="">
+        <img src="../../static/img/logo.png" alt="">
       </div>
       <div class="right">
         <div>产品介绍</div>

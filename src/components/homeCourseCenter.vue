@@ -1,19 +1,90 @@
 <template>
   <div class="courseCon" id="courseCon" v-show="showCourse">
+    <el-popover
+      ref="popover1"
+      placement="top-start"
+      width="200"
+      trigger="hover"
+      content="帮你快速实现词汇母语式的记忆效果，40小时牢记3000生词，永久不忘。词汇学习从此无忧！
+      难度指数：★">
+    </el-popover>
+    <el-popover
+      ref="popover2"
+      placement="top-start"
+      width="200"
+      trigger="hover"
+      content="快速训练你的听读音写单词的能力，具有独创的按照拼音音节抄写单词功能和拼写错误纠正功能。
+      难度指数：★★">
+    </el-popover>
+    <el-popover
+      ref="popover3"
+      placement="top-start"
+      width="200"
+      trigger="hover"
+      content="这个模块通过智能化记忆引擎自动管理你的记忆，分出生词、夹生词和熟词，实现快速牢记的效果。
+      难度指数：★★">
+    </el-popover>
+    <el-popover
+      ref="popover4"
+      placement="top-start"
+      width="200"
+      trigger="hover"
+      content="由记忆引擎驱动，通过听音组句训练，快速提高听力，培养语感，并能积累语法知识。
+      难度指数：★★★">
+    </el-popover>
+    <el-popover
+      ref="popover5"
+      placement="top-start"
+      width="200"
+      trigger="hover"
+      content="由记忆引擎驱动，通过连词成句训练，快速提高翻译能力，为英语写作打下坚实基础。
+      难度指数：★★★">
+    </el-popover>
+    <el-popover
+      ref="popover6"
+      placement="top-start"
+      width="200"
+      trigger="hover"
+      content="根据中文句意写出对应的英文句子，提高英语书面表达能力，学习这个模块需要有过硬的单词拼写能力、较为完整的句法知识和语法知识，适合英语基础较好的学习者。
+      难度指数：★★★★★">
+    </el-popover>
+    <el-popover
+      ref="popover7"
+      placement="top-start"
+      width="200"
+      trigger="hover"
+      content="词汇学习第二乐园，完成同步学习的同时扩充你的词汇量，以词汇记忆，听写，默写为主的全方位训练，培养学习者良好的英语学习习惯。">
+    </el-popover>
+    <el-popover
+      ref="popover8"
+      placement="top-start"
+      width="200"
+      trigger="hover"
+      content="科学，有趣的英文提速工具，通过它你可以快速消灭生词，改正不良阅读习惯，轻松将阅读速度和效率提高2至5倍。">
+    </el-popover>
+    <el-popover
+      ref="popover9"
+      placement="top-start"
+      width="200"
+      trigger="hover"
+      content="课程按场景进行分类，通过学习引擎技术，帮助学习者不断复习、巩固所学内容。先输入再输出，逐步实现自由表达。">
+    </el-popover>
+
+
     <ul>
       <li class="words">
         <ul>
           <li class="leftName">智能单词</li>
-          <li>
-            <span class="leftIcon" style="background-image:url(../assets/img/memory.png);"></span>
+          <li class="item" v-popover:popover1>
+            <span class="leftIcon" style="background-image:url(../../static/img/memory.png);"></span>
             <span class="name">智能记忆</span>
           </li>
-          <li>
-            <span class="leftIcon" style="background-image:url(../assets/img/dictation-fff.png);"></span>
+          <li class="item" v-popover:popover2>
+            <span class="leftIcon" style="background-image:url(../../static/img/dictation-fff.png);"></span>
             <span class="name">智能听写</span>
           </li>
-          <li>
-            <span class="leftIcon" style="background-image:url(../assets/img/write-fff.png);"></span>
+          <li class="item" v-popover:popover3>
+            <span class="leftIcon" style="background-image:url(../../static/img/write-fff.png);"></span>
             <span class="name">智能默写</span>
           </li>
         </ul>
@@ -21,16 +92,16 @@
       <li class="sentence">
         <ul>
           <li class="leftName">智能例句</li>
-          <li>
-            <span class="leftIcon" style="background-image:url(../assets/img/hearing.png);"></span>
+          <li class="item" v-popover:popover4>
+            <span class="leftIcon" style="background-image:url(../../static/img/hearing.png);"></span>
             <span class="name">例句听力</span>
           </li>
-          <li>
-            <span class="leftIcon" style="background-image:url(../assets/img/translation.png);"></span>
+          <li class="item" v-popover:popover5>
+            <span class="leftIcon" style="background-image:url(../../static/img/translation.png);"></span>
             <span class="name">例句翻译</span>
           </li>
-          <li>
-            <span class="leftIcon" style="background-image:url(../assets/img/example-write.png);"></span>
+          <li class="item" v-popover:popover6>
+            <span class="leftIcon" style="background-image:url(../../static/img/example-write.png);"></span>
             <span class="name">例句默写</span>
           </li>
         </ul>
@@ -38,16 +109,16 @@
       <li class="expand">
         <ul>
           <li class="leftName">拓展学习</li>
-          <li>
-            <span class="leftIcon" style="background-image:url(../assets/img/voice.png);"></span>
+          <li class="item" v-popover:popover7>
+            <span class="leftIcon" style="background-image:url(../../static/img/voice.png);"></span>
             <span class="name">智能语音</span>
           </li>
-          <li>
-            <span class="leftIcon" style="background-image:url(../assets/img/reading.png);"></span>
+          <li class="item" v-popover:popover8>
+            <span class="leftIcon" style="background-image:url(../../static/img/reading.png);"></span>
             <span class="name">智能阅读</span>
           </li>
-          <li>
-            <span class="leftIcon" style="background-image:url(../assets/img/spoken.png);"></span>
+          <li class="item" v-popover:popover9>
+            <span class="leftIcon" style="background-image:url(../../static/img/spoken.png);"></span>
             <span class="name">智能口语</span>
           </li>
         </ul>
@@ -67,7 +138,23 @@
     components: {},
     data() {
       return {
-
+        contentArr:[
+          '帮你快速实现词汇母语式的记忆效果，40小时牢记3000生词，永久不忘。词汇学习从此无忧！\n' +
+          '      难度指数：★',
+          '快速训练你的听读音写单词的能力，具有独创的按照拼音音节抄写单词功能和拼写错误纠正功能。\n' +
+          '      难度指数：★★',
+          '这个模块通过智能化记忆引擎自动管理你的记忆，分出生词、夹生词和熟词，实现快速牢记的效果。\n' +
+          '      难度指数：★★',
+          '由记忆引擎驱动，通过听音组句训练，快速提高听力，培养语感，并能积累语法知识。\n' +
+          '      难度指数：★★★',
+          '由记忆引擎驱动，通过连词成句训练，快速提高翻译能力，为英语写作打下坚实基础。\n' +
+          '      难度指数：★★★',
+          '根据中文句意写出对应的英文句子，提高英语书面表达能力，学习这个模块需要有过硬的单词拼写能力、较为完整的句法知识和语法知识，适合英语基础较好的学习者。\n' +
+          '      难度指数：★★★★★',
+          '词汇学习第二乐园，完成同步学习的同时扩充你的词汇量，以词汇记忆，听写，默写为主的全方位训练，培养学习者良好的英语学习习惯。',
+          '科学，有趣的英文提速工具，通过它你可以快速消灭生词，改正不良阅读习惯，轻松将阅读速度和效率提高2至5倍。',
+          '课程按场景进行分类，通过学习引擎技术，帮助学习者不断复习、巩固所学内容。先输入再输出，逐步实现自由表达。'
+        ]
       }
     },
     methods: {},
@@ -130,15 +217,25 @@
     color: #666;
   }
 
-  .courseCon > ul > li .leftIcon {
+  .courseCon > ul  li span.leftIcon {
     display: inline-block;
     vertical-align: top;
     width: 44px;
     height: 80px;
-    background:url(../assets/img/memory.png) no-repeat center;
+    background:url(../../static/img/memory.png) no-repeat center;
   }
 
-  .courseCon > ul > li .name {
+  .courseCon > ul > li.words  li.item:hover{
+    background-color: #02987c;
+  }
+  .courseCon > ul > li.sentence  li.item:hover{
+    background-color: #299283;
+  }
+  .courseCon > ul > li.expand  li.item:hover{
+    background-color: #c9e4e4;
+  }
+
+  .courseCon > ul  li span.name {
     display: inline-block;
     vertical-align: top;
   }

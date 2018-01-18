@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import appLogin from '@/page/appLogin'
 import appHome from '@/page/appHome'
 
-Vue.use(Router)
+Vue.use(Router);
 
 export default new Router({
   routes: [
