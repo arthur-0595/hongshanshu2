@@ -14,19 +14,26 @@
         <div class="right clearfix">
           <div class="person" id="person"
                :class="{clickPerson:showPerson}"
-               @click="fncourseCenter(2)">
+               @click="fncourseCenter(2)"
+               @mouseleave="fnMouseLeave()">
             <img :src="personImg" alt=""/>
             <!--点击头像-->
             <home-person-con :showPerson="showPerson" :userInfo="userInfo"></home-person-con>
           </div>
-          <div class="abilityBtn">更多功能<span>▼</span></div>
+          <div class="abilityBtn"
+               :class="{clickMoreBtn:showMoreBtn}"
+               @click="fncourseCenter(3)"
+               @mouseleave="fnMouseLeave()">更多功能<span>▼</span>
+            <!--点击更多功能-->
+            <home-more-btn :showMoreBtn="showMoreBtn"></home-more-btn>
+          </div>
         </div>
       </div>
     </div>
     <div class="top2">
       <div class="header2">
         您所在位置：智能单词-学习中心
-        <div class="toStudyCenter">返回学习中心</div>
+        <div class="toStudyCenter" v-show="showGoStudyCenter">返回学习中心</div>
       </div>
     </div>
   </div>
@@ -35,14 +42,17 @@
 <script>
   import homeCourseCenter from '../components/homeCourseCenter'
   import homePersonCon from '../components/homePersonCon'
+  import homeMoreBtn from '../components/homeMoreBtn'
 
   export default {
     name: 'home-head',
-    components: {homeCourseCenter , homePersonCon},
+    components: {homeCourseCenter, homePersonCon, homeMoreBtn},
     data() {
       return {
-        showCourse: false ,
-        showPerson: false ,
+        showGoStudyCenter: false,
+        showCourse: false,
+        showPerson: false,
+        showMoreBtn: false,
         userInfo: {
           info: [
             {
@@ -70,18 +80,31 @@
       }
     },
     methods: {
-      fncourseCenter(type_){
-        if(type_ === 1){
+      fncourseCenter(type_) {
+        if (type_ === 1) {
           this.showCourse = !this.showCourse;
-        }else if(type_ === 2){
+          this.showPerson = false;
+          this.showMoreBtn = false;
+        } else if (type_ === 2) {
           this.fnGetUserInfo();
           this.showPerson = !this.showPerson;
+          this.showCourse = false;
+          this.showMoreBtn = false;
+        } else if (type_ === 3) {
+          this.showMoreBtn = !this.showMoreBtn;
+          this.showPerson = false;
+          this.showCourse = false;
         }
       },
-      fnGetUserInfo(){
+      fnMouseLeave(){
+        this.showPerson = false;
+        this.showCourse = false;
+        this.showMoreBtn = false;
+      },
+      fnGetUserInfo() {
         //获取用户ID
         let userMsg = JSON.parse(sessionStorage.userMsg);
-        if(!userMsg){
+        if (!userMsg) {
           return
         }
         this.$ajax({
@@ -100,12 +123,12 @@
     },
     mounted() {
     },
-    created(){
+    created() {
       this.fnGetUserInfo();
     },
-    computed:{
-      personImg(){
-        return  this.userInfo.info?(this.$url.url2 + this.userInfo.info[0].S_picurl):'../../static/img/portrait-1.png'
+    computed: {
+      personImg() {
+        return this.userInfo.info ? (this.$url.url2 + this.userInfo.info[0].S_picurl) : '../../static/img/portrait-1.png'
       }
     }
   }
@@ -159,16 +182,18 @@
     width: 80px;
     position: relative;
   }
-  .top1 > .header1 .right .person img{
+
+  .top1 > .header1 .right .person img {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%,-50%);
-    -webkit-transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
   }
+
   .top1 > .header1 .right .abilityBtn {
     float: right;
     height: 100%;
@@ -178,16 +203,18 @@
     line-height: 80px;
     color: #fff;
     font-size: 16px;
+    position: relative;
   }
 
   .top1 > .header1 .right .abilityBtn:hover,
-  .top1 > .header1 .right .abilityBtn.active,
+  .top1 > .header1 .right .abilityBtn:active,
   .top1 > .header1 .left .courseBtn:hover,
-  .top1 > .header1 .right .courseBtn.active,
+  .top1 > .header1 .right .courseBtn:active,
   .top1 > .header1 .right .person:hover,
-  .top1 > .header1 .right .person.active,
+  .top1 > .header1 .right .person:active,
   .top1 > .header1 .left .courseBtn.clickthis,
-  .top1 > .header1 .right .person.clickPerson{
+  .top1 > .header1 .right .person.clickPerson,
+  .top1 > .header1 .right .abilityBtn.clickMoreBtn {
     background-color: #fff;
     cursor: pointer;
     color: #000;
@@ -210,13 +237,14 @@
     position: relative;
   }
 
-  .top2 .toStudyCenter{
+  .top2 .toStudyCenter {
     position: absolute;
     right: 0;
     top: 0;
     cursor: pointer;
   }
-  .top2 .toStudyCenter:hover{
+
+  .top2 .toStudyCenter:hover {
     color: #ff7676;
   }
 

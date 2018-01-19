@@ -1,22 +1,30 @@
 <template>
-  <div id="home" >
+  <div id="home">
     <home-head></home-head>
-    <home-con></home-con>
+    <home-content @showCoverBox = 'fnShowCoverBox'></home-content>
     <home-foot></home-foot>
+    <div class="coverBox" id="coverBox" v-show="showCover"></div>
   </div>
 </template>
 
 <script>
   import homeHead from '../components/homeHead'
-  import homeCon from '../components/homeCon'
+  import homeContent from '../components/homeContent'
   import homeFoot from '../components/homeFoot'
+
   export default {
     name: 'appHome',
-    components: {homeHead , homeCon , homeFoot},
+    components: {homeHead, homeContent, homeFoot},
     data() {
-      return {}
+      return {
+        showCover: false,
+      }
     },
-    methods: {},
+    methods: {
+      fnShowCoverBox(bool_){
+        this.showCover = bool_;
+      }
+    },
     mounted() {
 
     }
@@ -24,7 +32,18 @@
 </script>
 
 <style scoped>
-#home{
-  background-color: #efefef;
-}
+  #home {
+    background-color: #efefef;
+  }
+
+  .coverBox {
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+    z-index: 100;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgb(51, 51, 51);
+  }
 </style>

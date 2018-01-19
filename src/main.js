@@ -23,3 +23,5 @@ new Vue({
   components: { App },
   template: '<App/>'
 });
+
+var bus = new Vue();

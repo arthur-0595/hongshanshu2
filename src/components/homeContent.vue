@@ -2,9 +2,9 @@
   <section class="content" id="home-con">
     <!--中间顶部按钮-->
     <div class="categoryBtn clearfix">
-      <div class="leftBtn curProgramName" onclick="fnShowVersion()">牛津译林版2012(三年级起点)-三上词组和惯用法<span>▼</span></div>
-      <div class="leftBtn curUnitName" onclick="fnShowUnit()">Unit1-8<span>▼</span></div>
-      <div class="leftBtn curDeviceType" onclick="fnShowDevice()">智能记忆<span>▼</span></div>
+      <div class="leftBtn curProgramName" @click="fnShowSelfBox(1)">牛津译林版2012(三年级起点)-三上词组和惯用法<span>▼</span></div>
+      <div class="leftBtn curUnitName" @click="fnShowSelfBox(2)">Unit1-8<span>▼</span></div>
+      <div class="leftBtn curDeviceType" @click="fnShowSelfBox(3)">智能记忆<span>▼</span></div>
       <div class="link">测试中心<span>▼</span></div>
       <div class="link">记忆追踪</div>
       <div class="link">单词本</div>
@@ -12,42 +12,9 @@
     </div>
     <!--蒙版中间内容-->
     <div class="centerCon">
-      <div class="versionBox" id="versionBox" style="display: none;">
-        <div class="versionTop clearfix">
-          <div class="vBtn">牛津译林版2012(三年级起点)-三上词组和惯用法<span>▼</span></div>
-        </div>
-        <div class="versionCon">
-          <ul class="courseMenu">
-            <li class="choosed">在学课程</li>
-            <li style="border-left:none;border-right:none;">我的课程</li>
-            <li>所有课程</li>
-          </ul>
-          <div class="courseWrapper">
-            <table class="courseList" style="display: block;">
-              <tr class="tHeader">
-                <td style="width:450px">课程名称</td>
-                <td style="width:230px">最后一次学习时间</td>
-                <td style="width:131px">学习进度</td>
-                <td style="width:107px">学习</td>
-              </tr>
-              <tr class="line">
-                <td>牛津译林版2012(三年级起点)-三上词组和惯用法</td>
-                <td>3天前</td>
-                <td class="check">查看</td>
-                <td class="study"><span>学习</span></td>
-              </tr>
-              <tr class="line">
-                <td>牛津译林版2012(三年级起点)-三上词组和惯用法</td>
-                <td>3天前</td>
-                <td class="check">查看</td>
-                <td class="study"><span>学习</span></td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="unitBox" id="unitBox" style="display: none;">单元选择</div>
-      <div class="deviceBox" id="deviceBox" style="display: none;">板块选择</div>
+      <home-content-version-box @closeVersionBox="fncloseCenterBox" :showVersionBox="showVersionBox"></home-content-version-box>
+      <home-content-unit-box @closeUnitBox="fncloseCenterBox" :showUnitBox="showUnitBox"></home-content-unit-box>
+      <home-content-device-box @closeDeviceBox="fncloseCenterBox" :showDeviceBox="showDeviceBox"></home-content-device-box>
     </div>
     <!--学习进度-->
     <div class="progressBox clearfix">
@@ -96,13 +63,46 @@
 </template>
 
 <script>
+  import homeContentUnitBox from "./homeContentUnitBox";
+  import homeContentVersionBox from "./homeContentVersionBox";
+  import HomeContentDeviceBox from "./homeContentDeviceBox";
+
   export default {
-    name: 'home-con',
-    components: {},
+    name: 'home-content',
+    components: {HomeContentDeviceBox , homeContentUnitBox , homeContentVersionBox},
     data() {
-      return {}
+      return {
+        showDeviceBox: false,
+        showVersionBox: false,
+        showUnitBox: false,
+      }
     },
-    methods: {},
+    methods: {
+      fnShowSelfBox(type_){
+        if(type_ === 1){
+          this.showVersionBox = true;
+          this.$emit("showCoverBox" , true);
+        }else if(type_ === 2){
+          this.showUnitBox = true;
+          this.$emit("showCoverBox" , true);
+        }else if(type_ === 3){
+          this.showDeviceBox = true;
+          this.$emit("showCoverBox" , true);
+        }
+      },
+      fncloseCenterBox(eventType){
+        if(eventType === 1){
+          this.showVersionBox = false;
+          this.$emit("showCoverBox" , false);
+        }else if(eventType === 2){
+          this.showUnitBox = false;
+          this.$emit("showCoverBox" , false);
+        }else if(eventType === 3){
+          this.showDeviceBox = false;
+          this.$emit("showCoverBox" , false);
+        }
+      }
+    },
     mounted() {
 
     }
@@ -308,5 +308,11 @@
     font-size: 14px;
     color: #666;
     line-height: 26px;;
+  }
+  .centerCon{
+    position: relative;
+    z-index: 200;
+    background-color: #eee;
+    width:1000px;
   }
 </style>
