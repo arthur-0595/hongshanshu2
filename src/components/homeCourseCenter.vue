@@ -70,20 +70,22 @@
       content="课程按场景进行分类，通过学习引擎技术，帮助学习者不断复习、巩固所学内容。先输入再输出，逐步实现自由表达。">
     </el-popover>
 
-
     <ul>
       <li class="words">
         <ul>
           <li class="leftName">智能单词</li>
-          <li class="item" v-popover:popover1>
+          <li class="item" v-popover:popover1
+            @click="fnOpenStudyType(1)">
             <span class="leftIcon" style="background-image:url(../../static/img/memory.png);"></span>
             <span class="name">智能记忆</span>
           </li>
-          <li class="item" v-popover:popover2>
+          <li class="item" v-popover:popover2
+              @click="fnOpenStudyType(2)">
             <span class="leftIcon" style="background-image:url(../../static/img/dictation-fff.png);"></span>
             <span class="name">智能听写</span>
           </li>
-          <li class="item" v-popover:popover3>
+          <li class="item" v-popover:popover3
+              @click="fnOpenStudyType(3)">
             <span class="leftIcon" style="background-image:url(../../static/img/write-fff.png);"></span>
             <span class="name">智能默写</span>
           </li>
@@ -92,15 +94,18 @@
       <li class="sentence">
         <ul>
           <li class="leftName">智能例句</li>
-          <li class="item" v-popover:popover4>
+          <li class="item" v-popover:popover4
+              @click="fnOpenStudyType(4)">
             <span class="leftIcon" style="background-image:url(../../static/img/hearing.png);"></span>
             <span class="name">例句听力</span>
           </li>
-          <li class="item" v-popover:popover5>
+          <li class="item" v-popover:popover5
+              @click="fnOpenStudyType(5)">
             <span class="leftIcon" style="background-image:url(../../static/img/translation.png);"></span>
             <span class="name">例句翻译</span>
           </li>
-          <li class="item" v-popover:popover6>
+          <li class="item" v-popover:popover6
+              @click="fnOpenStudyType(6)">
             <span class="leftIcon" style="background-image:url(../../static/img/example-write.png);"></span>
             <span class="name">例句默写</span>
           </li>
@@ -109,15 +114,18 @@
       <li class="expand">
         <ul>
           <li class="leftName">拓展学习</li>
-          <li class="item" v-popover:popover7>
+          <li class="item" v-popover:popover7
+              @click="fnOpenStudyType(7)">
             <span class="leftIcon" style="background-image:url(../../static/img/voice.png);"></span>
             <span class="name">智能语音</span>
           </li>
-          <li class="item" v-popover:popover8>
+          <li class="item" v-popover:popover8
+              @click="fnOpenStudyType(8)">
             <span class="leftIcon" style="background-image:url(../../static/img/reading.png);"></span>
             <span class="name">智能阅读</span>
           </li>
-          <li class="item" v-popover:popover9>
+          <li class="item" v-popover:popover9
+              @click="fnOpenStudyType(9)">
             <span class="leftIcon" style="background-image:url(../../static/img/spoken.png);"></span>
             <span class="name">智能口语</span>
           </li>
@@ -130,8 +138,8 @@
 <script>
   export default {
     name: 'home-course-center',
-    props:{
-      showCourse:{
+    props: {
+      showCourse: {
         type: Boolean
       }
     },
@@ -157,7 +165,20 @@
         ]
       }
     },
-    methods: {},
+    methods: {
+      fnOpenStudyType(type_) {
+        if(type_ <= 6) {
+          this.$bus.emit('openStudyType', type_);
+        }else {
+          this.$alert('智能阅读等模块还在开发中哦: )', '提示', {
+            confirmButtonText: '确定',
+            callback: () => {
+              return
+            }
+          });
+        }
+      }
+    },
     mounted() {
 
     }

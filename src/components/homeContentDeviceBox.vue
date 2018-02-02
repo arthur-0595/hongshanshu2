@@ -1,20 +1,18 @@
 <template>
   <div class="versionBox" id="deviceBox" v-show="showDeviceBox">
     <div class="versionTop clearfix">
-      <div class="vBtn" style="visibility: hidden;">牛津译林版2012(三年级起点)-三上词组和惯用法<span>▼</span></div>
-      <div class="vBtn" style="visibility: hidden;">Unit1-8<span>▼</span></div>
-      <div class="vBtn" @click="fnTabSelf()">智能记忆<span>▼</span></div>
+      <div class="vBtn" style="visibility: hidden;">{{this.$store.state.versionBoxTitle}} <span> ▼</span></div>
+      <div class="vBtn" style="visibility: hidden;">{{this.$store.state.unitBoxTitle}} <span> ▼</span></div>
+      <div class="vBtn" @click="fnTabSelf()">{{this.$store.state.deviceBoxTitle}} <span> ▼</span></div>
     </div>
     <div class="versionCon">
-      <ul class="moudleList clearfix" style="display: none;">
-        <li style="background-image:url(../../static/img/remember.png);"><span>智能记忆</span></li>
-        <li style="background-image:url(../../static/img/listen.png);"><span>智能听写</span></li>
-        <li style="background-image:url(../../static/img/write.png);"><span>智能默写</span></li>
-      </ul>
-      <ul class="moudleList clearfix" style="display: block;">
-        <li style="background-image:url(../../static/img/sentenceListen.png);"><span>例句听力</span></li>
-        <li style="background-image:url(../../static/img/sentenceTranslate.png);"><span>例句翻译</span></li>
-        <li style="background-image:url(../../static/img/sentenceWrite.png);"><span>例句默写</span></li>
+      <ul class="moudleList clearfix">
+        <li :style="{backgroundImage:'url('+ item.imgUrl +')'}"
+            @click="fnclickItem(index)"
+            v-show="showType(index)"
+            v-for="(item,index) in moduleList">
+          <span>{{item.name}}</span>
+        </li>
       </ul>
     </div>
   </div>
@@ -30,16 +28,69 @@
     data() {
       return {
         showDevice: this.showDeviceBox,
+        moduleList: [
+          {
+            name: '智能记忆',
+            imgUrl: '../../static/img/remember.png'
+          }, {
+            name: '智能听写',
+            imgUrl: '../../static/img/listen.png'
+          }, {
+            name: '智能默写',
+            imgUrl: '../../static/img/write.png'
+          }, {
+            name: '例句听力',
+            imgUrl: '../../static/img/sentenceListen.png'
+          }, {
+            name: '例句翻译',
+            imgUrl: '../../static/img/sentenceTranslate.png'
+          }, {
+            name: '例句默写',
+            imgUrl: '../../static/img/sentenceWrite.png'
+          }
+        ]
       }
     },
     methods: {
-      fnTabSelf(){
+      // 关闭选择模块组件
+      fnTabSelf() {
         this.showDevice = false;
         this.$emit("closeDeviceBox", 3);
+      },
+      // 选中学习类型
+      fnclickItem(type_) {
+        let typeId = type_ + 1;
+        sessionStorage.type_id = typeId;
+        this.$store.commit('updateTypeId', typeId);
+        this.$store.commit('updateDeviceBoxTitle', this.moduleList[type_].name);
+        this.fnTabSelf();
+      },
+      // 获取默认选中类型
+      showType(index_) {
+        let typeId = this.$store.state.typeId;
+        if (typeId <= 3 && (index_ + 1) <= 3) {
+          return true
+        } else if (typeId > 3 && (index_ + 1) > 3) {
+          return true
+        } else {
+          return false
+        }
       }
     },
     mounted() {
+    },
+    computed: {
 
+    },
+    created() {
+      this.$bus.on('openStudyType', (type_) => {
+        this.fnclickItem(type_ - 1);
+      });
+    },
+    beforeDestroy() {
+      this.$bus.off('openStudyType', (type_) => {
+        this.fnclickItem(type_ - 1);
+      });
     }
   }
 </script>

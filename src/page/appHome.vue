@@ -21,12 +21,34 @@
       }
     },
     methods: {
-      fnShowCoverBox(bool_){
+      fnShowCoverBox(bool_) {
         this.showCover = bool_;
+      },
+      // 获取缓存中的模块ID,若未undefined,则设置默认为 1智能记忆
+      fnSetTypeId() {
+        let typeId = sessionStorage.type_id;
+        if (typeId) { // 如果缓存中存在typeId ，则设置vuex中typeId的值
+          this.$store.commit('updateTypeId' , typeId);
+        } else {
+          typeId = 1;
+          this.$store.commit('updateTypeId' , typeId);
+          sessionStorage.type_id = typeId;
+        }
+      },
+      // 获取用户信息中的用户Id
+      fnGetUserId() {
+        let userMsg = JSON.parse(sessionStorage.userMsg);
+        let userId = userMsg.ID;
+        this.$store.commit('updateUserId', userId);
       }
     },
     mounted() {
-
+      // 设置模块类型默认为 1 智能记忆
+      sessionStorage.type_id = 1;
+    },
+    created() {
+      this.fnSetTypeId();
+      this.fnGetUserId();
     }
   }
 </script>

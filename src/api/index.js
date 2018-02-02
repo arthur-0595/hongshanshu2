@@ -4,6 +4,7 @@ import qs from 'qs';
 axios.defaults.timeout = 30000;
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
 axios.defaults.baseURL = 'http://192.168.2.127:8091';
+// axios.defaults.baseURL = 'http://192.168.2.127:8091';
 
 // POST传参序列化 http request 拦截器
 axios.interceptors.request.use((config) => {

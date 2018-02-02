@@ -23,7 +23,8 @@
           <div class="abilityBtn"
                :class="{clickMoreBtn:showMoreBtn}"
                @click="fncourseCenter(3)"
-               @mouseleave="fnMouseLeave()">更多功能<span>▼</span>
+               @mouseleave="fnMouseLeave()"
+              v-if="false">更多功能<span>▼</span>
             <!--点击更多功能-->
             <home-more-btn :showMoreBtn="showMoreBtn"></home-more-btn>
           </div>

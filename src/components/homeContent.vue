@@ -2,19 +2,37 @@
   <section class="content" id="home-con">
     <!--中间顶部按钮-->
     <div class="categoryBtn clearfix">
-      <div class="leftBtn curProgramName" @click="fnShowSelfBox(1)">牛津译林版2012(三年级起点)-三上词组和惯用法<span>▼</span></div>
-      <div class="leftBtn curUnitName" @click="fnShowSelfBox(2)">Unit1-8<span>▼</span></div>
-      <div class="leftBtn curDeviceType" @click="fnShowSelfBox(3)">智能记忆<span>▼</span></div>
+      <div class="leftBtn curProgramName" @click="fnShowSelfBox(1)">
+        {{this.$store.state.versionBoxTitle}}
+        <span>▼</span>
+      </div>
+      <div class="leftBtn curUnitName" @click="fnShowSelfBox(2)">
+        {{this.$store.state.unitBoxTitle}}
+        <span>▼</span>
+      </div>
+      <div class="leftBtn curDeviceType" @click="fnShowSelfBox(3)">
+        {{this.$store.state.deviceBoxTitle}}
+        <span>▼</span>
+      </div>
       <div class="link">测试中心<span>▼</span></div>
       <div class="link">记忆追踪</div>
       <div class="link">单词本</div>
-      <div class="link">操作指南</div>
+      <div class="link" v-if="false">操作指南</div>
     </div>
-    <!--蒙版中间内容-->
+    <!--中间内容-->
     <div class="centerCon">
-      <home-content-version-box @closeVersionBox="fncloseCenterBox" :showVersionBox="showVersionBox"></home-content-version-box>
-      <home-content-unit-box @closeUnitBox="fncloseCenterBox" :showUnitBox="showUnitBox"></home-content-unit-box>
-      <home-content-device-box @closeDeviceBox="fncloseCenterBox" :showDeviceBox="showDeviceBox"></home-content-device-box>
+      <home-content-version-box
+        @closeVersionBox="fncloseCenterBox"
+        :showVersionBox="showVersionBox">
+      </home-content-version-box>
+      <home-content-unit-box
+        @closeUnitBox="fncloseCenterBox"
+        :showUnitBox="showUnitBox">
+      </home-content-unit-box>
+      <home-content-device-box
+        @closeDeviceBox="fncloseCenterBox"
+        :showDeviceBox="showDeviceBox">
+      </home-content-device-box>
     </div>
     <!--学习进度-->
     <div class="progressBox clearfix">
@@ -24,7 +42,7 @@
           <span class="mRight">单元进度：</span>
           <span class="totalProgress mRight">
 	    				<span class="curProgress"></span>
-    				</span>
+          </span>
           <span class="percent">20%</span>
         </div>
       </div>
@@ -33,7 +51,7 @@
           <span class="mRight">课程进度：</span>
           <span class="totalProgress mRight">
 	    				<span class="curProgress"></span>
-    				</span>
+          </span>
           <span class="percent">20%</span>
         </div>
         <div class="studyAgain">再学一遍</div>
@@ -42,15 +60,19 @@
     <!--底部复习-->
     <div class="conBot">
       <div class="botLeft">
-        <div class="review">课程总复习量</div>
-        <h3 class="reviewNum">200个</h3>
+        <div class="review">课程总单词量</div>
+        <h3 class="reviewNum">{{this.$store.state.courseNum}}个</h3>
         <div class="reviewBtn">
           <span>智能复习</span>
           <span>测试复习</span>
         </div>
       </div>
-      <div class="botCenter">
-        <span class="tit">智能记忆</span>
+      <div class="botCenter"
+           @click="fnGoToStudy()"
+        :class="{ type1: typeNum === 1,type2: typeNum === 2,
+                  type3: typeNum === 3,type4: typeNum === 4,
+                  type5: typeNum === 5,type6: typeNum === 6}">
+        <span class="tit">{{typeName}}</span>
       </div>
       <div class="botRight">
         <div class="review">今日学习效率</div>
@@ -69,42 +91,106 @@
 
   export default {
     name: 'home-content',
-    components: {HomeContentDeviceBox , homeContentUnitBox , homeContentVersionBox},
+    components: {HomeContentDeviceBox, homeContentUnitBox, homeContentVersionBox},
     data() {
       return {
         showDeviceBox: false,
         showVersionBox: false,
         showUnitBox: false,
+        versionBoxTitle: '选择版本',
+        unitBoxTitle: '选择单元',
+        deviceBoxTitle: '智能记忆'
       }
     },
     methods: {
-      fnShowSelfBox(type_){
-        if(type_ === 1){
+      // 点击选择教材、 单元 、 模块三个事件，分别唤起不同的组件
+      fnShowSelfBox(type_) {
+        if (type_ === 1) {
           this.showVersionBox = true;
-          this.$emit("showCoverBox" , true);
-        }else if(type_ === 2){
-          this.showUnitBox = true;
-          this.$emit("showCoverBox" , true);
-        }else if(type_ === 3){
+          this.$emit("showCoverBox", true);
+        } else if (type_ === 2) {
+          let textbook_id = sessionStorage.textbook_id;
+          if(textbook_id) { // 有缓存的课程ID
+            this.$bus.emit('getUnitList', textbook_id);
+            this.showUnitBox = true;
+            this.$emit("showCoverBox", true);
+          }else{ // 没有缓存的课程ID，弹出提示，点击确认自动弹出选择课程窗口
+            this.$alert('需要先选择教材哦: )', '提示', {
+              confirmButtonText: '确定',
+              callback: action => {
+                // 此处回调唤起选择教材事件
+                this.fnShowSelfBox(1);
+                return
+                // this.$message({
+                //   type: 'info',
+                //   message: `action: ${ action }`
+                // });
+              }
+            });
+          }
+        } else if (type_ === 3) {
           this.showDeviceBox = true;
-          this.$emit("showCoverBox" , true);
+          this.$emit("showCoverBox", true);
         }
       },
-      fncloseCenterBox(eventType){
-        if(eventType === 1){
+      fncloseCenterBox(eventType) {
+        if (eventType === 1) {
           this.showVersionBox = false;
-          this.$emit("showCoverBox" , false);
-        }else if(eventType === 2){
+          this.$emit("showCoverBox", false);
+        } else if (eventType === 2) {
           this.showUnitBox = false;
-          this.$emit("showCoverBox" , false);
-        }else if(eventType === 3){
+          this.$emit("showCoverBox", false);
+        } else if (eventType === 3) {
           this.showDeviceBox = false;
-          this.$emit("showCoverBox" , false);
+          this.$emit("showCoverBox", false);
         }
+      },
+      // 获取缓存中的选中的教材和课程信息，更新到vuex
+      fnUpdateCourseMsg() {
+        let version_id = sessionStorage.version_id;
+        let version_name = sessionStorage.version_name;
+        let textbook_id = sessionStorage.textbook_id;
+        let textbook_name = sessionStorage.textbook_name;
+        let unit_id = sessionStorage.unit_id;
+        let unit_name = sessionStorage.unit_name;
+        if(version_id && version_name && textbook_id && textbook_name && unit_id && unit_name){
+          this.$store.commit('updateVersionBoxTitle' , version_name + ' - ' + textbook_name);
+          this.$store.commit('updateVersionId' , version_id);
+          this.$store.commit('updateTextbookId' , textbook_id);
+          this.$store.commit('updateUnitBoxTitle' , unit_name);
+          this.$store.commit('updateUnitId' , unit_id);
+        }
+      },
+      // 获取缓存中的课程id,以更新单元列表内容
+      fnUpdateUnitList() {
+        let textbook_id = sessionStorage.textbook_id;
+        this.$bus.emit('getUnitList', textbook_id);
+      },
+      // 去学习了
+      fnGoToStudy() {
+        console.log('去学习了');
+
+      }
+    },
+    computed: {
+      typeNum() {
+        let typeId = this.$store.state.typeId;
+        return parseInt(typeId)
+      },
+      typeName() {
+        return this.$store.state.deviceBoxTitle;
       }
     },
     mounted() {
 
+    },
+    created() {
+      this.fnUpdateCourseMsg();
+      this.fnUpdateUnitList();
+    },
+    // 组件销毁时，解除监听
+    beforeDestroy() {
+      this.$bus.off('getUnitList', textbook_id);
     }
   }
 </script>
@@ -268,9 +354,26 @@
     float: left;
     width: 254px;
     height: 100%;
-    background: url(../../static/img/remember.png) no-repeat center center;
     opacity: .9;
     position: relative;
+  }
+  .conBot > .botCenter.type1{
+    background: url(../../static/img/remember.png) no-repeat center center;
+  }
+  .conBot > .botCenter.type2{
+    background: url(../../static/img/listen.png) no-repeat center center;
+  }
+  .conBot > .botCenter.type3{
+    background: url(../../static/img/write.png) no-repeat center center;
+  }
+  .conBot > .botCenter.type4{
+    background: url(../../static/img/sentenceListen.png) no-repeat center center;
+  }
+  .conBot > .botCenter.type5{
+    background: url(../../static/img/sentenceTranslate.png) no-repeat center center;
+  }
+  .conBot > .botCenter.type6{
+    background: url(../../static/img/sentenceWrite.png) no-repeat center center;
   }
 
   .conBot > .botCenter:hover {
@@ -309,10 +412,11 @@
     color: #666;
     line-height: 26px;;
   }
-  .centerCon{
+
+  .centerCon {
     position: relative;
     z-index: 200;
     background-color: #eee;
-    width:1000px;
+    width: 1000px;
   }
 </style>

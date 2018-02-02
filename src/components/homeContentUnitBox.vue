@@ -1,41 +1,33 @@
 <template>
   <div class="versionBox" id="unitBox" v-show="showUnitBox">
     <div class="versionTop clearfix">
-      <div class="vBtn" style="visibility: hidden;">牛津译林版2012(三年级起点)-三上词组和惯用法<span>▼</span></div>
-      <div class="vBtn" @click="fnTabSelf()">Unit1-8<span>▼</span></div>
+      <div class="vBtn" style="visibility: hidden;">{{this.$store.state.versionBoxTitle}} <span> ▼</span></div>
+      <div class="vBtn" @click="fnTabSelf()">{{this.$store.state.unitBoxTitle}} <span> ▼</span></div>
     </div>
     <div class="versionCon">
       <ul class="unitList clearfix" id="unitList">
-        <li>
-          <div class="unitName">Unit 1</div>
+        <li v-for="(item,index) in unitList"
+          @click="fnclickUnitItem(item)"
+            :title="'学习次数：'+item.study_count+'---学前测试分数:'+item.score+'---闯关测试最高得分:'+item.top_score">
+          <div class="unitName">{{item.unit_name}}</div>
           <div class="markList">
-            <span class="hasStudy">闯</span>
+            <span>{{item.study_count}}</span>
             <span>|</span>
-            <span>听</span>
+            <span>{{item.score}}</span>
             <span>|</span>
-            <span>默</span>
+            <span>{{item.top_score}}</span>
           </div>
         </li>
-        <li class="curSelect">
-          <div class="unitName">Unit 2</div>
-          <div class="markList">
-            <span class="hasStudy">闯</span>
-            <span>|</span>
-            <span>听</span>
-            <span>|</span>
-            <span>默</span>
-          </div>
-        </li>
-        <li class="noStudyUnit">
-          <div class="unitName">Unit 2</div>
-          <div class="markList">
-            <span>闯</span>
-            <span>|</span>
-            <span>听</span>
-            <span>|</span>
-            <span>默</span>
-          </div>
-        </li>
+        <!--<li class="noStudyUnit">-->
+          <!--<div class="unitName">Unit 2</div>-->
+          <!--<div class="markList">-->
+            <!--<span class="hasStudy">闯</span>-->
+            <!--<span>|</span>-->
+            <!--<span>听</span>-->
+            <!--<span>|</span>-->
+            <!--<span>默</span>-->
+          <!--</div>-->
+        <!--</li>-->
       </ul>
     </div>
   </div>
@@ -45,7 +37,7 @@
   export default {
     name: 'home-content-unit-box',
     props:{
-      showUnitBox:Boolean
+      showUnitBox: Boolean
     },
     components: {},
     data() {
@@ -54,12 +46,27 @@
       }
     },
     methods: {
-      fnTabSelf(){
+      // 切换显示隐藏单元组件
+      fnTabSelf() {
         this.showUnit = false;
-        this.$emit("closeUnitBox" , 2)
+        this.$emit("closeUnitBox" , 2);
+      },
+      // 点击选中单元事件
+      fnclickUnitItem(obj_) {
+        this.$store.commit("updateUnitBoxTitle", obj_.unit_name);
+        this.fnTabSelf();
+        sessionStorage.unit_id = obj_.id;
+        sessionStorage.unit_name = obj_.unit_name;
+
+      }
+    },
+    computed: {
+      unitList() {
+        return this.$store.state.unitList;
       }
     },
     mounted() {
+      console.log(this.$store.state.unitList);
 
     }
   }
@@ -95,6 +102,7 @@
     padding:20px 40px;
     box-sizing: border-box;
     background-color: #fff;
+    overflow: auto;
   }
   .unitList>li{
     float:left;
@@ -137,7 +145,7 @@
     color:#6bb3a3;
   }
   .unitList>li .markList > span{
-    margin:6px;
+    margin:1px;
   }
   .unitList>li .markList > span.hasStudy{
     color:#ff6600 !important

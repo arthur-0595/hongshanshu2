@@ -1,36 +1,43 @@
 <template>
   <div class="versionBox" id="versionBox" v-show="showVersionBox">
     <div class="versionTop clearfix">
-      <div class="vBtn" @click="fnTabSelf()">牛津译林版2012(三年级起点)-三上词组和惯用法<span>▼</span></div>
+      <div class="vBtn" @click="fnTabSelf()">{{versionName}} <span> ▼</span></div>
     </div>
     <div class="versionCon">
       <!--课程选择按钮-->
       <ul class="courseMenu">
-        <li :class="{choosed:showTab===0}" @click="fnShowSelf(0)">在学课程</li>
-        <li :class="{choosed:showTab===1}" style="border-left:none;border-right:none;" @click="fnShowSelf(1)">我的课程</li>
-        <li :class="{choosed:showTab===2}" @click="fnShowSelf(2)">所有课程</li>
+        <li :class="{choosed:showTab===0}"
+            @click="fnShowSelf(0)">
+          在学课程
+        </li>
+        <li :class="{choosed:showTab===1}"
+            style="border-left:none;border-right:none;"
+            @click="fnShowSelf(1)"
+            v-if="false">
+          我的课程
+        </li>
+        <li :class="{choosed:showTab===2}"
+            @click="fnShowSelf(2)">
+          所有课程
+        </li>
       </ul>
 
-      <div class="courseWrapper">
+      <div class="courseWrapper"
+           v-loading="loading">
         <!--在学课程-->
-        <table class="courseList courseItem" id="courseList" v-show="showTab === 0">
+        <table class="courseList courseItem" id="courseList"
+               v-show="showTab === 0">
           <tr class="tHeader">
             <td style="width:450px">课程名称</td>
             <td style="width:230px">最后一次学习时间</td>
             <td style="width:131px">学习进度</td>
             <td style="width:107px">学习</td>
           </tr>
-          <tr class="line">
-            <td>牛津译林版2012(三年级起点)-三上词组和惯用法</td>
-            <td>3天前</td>
+          <tr class="line" v-for="(item,index) in currentCourseList">
+            <td>{{item.version_name + item.textbook_name}}</td>
+            <td>2小时前</td>
             <td class="check">查看</td>
-            <td class="study"><span>学习</span></td>
-          </tr>
-          <tr class="line">
-            <td>牛津译林版2012(三年级起点)-三上词组和惯用法</td>
-            <td>3天前</td>
-            <td class="check">查看</td>
-            <td class="study"><span>学习</span></td>
+            <td class="study" @click="fnGoStudy(item)"><span>学习</span></td>
           </tr>
         </table>
         <!--我的课程-->
@@ -38,29 +45,10 @@
           <div class="series">
             <h4>选择系列</h4>
             <ul>
-              <li>
+              <li v-for="(item,index) in serieList"
+                  @click="fnGetVersionList(item.series_id)">
                 <span class="icon"></span>
-                <span class="name">小学英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li class="choose">
-                <span class="icon"></span>
-                <span class="name">初中英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">高中英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">大学英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">出国英语</span>
+                <span class="name">{{item.series_name}}</span>
                 <span class="arrow">▶</span>
               </li>
             </ul>
@@ -68,29 +56,10 @@
           <div class="versions">
             <h4>选择版本</h4>
             <ul>
-              <li>
+              <li v-for="(item,index) in versionsList"
+                  @click="fnGetCourseList(item)">
                 <span class="icon"></span>
-                <span class="name">考研大纲</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">09</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li class="choose">
-                <span class="icon"></span>
-                <span class="name">高中英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">大学英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">出国英语</span>
+                <span class="name">{{item.version_name}}</span>
                 <span class="arrow">▶</span>
               </li>
             </ul>
@@ -98,25 +67,10 @@
           <div class="courses">
             <h4>选择课程</h4>
             <ul>
-              <li>
+              <li v-for="(item,index) in allCoursesList"
+                  @click="fnGetThisCourseMsg(item)">
                 <span class="icon"></span>
-                <span class="name">小学英语</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">初中英语</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">高中英语</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">大学英语</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">出国英语</span>
+                <span class="name">{{item.textbook_name}}</span>
               </li>
             </ul>
           </div>
@@ -126,29 +80,10 @@
           <div class="series">
             <h4>选择系列</h4>
             <ul>
-              <li>
+              <li v-for="(item,index) in serieList"
+                @click="fnGetVersionList(item.series_id)">
                 <span class="icon"></span>
-                <span class="name">小学英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li class="choose">
-                <span class="icon"></span>
-                <span class="name">初中英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">高中英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">大学英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">出国英语</span>
+                <span class="name">{{item.series_name}}</span>
                 <span class="arrow">▶</span>
               </li>
             </ul>
@@ -156,29 +91,10 @@
           <div class="versions">
             <h4>选择版本</h4>
             <ul>
-              <li>
+              <li v-for="(item,index) in versionsList"
+                @click="fnGetCourseList(item)">
                 <span class="icon"></span>
-                <span class="name">考研大纲</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">09</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li class="choose">
-                <span class="icon"></span>
-                <span class="name">高中英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">大学英语</span>
-                <span class="arrow">▶</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">出国英语</span>
+                <span class="name">{{item.version_name}}</span>
                 <span class="arrow">▶</span>
               </li>
             </ul>
@@ -186,25 +102,10 @@
           <div class="courses">
             <h4>选择课程</h4>
             <ul>
-              <li>
+              <li v-for="(item,index) in allCoursesList"
+                @click="fnGetThisCourseMsg(item)">
                 <span class="icon"></span>
-                <span class="name">小学英语</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">初中英语</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">高中英语</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">大学英语</span>
-              </li>
-              <li>
-                <span class="icon"></span>
-                <span class="name">出国英语</span>
+                <span class="name">{{item.textbook_name}}</span>
               </li>
             </ul>
           </div>
@@ -223,21 +124,187 @@
     components: {},
     data() {
       return {
-        showVersion : this.showVersionBox,
+        showVersion: this.showVersionBox,
         showTab: 0,
+        loading: false,
+        userInfo: {},
+        currentCourseList: [], // 在学课程列表
+        serieList: [], // 所有的系列
+        versionsList: [], // 该系列下的版本
+        allCoursesList: [], // 该版本下的课程
       }
     },
     methods: {
-      fnTabSelf(){
+      // 关闭组件并发送关闭模态层事件
+      fnTabSelf() {
         this.showVersion = false;
         this.$emit('closeVersionBox' , 1);
       },
-      fnShowSelf(type_){
+      // 点击在学课程，我的课程，所有课程
+      fnShowSelf(type_) {
         this.showTab = type_;
+        // 如果点击的是我的课程或者所有课程，则获取所有的教材系列
+        if (type_ === 2 || type_ === 3) {
+          this.fnGetSerieList();
+        }
+      },
+      // 在学课程窗口点击学习
+      fnGoStudy(item_) {
+        this.thisVersionName = item_.version_name + item_.textbook_name;
+        this.$store.commit('updateVersionBoxTitle' , this.thisVersionName);
+        this.fnTabSelf();
+        sessionStorage.version_name = item_.version_name;
+        sessionStorage.textbook_name = item_.textbook_name;
+        sessionStorage.version_id = item_.version_id;
+        sessionStorage.textbook_id = item_.textbook_id;
+        // 获取课程下单词数
+        this.fnGetCourseNum(item_.textbook_id);
+        // 获取课程下单元列表
+        this.fnGetUnitList(item_.textbook_id);
+      },
+      // 获取所有在学课程
+      fnGetCurrentCourse() {
+        this.loading = true;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'GetStudy',
+            user_id: this.userInfo.ID
+          }
+        }).then(res => {
+          this.loading = false;
+          let data = res.data;
+          if(data.msg === '无数据'){
+            return
+          }
+          this.currentCourseList = data;
+        })
+      },
+      // 获取所有的系列
+      fnGetSerieList() {
+        this.loading = true;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'GetSeries',
+            user_id: this.userInfo.ID
+          }
+        }).then(res => {
+          this.loading = false;
+          let data = res.data;
+          this.serieList = data;
+          // console.log('serieList: ' + JSON.stringify(this.serieList));
+        })
+      },
+      // 获取系列下的版本
+      fnGetVersionList(serieId_) {
+        this.loading = true;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'GetVersionBySeriesID',
+            user_id: this.userInfo.ID,
+            series_id: serieId_
+          }
+        }).then(res => {
+          this.loading = false;
+          let data = res.data;
+          this.versionsList = data;
+          // console.log('versionsList: ' + JSON.stringify(this.versionsList));
+        })
+      },
+      // 获取版本下的课本
+      fnGetCourseList(versionObj_) {
+        sessionStorage.version_name = versionObj_.version_name;
+        sessionStorage.version_id = versionObj_.version_id;
+        this.thisVersionName = versionObj_.version_name + ' - ';
+        this.loading = true;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'GetTextBookByVersionID',
+            user_id: this.userInfo.ID,
+            version_id: versionObj_.version_id
+          }
+        }).then(res => {
+          this.loading = false;
+          let data = res.data;
+          this.allCoursesList = data;
+          // console.log('allCoursesList: ' + JSON.stringify(this.allCoursesList));
+        })
+      },
+      // 选中课本，获取该课本下的信息
+      fnGetThisCourseMsg(courseObj_) {
+        sessionStorage.textbook_name = courseObj_.textbook_name;
+        sessionStorage.textbook_id = courseObj_.textbook_id;
+        this.thisVersionName += courseObj_.textbook_name;
+        this.$store.commit('updateVersionBoxTitle' , this.thisVersionName);
+        this.fnTabSelf();
+        // 获取课程下单词数
+        this.fnGetCourseNum(courseObj_.textbook_id);
+        // 获取课程下单元列表
+        this.fnGetUnitList(courseObj_.textbook_id);
+      },
+      // 请求课程下的单词数量，并更新数据
+      fnGetCourseNum(textbookId_) {
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'GetWordsByTextBookID',
+            textbook_id: textbookId_
+          }
+        }).then(res => {
+          let data = res.data;
+          this.$store.commit('updateCourseNum' , data.wordtotal);
+        })
+      },
+      // 请求课程下的单元列表，并更新数据
+      fnGetUnitList(textbookId_) {
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'GetUnitByTextBookID',
+            user_id: this.$store.state.userId,
+            textbook_id: textbookId_,
+            type_id: this.$store.state.typeId
+          }
+        }).then(res => {
+          let data = res.data;
+          if(data.msg === '无数据'){
+            return;
+          }
+          this.$store.commit('updateUnitList', data);
+        })
+      }
+    },
+    computed: {
+      versionName() {
+        return this.$store.state.versionBoxTitle;
       }
     },
     mounted() {
-
+      this.fnGetCurrentCourse();
+      // 获取
+    },
+    created() {
+      this.userInfo = JSON.parse(sessionStorage.userMsg);
+      this.$bus.on('getUnitList' , textbook_id => {
+        console.log('来了来了，加载课程列表时间，bus');
+        this.fnGetUnitList(textbook_id);
+      });
+    },
+    // 组件销毁时，解除监听
+    beforeDestroy() {
+      this.$bus.off('getUnitList', textbook_id => {
+        console.log('来了来了，加载课程列表时间，bus');
+        this.fnGetUnitList(textbook_id);
+      });
     }
   }
 </script>
