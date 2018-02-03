@@ -138,7 +138,7 @@
       // 关闭组件并发送关闭模态层事件
       fnTabSelf() {
         this.showVersion = false;
-        this.$emit('closeVersionBox' , 1);
+        this.$emit('closeVersionBox', 1);
       },
       // 点击在学课程，我的课程，所有课程
       fnShowSelf(type_) {
@@ -170,7 +170,7 @@
           url: this.$url.url0,
           params: {
             method: 'GetStudy',
-            user_id: this.userInfo.ID
+            user_id: this.userId
           }
         }).then(res => {
           this.loading = false;
@@ -206,7 +206,7 @@
           url: this.$url.url1,
           params: {
             method: 'GetVersionBySeriesID',
-            user_id: this.userInfo.ID,
+            user_id: this.userId,
             series_id: serieId_
           }
         }).then(res => {
@@ -227,7 +227,7 @@
           url: this.$url.url1,
           params: {
             method: 'GetTextBookByVersionID',
-            user_id: this.userInfo.ID,
+            user_id: this.userId,
             version_id: versionObj_.version_id
           }
         }).then(res => {
@@ -270,7 +270,7 @@
           url: this.$url.url0,
           params: {
             method: 'GetUnitByTextBookID',
-            user_id: this.$store.state.userId,
+            user_id: this.userId,
             textbook_id: textbookId_,
             type_id: this.$store.state.typeId
           }
@@ -286,16 +286,17 @@
     computed: {
       versionName() {
         return this.$store.state.versionBoxTitle;
+      },
+      userId() {
+        return this.$store.state.userId;
       }
     },
     mounted() {
       this.fnGetCurrentCourse();
-      // 获取
+      this.userInfo = JSON.parse(sessionStorage.userMsg);
     },
     created() {
-      this.userInfo = JSON.parse(sessionStorage.userMsg);
-      this.$bus.on('getUnitList' , textbook_id => {
-        console.log('来了来了，加载课程列表时间，bus');
+      this.$bus.on('getUnitList', textbook_id => {
         this.fnGetUnitList(textbook_id);
       });
     },

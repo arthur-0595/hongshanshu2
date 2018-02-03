@@ -1,7 +1,7 @@
 <template>
   <div id="home">
     <home-head></home-head>
-    <home-content @showCoverBox = 'fnShowCoverBox'></home-content>
+    <router-view @showCoverBox='fnShowCoverBox'/>
     <home-foot></home-foot>
     <div class="coverBox" id="coverBox" v-show="showCover"></div>
   </div>
@@ -9,15 +9,15 @@
 
 <script>
   import homeHead from '../components/homeHead'
-  import homeContent from '../components/homeContent'
   import homeFoot from '../components/homeFoot'
 
   export default {
     name: 'appHome',
-    components: {homeHead, homeContent, homeFoot},
+    components: {homeHead, homeFoot},
     data() {
       return {
         showCover: false,
+        current: 'homeContent',
       }
     },
     methods: {
@@ -28,27 +28,30 @@
       fnSetTypeId() {
         let typeId = sessionStorage.type_id;
         if (typeId) { // 如果缓存中存在typeId ，则设置vuex中typeId的值
-          this.$store.commit('updateTypeId' , typeId);
+          this.$store.commit('updateTypeId', typeId);
         } else {
           typeId = 1;
-          this.$store.commit('updateTypeId' , typeId);
+          this.$store.commit('updateTypeId', typeId);
           sessionStorage.type_id = typeId;
         }
       },
-      // 获取用户信息中的用户Id
-      fnGetUserId() {
-        let userMsg = JSON.parse(sessionStorage.userMsg);
-        let userId = userMsg.ID;
-        this.$store.commit('updateUserId', userId);
+      // 处理用户信息丢失的问题
+      fnGetUserMsg() {
+        if (!sessionStorage.userMsg) {
+          sessionStorage.userMsg = JSON.stringify(this.$store.state.userMsg);
+        }
       }
     },
+    computed: {},
     mounted() {
       // 设置模块类型默认为 1 智能记忆
       sessionStorage.type_id = 1;
     },
     created() {
       this.fnSetTypeId();
-      this.fnGetUserId();
+      this.fnGetUserMsg();
+    },
+    beforeDestroy() {
     }
   }
 </script>

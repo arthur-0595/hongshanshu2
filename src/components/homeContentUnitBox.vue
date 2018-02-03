@@ -57,7 +57,6 @@
         this.fnTabSelf();
         sessionStorage.unit_id = obj_.id;
         sessionStorage.unit_name = obj_.unit_name;
-
       }
     },
     computed: {
@@ -66,8 +65,7 @@
       }
     },
     mounted() {
-      console.log(this.$store.state.unitList);
-
+      // console.log(this.$store.state.unitList);
     }
   }
 </script>

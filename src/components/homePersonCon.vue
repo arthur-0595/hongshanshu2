@@ -1,19 +1,24 @@
 <template>
   <div class="personCon clearfix" id="personCon" v-show="showPerson">
-    <div class="perLeft">
-      <img :src="userHeadImg" alt=""/>
-      <h4>等级 <i class="red">{{userInfo.info[0].Grade}}</i></h4>
-    </div>
-    <div class="personInfo">
-      <h4>{{userInfo.info[0].S_name}}</h4>
-      <div class="gray">{{userInfo.info[0].S_code}}</div>
-      <div class="line">智能记忆已学生词：<i class="red">{{userInfo.info[0].New_words}}</i></div>
-      <div class="line">
-        <span class="goldNum">总学分：<i class="red">{{userInfo.info[0].Integral}}</i></span>
-        <span>今日学分：<i class="red">{{userInfo.info[0].Today_Integral}}</i></span>
+    <div class="clearfix">
+      <div class="perLeft">
+        <img :src="userHeadImg" alt=""/>
+        <h4>等级 <i class="red">{{userInfo.info[0].Grade}}</i></h4>
       </div>
-      <div class="line">距离下一个等级还差<i class="red">{{userInfo.next_level}}</i>学分哦！</div>
+      <div class="personInfo">
+        <h4>{{userInfo.info[0].S_name}}</h4>
+        <div class="gray">{{userInfo.info[0].S_code}}</div>
+        <div class="line">智能记忆已学生词：<i class="red">{{userInfo.info[0].New_words}}</i></div>
+        <div class="line">
+          <span class="goldNum">总学分：<i class="red">{{userInfo.info[0].Integral}}</i></span>
+          <span>今日学分：<i class="red">{{userInfo.info[0].Today_Integral}}</i></span>
+        </div>
+        <div class="line">距离下一个等级还差<i class="red">{{userInfo.next_level}}</i>学分哦！</div>
+      </div>
     </div>
+    <ul class="personBox">
+      <li @click="fnOpenPersonCenter()">我的信息</li>
+    </ul>
     <div class="exit" @click="fnExit()"><span></span>安全退出</div>
   </div>
 </template>
@@ -36,7 +41,13 @@
     methods: {
       fnExit() {
         sessionStorage.userMsg = null;
-        this.$router.go(-1);
+        this.$router.push('/');
+      },
+      // 点击我的信息按钮，打开个人信息中心
+      fnOpenPersonCenter() {
+        this.fnExit();
+        this.$router.push('/home/myInfo');
+        this.$store.commit('updateShowGoStudyCenter');
       }
     },
     mounted() {
@@ -63,9 +74,11 @@
     z-index: 3;
     padding: 20px;
     padding-bottom: 50px;
+    cursor: auto;
   }
 
   .exit {
+    cursor: pointer;
     position: absolute;
     right: 20px;
     bottom: 10px;
@@ -88,14 +101,14 @@
     opacity: .8;
   }
 
-  .personCon > .perLeft {
+  .personCon  .perLeft {
     float: left;
     width: 88px;
     height: 120px;
     position: relative;
   }
 
-  .personCon > .perLeft img {
+  .personCon  .perLeft img {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -104,7 +117,7 @@
     left: 20px;
   }
 
-  .personCon > .perLeft h4 {
+  .personCon  .perLeft h4 {
     position: absolute;
     bottom: 10px;
     width: 100%;
@@ -112,7 +125,7 @@
     font-size: 12px;
   }
 
-  .personCon > .personInfo {
+  .personCon  .personInfo {
     float: left;
     font-size: 12px;
     line-height: 24px;
@@ -123,12 +136,33 @@
     color: #e92344;
   }
 
-  .personCon > .personInfo h4 {
+  .personCon  .personInfo h4 {
     color: #666;
     font-size: 16px;
   }
 
-  .personCon > .personInfo .goldNum {
+  .personCon  .personInfo .goldNum {
     margin-right: 16px;
+  }
+
+  .personBox {
+    width: 100%;
+    padding-top: 5px;
+  }
+
+  .personBox li{
+    cursor: pointer;
+    float: left;
+    padding: 0 7px;
+    height: 28px;
+    border: 1px solid #333;
+    line-height: 28px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .personBox li:hover{
+    color: #f9a7a7;
+    border-color: #f9a7a7;
   }
 </style>

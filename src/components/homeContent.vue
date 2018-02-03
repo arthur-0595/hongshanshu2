@@ -87,11 +87,11 @@
 <script>
   import homeContentUnitBox from "./homeContentUnitBox";
   import homeContentVersionBox from "./homeContentVersionBox";
-  import HomeContentDeviceBox from "./homeContentDeviceBox";
+  import homeContentDeviceBox from "./homeContentDeviceBox";
 
   export default {
     name: 'home-content',
-    components: {HomeContentDeviceBox, homeContentUnitBox, homeContentVersionBox},
+    components: {homeContentDeviceBox, homeContentUnitBox, homeContentVersionBox },
     data() {
       return {
         showDeviceBox: false,
@@ -168,8 +168,8 @@
       },
       // 去学习了
       fnGoToStudy() {
-        console.log('去学习了');
-
+        console.log('去学习了,学习类型：' + this.$store.state.typeId);
+        this.$router.push('./wordStudy');
       }
     },
     computed: {
@@ -182,7 +182,10 @@
       }
     },
     mounted() {
-
+      if (!sessionStorage.userMsg) {
+        console.log('缓存丢啦：学习中心');
+        sessionStorage.userMsg = JSON.stringify(this.$store.state.userMsg);
+      }
     },
     created() {
       this.fnUpdateCourseMsg();
@@ -190,7 +193,7 @@
     },
     // 组件销毁时，解除监听
     beforeDestroy() {
-      this.$bus.off('getUnitList', textbook_id);
+      this.$bus.off('getUnitList');
     }
   }
 </script>

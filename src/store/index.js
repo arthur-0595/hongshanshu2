@@ -7,6 +7,7 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
+    userMsg: {}, // 保存用户信息
     userId: 1, // 用户ID
     typeId: 1, // 模块类型 1智能记忆，2智能听写，3智能默写,4例句听力，5例句翻译，6例句默写
     courseNum: 0, // 课程下总单词量
@@ -17,8 +18,14 @@ const store = new Vuex.Store({
     unitBoxTitle: '选择单元', // 单元名
     deviceBoxTitle: '智能记忆', // 模块名
     unitList: [], // 课程下单元列表
+    showGoStudyCenter: false, // 是否显示头部返回学习中心按钮
   },
   mutations: {
+    // 设置用户信息
+    updateUserMsg(state, userMsg_) {
+      state.userMsg = userMsg_;
+      console.log('store用户信息: ' + state.userMsg);
+    },
     // 设置用户ID
     updateUserId(state, userid_) {
       state.userId = userid_;
@@ -68,7 +75,11 @@ const store = new Vuex.Store({
     updateUnitList(state, arr_) {
       state.unitList = arr_;
       console.log('更新store：课程下单元列表');
-    }
+    },
+    // 修改显示返回学习中心按钮状态显示或隐藏
+    updateShowGoStudyCenter(state) {
+      state.showGoStudyCenter = !state.showGoStudyCenter;
+    },
   },
   actions: {
 

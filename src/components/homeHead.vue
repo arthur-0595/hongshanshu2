@@ -15,7 +15,8 @@
           <div class="person" id="person"
                :class="{clickPerson:showPerson}"
                @click="fncourseCenter(2)"
-               @mouseleave="fnMouseLeave()">
+              >
+            <!--@mouseleave="fnMouseLeave()"-->
             <img :src="personImg" alt=""/>
             <!--点击头像-->
             <home-person-con :showPerson="showPerson" :userInfo="userInfo"></home-person-con>
@@ -34,7 +35,9 @@
     <div class="top2">
       <div class="header2">
         您所在位置：智能单词-学习中心
-        <div class="toStudyCenter" v-show="showGoStudyCenter">返回学习中心</div>
+        <div class="toStudyCenter"
+             v-show="showGoStudyCenter"
+            @click="fnGoStudyCenter()">返回学习中心</div>
       </div>
     </div>
   </div>
@@ -50,7 +53,6 @@
     components: {homeCourseCenter, homePersonCon, homeMoreBtn},
     data() {
       return {
-        showGoStudyCenter: false,
         showCourse: false,
         showPerson: false,
         showMoreBtn: false,
@@ -103,7 +105,7 @@
         this.showMoreBtn = false;
       },
       fnGetUserInfo() {
-        //获取用户ID
+        // 获取用户ID
         let userMsg = JSON.parse(sessionStorage.userMsg);
         if (!userMsg) {
           return
@@ -120,6 +122,11 @@
           this.userInfo = res.data;
           sessionStorage.userMsg = JSON.stringify(res.data.info[0]);
         })
+      },
+      // 点击返回学习中心按钮
+      fnGoStudyCenter() {
+        this.$store.commit('updateShowGoStudyCenter');
+        this.$router.push('/home');
       }
     },
     mounted() {
@@ -130,6 +137,9 @@
     computed: {
       personImg() {
         return this.userInfo.info ? (this.$url.url2 + this.userInfo.info[0].S_picurl) : '../../static/img/portrait-1.png'
+      },
+      showGoStudyCenter() {
+        return this.$store.state.showGoStudyCenter;
       }
     }
   }

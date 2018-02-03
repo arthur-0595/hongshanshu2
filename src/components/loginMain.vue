@@ -65,10 +65,9 @@
               break;
             case 2:
               sessionStorage.userMsg = JSON.stringify(data.info[0]);
-              this.$router.afterEach( (to,from,next) => {
-                loading.close();
-              } );
-              this.$router.push('./home');
+              this.$store.commit('updateUserMsg', data.info[0]);
+              this.$store.commit('updateUserId', data.info[0].ID);
+              this.$router.push('/home');
               break;
             case 3:
               this.$message({
