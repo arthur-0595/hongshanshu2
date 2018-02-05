@@ -15,8 +15,8 @@
         <span>▼</span>
       </div>
       <div class="link">测试中心<span>▼</span></div>
-      <div class="link">记忆追踪</div>
-      <div class="link">单词本</div>
+      <div class="link" @click="fnGoHomeMemoryTracer()">记忆追踪</div>
+      <div class="link" @click="fnGoWordBook()">单词本</div>
       <div class="link" v-if="false">操作指南</div>
     </div>
     <!--中间内容-->
@@ -169,7 +169,45 @@
       // 去学习了
       fnGoToStudy() {
         console.log('去学习了,学习类型：' + this.$store.state.typeId);
-        this.$router.push('./wordStudy');
+        switch (this.$store.state.typeId) {
+          case 1:
+            console.log('单词记忆教材:' + this.$store.state.textbookId + '单元：' + this.$store.state.unitId);
+            this.$router.push('./wordStudy');
+            break;
+          case 2:
+            console.log('单词听写教材:' + this.$store.state.textbookId + '单元：' + this.$store.state.unitId);
+            this.$router.push('./wordListen');
+            break;
+          case 3:
+            console.log('单词默写教材:' + this.$store.state.textbookId + '单元：' + this.$store.state.unitId);
+            this.$router.push('./wordWrite');
+            break;
+          case 4:
+            console.log('句子听力教材:' + this.$store.state.textbookId + '单元：' + this.$store.state.unitId);
+            this.$router.push('./sentenceListen');
+            break;
+          case 5:
+            console.log('句子翻译教材:' + this.$store.state.textbookId + '单元：' + this.$store.state.unitId);
+            this.$router.push('./sentenceTranslate');
+            break;
+          case 6:
+            console.log('句子默写教材:' + this.$store.state.textbookId + '单元：' + this.$store.state.unitId);
+            this.$router.push('./sentenceWrite');
+            break;
+          default:
+            this.$router.push('./wordStudy');
+            break;
+        }
+      },
+      // 打开单词本
+      fnGoWordBook() {
+        this.$router.replace('/home/wordBook');
+        this.$store.commit('updateShowGoStudyCenter');
+      },
+      // 打开记忆追踪
+      fnGoHomeMemoryTracer() {
+        this.$router.replace('/home/homeMemoryTracer');
+        this.$store.commit('updateShowGoStudyCenter');
       }
     },
     computed: {
@@ -182,10 +220,6 @@
       }
     },
     mounted() {
-      if (!sessionStorage.userMsg) {
-        console.log('缓存丢啦：学习中心');
-        sessionStorage.userMsg = JSON.stringify(this.$store.state.userMsg);
-      }
     },
     created() {
       this.fnUpdateCourseMsg();

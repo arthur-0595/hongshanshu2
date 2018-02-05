@@ -45,8 +45,7 @@
       },
       // 点击我的信息按钮，打开个人信息中心
       fnOpenPersonCenter() {
-        this.fnExit();
-        this.$router.push('/home/myInfo');
+        this.$router.replace('/home/myInfo');
         this.$store.commit('updateShowGoStudyCenter');
       }
     },

@@ -117,14 +117,10 @@
     name: 'home-person-center',
     components: {},
     data() {
-      return {  }
+      return {}
     },
     methods: {},
     mounted() {
-      if (!sessionStorage.userMsg) {
-        console.log('缓存丢啦：个人中心');
-        sessionStorage.userMsg = JSON.stringify(this.$store.state.userMsg);
-      }
     }
   }
 </script>

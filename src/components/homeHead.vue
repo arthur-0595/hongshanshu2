@@ -126,7 +126,7 @@
       // 点击返回学习中心按钮
       fnGoStudyCenter() {
         this.$store.commit('updateShowGoStudyCenter');
-        this.$router.push('/home');
+        this.$router.replace('/home');
       }
     },
     mounted() {

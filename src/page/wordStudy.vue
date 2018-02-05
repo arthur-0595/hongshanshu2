@@ -14,9 +14,9 @@
           <div class="deviceName">智能记忆-词义记忆</div>
           <div class="version">牛津译林版2012（三年级起点）-三上- Unit 5</div>
           <div class="rightBtn clearfix">
-            <span class="help"></span>
-            <span class="skin"></span>
-            <span class="close"></span>
+            <!--<span class="help"></span>-->
+            <!--<span class="skin"></span>-->
+            <span class="close" @click="fnclosePage()"></span>
           </div>
         </div>
         <!--要学习的主要内容-->
@@ -65,8 +65,8 @@
         <!--底部内容-->
         <div class="botInfo">
           <span id="countdown">倒计时： 5</span>
-          <span>引擎档位： 6</span>
-          <span>有效时长： 00:00:30</span>
+          <!--<span>引擎档位： 6</span>-->
+          <span>学习时长： 00:00:30</span>
           <span>本次学习[生词： 0个　熟词：2个　复习：0个 ]</span>
           <span>学习进度：8/12</span>
         </div>
@@ -83,6 +83,9 @@
             return {}
         },
         methods: {
+          fnclosePage() {
+            this.$router.go(-1);
+          },
           fnReadWord() {
 
           },
@@ -115,12 +118,12 @@
     /*background:url(../../static/img/study/space-bg.jpg) no-repeat 0 0;*/
     /*position: relative;*/
   /*}*/
-  /*.wordStudy{*/
-    /*width:100%;*/
-    /*height:100%;*/
-    /*background:url(../../static/img/study/space-bg.jpg) no-repeat 0 0;*/
-    /*position: relative;*/
-  /*}*/
+  .wordStudy{
+    width:100%;
+    height:100%;
+    background:url(../../static/img/study/space-bg.jpg) no-repeat 0 0;
+    position: relative;
+  }
   .topInfo{
     width:100%;
     line-height: 40px;

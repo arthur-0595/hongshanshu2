@@ -34,12 +34,6 @@
           this.$store.commit('updateTypeId', typeId);
           sessionStorage.type_id = typeId;
         }
-      },
-      // 处理用户信息丢失的问题
-      fnGetUserMsg() {
-        if (!sessionStorage.userMsg) {
-          sessionStorage.userMsg = JSON.stringify(this.$store.state.userMsg);
-        }
       }
     },
     computed: {},
@@ -49,7 +43,6 @@
     },
     created() {
       this.fnSetTypeId();
-      this.fnGetUserMsg();
     },
     beforeDestroy() {
     }
