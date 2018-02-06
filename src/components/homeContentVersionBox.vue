@@ -151,7 +151,8 @@
       // 在学课程窗口点击学习
       fnGoStudy(item_) {
         this.thisVersionName = item_.version_name + item_.textbook_name;
-        this.$store.commit('updateVersionBoxTitle' , this.thisVersionName);
+        this.$store.commit('updateVersionBoxTitle', this.thisVersionName);
+        this.$store.commit('updateVersionId', this.textbook_id);
         this.fnTabSelf();
         sessionStorage.version_name = item_.version_name;
         sessionStorage.textbook_name = item_.textbook_name;
@@ -161,6 +162,8 @@
         this.fnGetCourseNum(item_.textbook_id);
         // 获取课程下单元列表
         this.fnGetUnitList(item_.textbook_id);
+        // 通过bus发送打开选择单元组件的事件
+        this.$bus.emit('openUnitModule');
       },
       // 获取所有在学课程
       fnGetCurrentCourse() {
@@ -220,6 +223,8 @@
       fnGetCourseList(versionObj_) {
         sessionStorage.version_name = versionObj_.version_name;
         sessionStorage.version_id = versionObj_.version_id;
+        this.$store.commit('updateVersionId', versionObj_.version_id);
+
         this.thisVersionName = versionObj_.version_name + ' - ';
         this.loading = true;
         this.$ajax({
@@ -242,12 +247,15 @@
         sessionStorage.textbook_name = courseObj_.textbook_name;
         sessionStorage.textbook_id = courseObj_.textbook_id;
         this.thisVersionName += courseObj_.textbook_name;
-        this.$store.commit('updateVersionBoxTitle' , this.thisVersionName);
+        this.$store.commit('updateVersionBoxTitle', this.thisVersionName);
+        this.$store.commit('updateTextbookId', courseObj_.textbook_id);
         this.fnTabSelf();
         // 获取课程下单词数
         this.fnGetCourseNum(courseObj_.textbook_id);
         // 获取课程下单元列表
         this.fnGetUnitList(courseObj_.textbook_id);
+        // 通过bus发送打开选择单元组件的事件
+        this.$bus.emit('openUnitModule');
       },
       // 请求课程下的单词数量，并更新数据
       fnGetCourseNum(textbookId_) {

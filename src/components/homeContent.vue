@@ -85,9 +85,9 @@
 </template>
 
 <script>
-  import homeContentUnitBox from "./homeContentUnitBox";
-  import homeContentVersionBox from "./homeContentVersionBox";
-  import homeContentDeviceBox from "./homeContentDeviceBox";
+  import homeContentUnitBox from './homeContentUnitBox';
+  import homeContentVersionBox from './homeContentVersionBox';
+  import homeContentDeviceBox from './homeContentDeviceBox';
 
   export default {
     name: 'home-content',
@@ -136,13 +136,13 @@
       fncloseCenterBox(eventType) {
         if (eventType === 1) {
           this.showVersionBox = false;
-          this.$emit("showCoverBox", false);
+          this.$emit('showCoverBox', false);
         } else if (eventType === 2) {
           this.showUnitBox = false;
-          this.$emit("showCoverBox", false);
+          this.$emit('showCoverBox', false);
         } else if (eventType === 3) {
           this.showDeviceBox = false;
-          this.$emit("showCoverBox", false);
+          this.$emit('showCoverBox', false);
         }
       },
       // 获取缓存中的选中的教材和课程信息，更新到vuex
@@ -169,7 +169,7 @@
       // 去学习了
       fnGoToStudy() {
         console.log('去学习了,学习类型：' + this.$store.state.typeId);
-        switch (this.$store.state.typeId) {
+        switch ( parseInt(this.$store.state.typeId) ) {
           case 1:
             console.log('单词记忆教材:' + this.$store.state.textbookId + '单元：' + this.$store.state.unitId);
             this.$router.push('./wordStudy');
@@ -194,9 +194,9 @@
             console.log('句子默写教材:' + this.$store.state.textbookId + '单元：' + this.$store.state.unitId);
             this.$router.push('./sentenceWrite');
             break;
-          default:
-            this.$router.push('./wordStudy');
-            break;
+          // default:
+          //   this.$router.push('./wordStudy');
+          //   break;
         }
       },
       // 打开单词本
@@ -220,14 +220,21 @@
       }
     },
     mounted() {
+      // console.log('打开学习中心：(VUEX)' + this.$store.state.typeId);
+      // console.log('打开学习中心：(缓存)' + sessionStorage.type_id);
     },
     created() {
       this.fnUpdateCourseMsg();
       this.fnUpdateUnitList();
+      // 监听选择完课本打开选择单元组件的事件
+      this.$bus.on('openUnitModule', () => {
+        this.fnShowSelfBox(2);
+      });
     },
     // 组件销毁时，解除监听
     beforeDestroy() {
       this.$bus.off('getUnitList');
+      this.$bus.off('openUnitModule');
     }
   }
 </script>

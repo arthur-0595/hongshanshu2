@@ -24,37 +24,37 @@ const store = new Vuex.Store({
     // 设置用户信息
     updateUserMsg(state, userMsg_) {
       state.userMsg = userMsg_;
-      console.log('store用户信息: ' + state.userMsg);
+      // console.log('store用户信息: ' + state.userMsg);
     },
     // 设置用户ID
     updateUserId(state, userid_) {
       state.userId = userid_;
-      console.log('store用户ID: ' + state.userId);
+      // console.log('store用户ID: ' + state.userId);
     },
     // 更新模块类型的值
     updateTypeId(state, val_) {
       state.typeId = val_;
-      console.log('store模块类型: ' + state.typeId);
+      // console.log('store模块类型: ' + state.typeId);
     },
     // 更新选择版本标题
     updateVersionBoxTitle(state, val_) {
       state.versionBoxTitle = val_;
-      console.log('store版本名: ' + state.versionBoxTitle);
+      // console.log('store版本名: ' + state.versionBoxTitle);
     },
     // 更新选择单元标题
     updateUnitBoxTitle(state, val_) {
       state.unitBoxTitle = val_;
-      console.log('store单元名: ' + state.unitBoxTitle);
+      // console.log('store单元名: ' + state.unitBoxTitle);
     },
     // 更新选择模块标题
     updateDeviceBoxTitle(state, val_) {
       state.deviceBoxTitle = val_;
-      console.log('store模块名: ' + state.deviceBoxTitle);
+      // console.log('store模块名: ' + state.deviceBoxTitle);
     },
     // 更新版本ID
     updateVersionId(state, val_) {
       state.versionId = val_;
-      console.log('store版本ID: ' + state.versionId);
+      // console.log('store版本ID: ' + state.versionId);
     },
     // 更新课程ID
     updateTextbookId(state, val_) {
@@ -69,16 +69,20 @@ const store = new Vuex.Store({
     // 修改课程下的总单词量
     updateCourseNum(state, val_) {
       state.courseNum = val_;
-      console.log('store课程总单词量: ' + state.courseNum);
+      // console.log('store课程总单词量: ' + state.courseNum);
     },
     // 修改课程下的单元列表
     updateUnitList(state, arr_) {
       state.unitList = arr_;
-      console.log('更新store：课程下单元列表');
+      // console.log('更新store：课程下单元列表');
     },
     // 修改显示返回学习中心按钮状态显示或隐藏
-    updateShowGoStudyCenter(state) {
-      state.showGoStudyCenter = !state.showGoStudyCenter;
+    updateShowGoStudyCenter(state, stateType_) {
+      if (stateType_) {
+        state.showGoStudyCenter = true;
+      }else{
+        state.showGoStudyCenter = !state.showGoStudyCenter;
+      }
     },
   },
   actions: {

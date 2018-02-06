@@ -146,7 +146,7 @@
     components: {},
     data() {
       return {
-        contentArr:[
+        contentArr: [
           '帮你快速实现词汇母语式的记忆效果，40小时牢记3000生词，永久不忘。词汇学习从此无忧！\n' +
           '      难度指数：★',
           '快速训练你的听读音写单词的能力，具有独创的按照拼音音节抄写单词功能和拼写错误纠正功能。\n' +
@@ -162,6 +162,17 @@
           '词汇学习第二乐园，完成同步学习的同时扩充你的词汇量，以词汇记忆，听写，默写为主的全方位训练，培养学习者良好的英语学习习惯。',
           '科学，有趣的英文提速工具，通过它你可以快速消灭生词，改正不良阅读习惯，轻松将阅读速度和效率提高2至5倍。',
           '课程按场景进行分类，通过学习引擎技术，帮助学习者不断复习、巩固所学内容。先输入再输出，逐步实现自由表达。'
+        ],
+        moduleList: [
+          {
+            name: '智能语音'
+          },
+          {
+            name: '智能阅读'
+          },
+          {
+            name: '智能口语'
+          }
         ]
       }
     },
@@ -169,7 +180,13 @@
       fnOpenStudyType(type_) {
         if(type_ <= 6) {
           this.$bus.emit('openStudyType', type_);
-        }else {
+        } else if (type_ === 7) { // 智能语音
+          this.$router.replace('/home/homeExtendVoice');
+          this.$store.commit('updateShowGoStudyCenter', true);
+        } else if (type_ === 9) { // 智能口语
+          this.$router.replace('/home/homeExtendTongue');
+          this.$store.commit('updateShowGoStudyCenter', true);
+        } else {
           this.$alert('智能阅读等模块还在开发中哦: )', '提示', {
             confirmButtonText: '确定',
             callback: () => {
@@ -177,6 +194,12 @@
             }
           });
         }
+      },
+      // 选择智能语音或者智能口语类型，缓存修改，vuex数据更新
+      fnUpdateType(type_) {
+        sessionStorage.type_id = type_;
+        this.$store.commit('updateTypeId', type_);
+        this.$store.commit('updateDeviceBoxTitle', this.moduleList[type_].name);
       }
     },
     mounted() {

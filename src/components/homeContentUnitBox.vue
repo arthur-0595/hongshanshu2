@@ -49,11 +49,12 @@
       // 切换显示隐藏单元组件
       fnTabSelf() {
         this.showUnit = false;
-        this.$emit("closeUnitBox" , 2);
+        this.$emit('closeUnitBox', 2);
       },
       // 点击选中单元事件
       fnclickUnitItem(obj_) {
-        this.$store.commit("updateUnitBoxTitle", obj_.unit_name);
+        this.$store.commit('updateUnitBoxTitle', obj_.unit_name);
+        this.$store.commit('updateUnitId', obj_.id);
         this.fnTabSelf();
         sessionStorage.unit_id = obj_.id;
         sessionStorage.unit_name = obj_.unit_name;
