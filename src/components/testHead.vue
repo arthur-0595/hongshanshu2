@@ -2,8 +2,8 @@
   <div class="header">
     <div class="headerCenter clearfix">
       <span class="version">高考词汇-大纲单词（一）- 智能记忆闯关测试</span>
-      <span class="back">返回</span>
-      <span class="handPaper">交卷</span>
+      <span class="back" @click="fnclosePage()">返回</span>
+      <span class="handPaper" @click="fnSubmitGrade()">交卷</span>
       <span class="countdown">剩余时间：<i>10分00秒</i></span>
     </div>
   </div>
@@ -16,7 +16,16 @@
     data() {
       return {}
     },
-    methods: {},
+    methods: {
+      // 返回按钮
+      fnclosePage() {
+        this.$router.go(-1);
+      },
+      // 提交成绩
+      fnSubmitGrade() {
+        this.$bus.emit('submitGrade');
+      }
+    },
     mounted() {
 
     }

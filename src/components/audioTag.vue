@@ -1,6 +1,6 @@
 <template>
     <div>
-        $END$
+      <audio src="" id="audio" autoplay="autoplay"></audio>
     </div>
 </template>
 
@@ -9,7 +9,9 @@
         name: 'audio-tag',
         components: {},
         data() {
-            return {}
+            return {
+              audioSrc: ''
+            }
         },
         methods: {},
         mounted() {

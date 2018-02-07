@@ -1,23 +1,26 @@
 <template>
   <div id="studyTest">
     <testHead></testHead>
-    <div class="content">
+    <div class="content" v-loading="loading">
       <div class="itemBox">
         <h4>英译汉</h4>
         <ul class="itemList">
-          <li class="selItem">
+          <li :class="{selItem:false}" v-for="(item, index) in e_cList">
             <div class="wordLine">
-              <span class="num">1.</span>
-              <span class="word">alive</span>
+              <span class="num">{{index + 1}}.</span>
+              <span class="word">{{item.word_name.replace(/\•/g,'')}}</span>
             </div>
             <div class="selectorBox">
-              <label for="y1-a"><input type="radio" checked="checked" name="Y-itemsel1" id="y1-a"/>n. 助手</label>
-              <label for="y1-b"><input type="radio" name="Y-itemsel1" id="y1-b"/>adv. 在周围；在附近prep. 在......周围；大约</label>
-              <label for="y1-c"><input type="radio" name="Y-itemsel1" id="y1-c"/>adv. 在周围；在附近prep. 在......周围；大约adv. 在周围；在附近prep. 在......周围；大约</label>
-              <label for="y1-d"><input type="radio" name="Y-itemsel1" id="y1-d"/>adj. 积极的，主动的</label>
+              <label v-for="vo in item.chinese">
+                <input type="radio" :value="vo"
+                       v-model="item.checked"
+                       :name="item.id"
+                       data-type="vo.type"/>
+                {{vo.content}}
+              </label>
             </div>
           </li>
-          <li>
+          <!--<li>
             <div class="wordLine">
               <span class="num">2.</span>
               <span class="word">alive</span>
@@ -28,13 +31,28 @@
               <label for="y2-c" ><input type="radio" name="Y-itemsel2" id="y2-c"/>adv. 在周围；在附近prep. 在......周围；大约adv. 在周围；在附近prep. 在......周围；大约</label>
               <label for="y2-d" ><input type="radio" name="Y-itemsel2" id="y2-d"/>adj. 积极的，主动的</label>
             </div>
-          </li>
+          </li>-->
         </ul>
       </div>
       <div class="itemBox">
         <h4>汉译英</h4>
         <ul class="itemList">
-          <li>
+          <li v-for="(item, index) in c_eList">
+            <div class="wordLine">
+              <span class="num">{{index + 1}}.</span>
+              <span class="word">{{item.word_mean}}</span>
+            </div>
+            <div class="selectorBox">
+              <label v-for="vo in item.english">
+                <input type="radio" :value="vo"
+                       v-model="item.checked"
+                       :name="item.id"
+                       data-type="vo.type"/>
+                {{vo.content.replace(/\•/g,'')}}
+              </label>
+            </div>
+          </li>
+          <!--<li>
             <div class="wordLine">
               <span class="num">1.</span>
               <span class="word">adj. 积极的</span>
@@ -45,52 +63,31 @@
               <label for="h1-c"><input type="radio" name="H-itemsel1" id="h1-c"/>arrive</label>
               <label for="h1-d"><input type="radio" name="H-itemsel1" id="h1-d"/>active</label>
             </div>
-          </li>
-          <li>
-            <div class="wordLine">
-              <span class="num">2.</span>
-              <span class="word">n. 臂，支架；（美）武器，武力  v. 以......装备，武装起来</span>
-            </div>
-            <div class="selectorBox">
-              <label for="h2-a"><input type="radio" name="H-itemsel2" id="h2-a"/>atract</label>
-              <label for="h2-b"><input type="radio" name="H-itemsel2" id="h2-b"/>attend</label>
-              <label for="h2-c"><input type="radio" name="H-itemsel2" id="h2-c"/>arrive</label>
-              <label for="h2-d"><input type="radio" name="H-itemsel2" id="h2-d"/>active</label>
-            </div>
-          </li>
-          <li>
-            <div class="wordLine">
-              <span class="num">3.</span>
-              <span class="word">adj. 积极的</span>
-            </div>
-            <div class="selectorBox">
-              <label for="h3-a"><input type="radio" name="H-itemsel3" id="h3-a"/>atract</label>
-              <label for="h3-b"><input type="radio" name="H-itemsel3" id="h3-b"/>attend</label>
-              <label for="h3-c"><input type="radio" name="H-itemsel3" id="h3-c"/>arrive</label>
-              <label for="h3-d"><input type="radio" name="H-itemsel3" id="h3-d"/>active</label>
-            </div>
-          </li>
-          <li>
-            <div class="wordLine">
-              <span class="num">3.</span>
-              <span class="word">adj. 积极的</span>
-            </div>
-            <div class="selectorBox">
-              <label for="h3-a"><input type="radio" name="H-itemsel3" id="h3-a"/>atract</label>
-              <label for="h3-b"><input type="radio" name="H-itemsel3" id="h3-b"/>attend</label>
-              <label for="h3-c"><input type="radio" name="H-itemsel3" id="h3-c"/>arrive</label>
-              <label for="h3-d"><input type="radio" name="H-itemsel3" id="h3-d"/>active</label>
-            </div>
-          </li>
+          </li>-->
         </ul>
       </div>
       <div class="itemBox">
         <h4>听力理解</h4>
         <ul class="itemList">
-          <li>
+          <li v-for="(item, index) in listenList">
+            <div class="wordLine">
+              <span class="num">{{index + 1}}.</span>
+              <span class="readBtn" @click="fnVoicePlaying(item)"></span>
+            </div>
+            <div class="selectorBox">
+              <label v-for="vo in item.chinese">
+                <input type="radio" :value="vo"
+                       v-model="item.checked"
+                       :name="item.id"
+                       data-type="vo.type"/>
+                {{vo.content}}
+              </label>
+            </div>
+          </li>
+          <!--<li>
             <div class="wordLine">
               <span class="num">1.</span>
-              <span class="readBtn"></span>
+              <span class="readBtn" ></span>
             </div>
             <div class="selectorBox">
               <label for="y2-a"><input type="radio" name="Y-itemsel2" id="y2-a"/>n. 助手</label>
@@ -98,63 +95,118 @@
               <label for="y2-c"><input type="radio" name="Y-itemsel2" id="y2-c"/>adv. 在周围；在附近prep. 在......周围；大约adv. 在周围；在附近prep. 在......周围；大约</label>
               <label for="y2-d"><input type="radio" name="Y-itemsel2" id="y2-d"/>adj. 积极的，主动的</label>
             </div>
-          </li>
-          <li>
-            <div class="wordLine">
-              <span class="num">2.</span>
-              <span class="readBtn"></span>
-            </div>
-            <div class="selectorBox">
-              <label for="y2-a"><input type="radio" name="Y-itemsel2" id="y2-a"/>n. 助手</label>
-              <label for="y2-b"><input type="radio" name="Y-itemsel2" id="y2-b"/>adv. 在周围；在附近prep. 在......周围；大约</label>
-              <label for="y2-c"><input type="radio" name="Y-itemsel2" id="y2-c"/>adv. 在周围；在附近prep. 在......周围；大约adv. 在周围；在附近prep. 在......周围；大约</label>
-              <label for="y2-d"><input type="radio" name="Y-itemsel2" id="y2-d"/>adj. 积极的，主动的</label>
-            </div>
-          </li>
-          <li>
-            <div class="wordLine">
-              <span class="num">3.</span>
-              <span class="readBtn"></span>
-            </div>
-            <div class="selectorBox">
-              <label for="y2-a"><input type="radio" name="Y-itemsel2" id="y2-a"/>n. 助手</label>
-              <label for="y2-b"><input type="radio" name="Y-itemsel2" id="y2-b"/>adv. 在周围；在附近prep. 在......周围；大约</label>
-              <label for="y2-c"><input type="radio" name="Y-itemsel2" id="y2-c"/>adv. 在周围；在附近prep. 在......周围；大约adv. 在周围；在附近prep. 在......周围；大约</label>
-              <label for="y2-d"><input type="radio" name="Y-itemsel2" id="y2-d"/>adj. 积极的，主动的</label>
-            </div>
-          </li>
-          <li>
-            <div class="wordLine">
-              <span class="num">3.</span>
-              <span class="readBtn"></span>
-            </div>
-            <div class="selectorBox">
-              <label for="y2-a"><input type="radio" name="Y-itemsel2" id="y2-a"/>n. 助手</label>
-              <label for="y2-b"><input type="radio" name="Y-itemsel2" id="y2-b"/>adv. 在周围；在附近prep. 在......周围；大约</label>
-              <label for="y2-c"><input type="radio" name="Y-itemsel2" id="y2-c"/>adv. 在周围；在附近prep. 在......周围；大约adv. 在周围；在附近prep. 在......周围；大约</label>
-              <label for="y2-d"><input type="radio" name="Y-itemsel2" id="y2-d"/>adj. 积极的，主动的</label>
-            </div>
-          </li>
+          </li>-->
         </ul>
       </div>
     </div>
     <home-foot></home-foot>
+    <audio-tag></audio-tag>
   </div>
 </template>
 
 <script>
   import testHead from '../components/testHead'
   import homeFoot from '../components/homeFoot'
+  import audioTag from '../components/audioTag'
 
   export default {
     name: 'word-study-test',
-    components: {testHead, homeFoot},
+    components: {testHead, homeFoot, audioTag},
     data() {
-      return {}
+      return {
+        loading: false,
+        unitId: 0,
+        dataArr: [],
+        dataLength: 0,
+        itemsLength: 0,
+        e_cList: [],
+        c_eList: [],
+        listenList: [],
+      }
     },
-    methods: {},
-    mounted() {
+    methods: {
+      // 获取测试所有题目
+      fnGetTestList() {
+        this.loading = true;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'getwords',
+            unit_id: this.unitId
+          }
+        }).then(res => {
+          this.loading = false;
+          let data = res.data;
+          this.fnArrProcessor(data);
 
+          if (data && JSON.stringify(data) === '[]') {
+            this.$alert('无测试内容，请返回重试，或联系管理员', '提示', {
+              confirmButtonTex: '确定',
+
+              callback: () => {
+                this.$router.push('/home');
+              }
+            });
+          } else {
+            this.dataArr = data;
+            this.dataLength = data.length;
+            this.itemsLength = parseInt(this.dataLength / 3);
+
+            this.fnPushList();
+          }
+        })
+      },
+      // 处理数组，添加一个选中项的空数组
+      fnArrProcessor(arr_) {
+        arr_.forEach((item, index) => {
+          item.checked = {};
+        })
+      },
+      // 给三种题目的列表分别push进题目，循环题目列表，依次push
+      fnPushList() {
+        this.fnPushItemList(this.e_cList);
+        this.fnPushItemList(this.c_eList);
+        this.listenList = this.dataArr;
+        console.log('三种题目分别的数量：'+this.e_cList.length +'-'+ this.c_eList.length +'-'+ this.listenList.length);
+      },
+      fnPushItemList(arr_) {
+        for (let i = 0; i < this.itemsLength; i++) {
+          this.dataLength--;
+          let random = parseInt(Math.random() * this.dataLength + 1);
+          arr_.push(this.dataArr.splice(random, 1)[0]);
+        }
+      },
+      // 点击播放语音事件
+      fnVoicePlaying(item_) {
+
+      }
+    },
+    mounted() {
+      this.fnGetTestList();
+    },
+    created() {
+      this.unitId = sessionStorage.unit_id;
+      // 监听提交成绩事件
+      this.$bus.on('submitGrade', () => {
+        this.$alert('提交成绩啦！', '提交', {
+          confirmButtonTex: '确定',
+          callback: () => {
+            console.log(this.e_cList.map(item => {
+              return item.checked
+            }));
+            console.log(this.c_eList.map(item => {
+              return item.checked
+            }));
+            console.log(this.listenList.map(item => {
+              return item.checked
+            }));
+          }
+        });
+      });
+    },
+    beforeDestroy() {
+      this.$bus.off('submitGrade');
     }
   }
 </script>
