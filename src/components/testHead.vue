@@ -1,10 +1,11 @@
 <template>
   <div class="header">
     <div class="headerCenter clearfix">
-      <span class="version">高考词汇-大纲单词（一）- 智能记忆闯关测试</span>
+      <span class="version">{{title}}</span>
       <span class="back" @click="fnclosePage()">返回</span>
       <span class="handPaper" @click="fnSubmitGrade()">交卷</span>
-      <span class="countdown">剩余时间：<i>10分00秒</i></span>
+      <span class="countdown">剩余时间：<i>{{onlyminute}}分{{onlysecond}}秒</i></span>
+      <!--<span class="countdown">剩余时间：<i>{{timeStr}}</i></span>-->
     </div>
   </div>
 </template>
@@ -12,22 +13,54 @@
 <script>
   export default {
     name: 'test-head',
+    props: ['title'],
     components: {},
     data() {
-      return {}
+      return {
+        onlyminute: 0,
+        onlysecond: 0
+      }
     },
     methods: {
       // 返回按钮
       fnclosePage() {
-        this.$router.go(-1);
+        this.$router.push('/home');
       },
       // 提交成绩
       fnSubmitGrade() {
         this.$bus.emit('submitGrade');
-      }
+      },
+      // 根据单词数量计算答题时间
+      fnSetTimeOut(lietLenth_) {
+        let time = parseInt(lietLenth_) * 20;
+        let timer = setInterval(() => {
+          time--;
+          this.onlyminute = parseInt(time/60);
+          this.onlysecond = time % 60;
+          if (time <= 0) {
+            clearInterval(timer);
+            this.fnSubmitGrade();
+            // this.$alert('倒计时结束啦，看看自己的成绩吧！', '测试结束', {
+            //   confirmButtonText: '确定',
+            //   callback: () => {
+            //   }
+            // });
+          }
+        }, 1000);
+      },
+    },
+    computed: {
+
     },
     mounted() {
-
+    },
+    created() {
+      this.$bus.on('fnsetTimeOut', (length_) => {
+        this.fnSetTimeOut(length_);
+      });
+    },
+    beforeDestroy() {
+      this.$bus.off('fnsetTimeOut');
     }
   }
 </script>

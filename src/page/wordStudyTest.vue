@@ -1,6 +1,6 @@
 <template>
   <div id="studyTest">
-    <testHead></testHead>
+    <testHead :title="test_type"></testHead>
     <div class="content" v-loading="loading">
       <div class="itemBox">
         <h4>英译汉</h4>
@@ -15,7 +15,7 @@
                 <input type="radio" :value="vo"
                        v-model="item.checked"
                        :name="item.id"
-                       data-type="vo.type"/>
+                       :data-type="vo.type"/>
                 {{vo.content}}
               </label>
             </div>
@@ -47,7 +47,7 @@
                 <input type="radio" :value="vo"
                        v-model="item.checked"
                        :name="item.id"
-                       data-type="vo.type"/>
+                       :data-type="vo.type"/>
                 {{vo.content.replace(/\•/g,'')}}
               </label>
             </div>
@@ -79,7 +79,7 @@
                 <input type="radio" :value="vo"
                        v-model="item.checked"
                        :name="item.id"
-                       data-type="vo.type"/>
+                       :data-type="vo.type"/>
                 {{vo.content}}
               </label>
             </div>
@@ -122,6 +122,9 @@
         e_cList: [],
         c_eList: [],
         listenList: [],
+        score: 0,
+        test_type: '我是左上角标题',
+        testObjArr: [],
       }
     },
     methods: {
@@ -153,6 +156,9 @@
             this.dataLength = data.length;
             this.itemsLength = parseInt(this.dataLength / 3);
 
+            // 发送开始倒计时事件
+            this.$bus.emit('fnsetTimeOut', data.length);
+
             this.fnPushList();
           }
         })
@@ -180,28 +186,142 @@
       // 点击播放语音事件
       fnVoicePlaying(item_) {
 
+      },
+      // 计算分数：把处理过后的数组合并在一起，并循环，计算正确题目的个数
+      fnNextArrProcessor() {
+        // let e_cArr = this.e_cList.map(item => { return item.checked });
+        // let c_eArr = this.c_eList.map(item => { return item.checked });
+        // let listenArr = this.listenList.map(item => { return item.checked });
+        // let newArr = e_cArr.concat(c_eArr, listenArr);
+        // 遍历所有的题目input，获取其选择的项正确或者错误，记录已选的或正确项的index
+        // let testObjArr = [];
+        let testArr = document.querySelectorAll('.itemList>li');
+        testArr.forEach((item, index) => {
+          let newItemObj = {};
+          let myCheckedIndex = -1;
+          let answerIndex = -1;
+          let isCorrect = false;
+          let itemInput = item.querySelectorAll('input');
+          itemInput.forEach((item_, index_) => {
+            if (item_.dataset.type === '1') {
+              answerIndex = index_;
+            }
+            if (item_.checked) {
+              myCheckedIndex = index_;
+            }
+            if (myCheckedIndex >= 0 && myCheckedIndex === answerIndex) {
+              isCorrect = true;
+            }
+          });
+          newItemObj.myCheckedIndex = myCheckedIndex;
+          newItemObj.answerIndex = answerIndex;
+          newItemObj.isCorrect = isCorrect;
+          newItemObj.liIndex = index;
+          this.testObjArr.push(newItemObj);
+        });
+        // console.log(JSON.stringify(testObjArr));
+        let correctNum = 0;
+        this.testObjArr.forEach((item, index) => {
+          if (item.isCorrect) {
+            correctNum++
+          }
+        });
+        this.score = Math.round( (correctNum / this.testObjArr.length) * 100 ) ;
+        sessionStorage.testList = JSON.stringify(this.testObjArr);
+        console.log('分数：' + this.score + '- 答对个数：' + correctNum);
+        this.fnSubmitScore();
+      },
+      // 提交成绩事件
+      fnSubmitScore() {
+        let textbook_id = sessionStorage.textbook_id;
+        let study_type = sessionStorage.type_id;
+        let userMsg = JSON.parse(sessionStorage.userMsg);
+        // console.log('user_id:' + userMsg.ID);
+        // console.log('textbook_id:' + textbook_id);
+        // console.log('test_type:' + test_type);
+        // console.log('test_score:' + this.score);
+        // console.log('test_number:' + this.dataLength);
+        // console.log('study_type:' + study_type);
+        // console.log('type:' + this.testType);
+        // console.log('unit_id:' + this.unitId);
+        // console.log('count:' + this.countTestType);
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'SaveTestRecord',
+            user_id: userMsg.ID,
+            textbook_id: textbook_id,
+            test_type: this.test_type,
+            test_score: this.score,
+            test_number: this.dataLength,
+            study_type: study_type,
+            type: this.testType, // 0学前测试 1学后测试
+            unit_id: this.unitId,
+            count: this.countTestType
+          }
+        }).then(res => {
+          let data = res.data;
+          console.log(data);
+          if (data.msg) {
+            this.$router.push({
+              path: './wordStudyScore',
+              query: {
+                score: this.score,
+                testType: this.testType,
+                countTestType: this.countTestType
+              }
+            });
+          } else {
+            this.$alert('提交成绩失败，请重试！', '请尝试重新提交或联系管理员', {
+              confirmButtonText: '确定',
+              callback: () => {
+                return
+              }
+            });
+          }
+        })
       }
+    },
+    computed: {
+      // 0学前测试   1闯关测试
+      testType() {
+        let testType_ = this.$route.query.testType ? parseInt(this.$route.query.testType) : 1 ;
+        return testType_;
+      },
+      // 0没学习直接进入测试   1学完了进入测试
+      countTestType() {
+        let countTestType_ = this.$route.query.countTestType ? parseInt(this.$route.query.countTestType) : 1;
+        return countTestType_;
+      },
+      // 是否是学前测试
+      scoreType() {
+        let scoreType_ = this.testType === 0 ? '学前测试' : '闯关测试';
+        return scoreType_;
+      },
     },
     mounted() {
       this.fnGetTestList();
+      this.test_type = sessionStorage.version_name + sessionStorage.textbook_name + ' - ' + this.scoreType + ' ( ' + sessionStorage.unit_name + ' )';
     },
     created() {
       this.unitId = sessionStorage.unit_id;
       // 监听提交成绩事件
       this.$bus.on('submitGrade', () => {
-        this.$alert('提交成绩啦！', '提交', {
-          confirmButtonTex: '确定',
-          callback: () => {
-            console.log(this.e_cList.map(item => {
-              return item.checked
-            }));
-            console.log(this.c_eList.map(item => {
-              return item.checked
-            }));
-            console.log(this.listenList.map(item => {
-              return item.checked
-            }));
-          }
+        // this.$alert('提交成绩啦！', '提交', {
+        //   confirmButtonTex: '确定',
+        //   callback: () => {
+        //     this.fnNextArrProcessor();
+        //   }
+        // });
+        this.$confirm('确认提交本次测试答案?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'success'
+        }).then(() => { // 确定
+          this.fnNextArrProcessor();
+        }).catch(() => { // 取消
+          return
         });
       });
     },

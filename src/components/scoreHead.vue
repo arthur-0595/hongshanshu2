@@ -2,8 +2,8 @@
   <div class="header">
     <div class="headerCenter clearfix">
       <span class="version">高考词汇-大纲单词（一）- 智能记忆闯关测试</span>
-      <span class="back">返回学习中心</span>
-      <span class="handPaper">重新测试</span>
+      <span class="back" @click="fnGoStudyCenter()">返回学习中心</span>
+      <span class="handPaper" @click="fnGoBack()">重新测试</span>
     </div>
   </div>
 </template>
@@ -15,7 +15,16 @@
         data() {
             return {}
         },
-        methods: {},
+        methods: {
+          // 返回学习中心
+          fnGoStudyCenter() {
+            this.$router.push('/home');
+          },
+          // 重新测试
+          fnGoBack() {
+            this.$router.go(-1);
+          }
+        },
         mounted() {
 
         }

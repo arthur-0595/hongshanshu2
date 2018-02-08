@@ -134,7 +134,7 @@
               this.$alert('到了检验学习成果的时候啦', '学习完毕，下面开始测试！', {
                 confirmButtonText: '确定',
                 callback: () => {
-                  this.$router.push('/wordStudyTest');
+                  this.$router.push({ path:'/wordStudyTest', query:{ countTestType:0 }});
                 }
               });
               break;
@@ -143,7 +143,7 @@
               this.$alert('先了解一下自己的真实水平吧', '先来学前测试一下吧！', {
                 confirmButtonText: '确定',
                 callback: () => {
-                  this.$router.push('/wordStudyTest');
+                  this.$router.push({ path:'/wordStudyTest', query:{ testType:0 }});
                 }
               });
               break;
