@@ -11,11 +11,11 @@
       <!--学习的单元名字-->
       <div class="nameBox">
         <div class="deviceName">智能记忆-词义强化</div>
-        <div class="version">牛津译林版2012（三年级起点）-三上- Unit 5</div>
+        <div class="version">{{thisVersionName}}</div>
         <div class="rightBtn clearfix">
-          <span class="help"></span>
-          <span class="skin"></span>
-          <span class="close"></span>
+          <!--<span class="help"></span>-->
+          <!--<span class="skin"></span>-->
+          <span class="close" @click="fnclosePage()"></span>
         </div>
       </div>
       <!--要学习的主要内容-->
@@ -45,9 +45,9 @@
       </div>
       <!--底部内容-->
       <div class="botInfo clearfix">
-        <span>有效时长：00:20:30</span>
+        <span>学习时长：{{studyTime}}</span>
         <span>拼写进度：4/10</span>
-        <span>错误率：40%</span>
+        <!--<span>错误率：40%</span>-->
       </div>
       <audio src="" id="audio" autoplay="autoplay"></audio>
     </div>
@@ -59,11 +59,44 @@
     name: 'word-memory',
     components: {},
     data() {
-      return {}
+      return {
+        studyTime: '00:00:00', // 学习时间
+      }
     },
-    methods: {},
-    mounted() {
+    methods: {
+      fnclosePage() {
+        this.$router.push('/home');
+      },
+      // 开始计时学习时间
+      fnStudyTime() {
+        let time = 0;
+        setInterval( () => {
+          time ++;
+          let hour = parseInt(time / 3600) < 10 ? '0' + parseInt(time / 3600) : parseInt(time / 3600);
+          let minute = parseInt(time % 3600 / 60) < 10 ? '0' + parseInt(time % 3600 / 60) : parseInt(time % 3600 / 60) ;
+          let second = parseInt(time % 60) < 10 ? '0' + parseInt(time % 60) : parseInt(time % 60);
+          this.studyTime = hour + ':' + minute + ':' + second;
+        }, 1000)
+      },
+      // 播放器播放
+      fnAudioPalyer(url_) {
+        let audio = document.querySelector('#audio');
+        audio.src = this.$url.url2 + url_;
+      },
 
+    },
+    computed: {
+      // 拼接左上角学习的教材标题
+      thisVersionName() {
+        let versionBoxName = sessionStorage.version_name;
+        let textbookName = sessionStorage.textbook_name;
+        let unitBoxName = sessionStorage.unit_name;
+        let leftTitle = versionBoxName + ' - ' + textbookName + ' - ' + unitBoxName;
+        return leftTitle;
+      },
+    },
+    mounted() {
+      this.fnStudyTime();
     }
   }
 </script>

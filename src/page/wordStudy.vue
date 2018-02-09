@@ -11,7 +11,7 @@
     <div class="centerBox" v-loading="loading">
       <!--学习的单元名字-->
       <div class="nameBox">
-        <div class="deviceName">智能记忆-词义记忆1</div>
+        <div class="deviceName">智能记忆-词义记忆</div>
         <div class="version">{{thisVersionName}}</div>
         <div class="rightBtn clearfix">
           <!--<span class="help"></span>-->
@@ -23,52 +23,55 @@
       <div class="mainCon">
         <!--单词区域-->
         <div class="wordName clearfix">
-          <ul class="difficultNum" title="难度系数2">
-            <li></li>
-            <li></li>
-            <li class="orange"></li>
-            <li class="orange"></li>
-            <li class="orange"></li>
+          <ul class="difficultNum" :title="'难度系数'+degreeOfDifficulty">
+            <li :class="{orange:degreeOfDifficulty>=5}"></li>
+            <li :class="{orange:degreeOfDifficulty>=4}"></li>
+            <li :class="{orange:degreeOfDifficulty>=3}"></li>
+            <li :class="{orange:degreeOfDifficulty>=2}"></li>
+            <li :class="{orange:degreeOfDifficulty>=1}"></li>
           </ul>
-          <span class="word">T-shirt</span>
-          <span class="soundmark">[ti:ʃə:t]</span>
-          <span class="laba" id="laba" @click="fnReadWord(0)"></span>
+          <span class="word">{{thisWord.word_name.replace(/\•/g, '')}}</span>
+          <span class="soundmark">{{thisWord.phonogram}}</span>
+          <span class="laba" id="laba" @click="fnAudioPalyer(thisWord.word_url)"></span>
         </div>
         <!--记忆强度-->
-        <div class="totalBar" title="记忆强度 20%">
-          <span class="curBar"></span>
+        <div class="totalBar" :title="'记忆强度 '+ thisWord.memory_percent +'%'">
+          <span class="curBar" :style="{width: thisWord.memory_percent + '%'}"></span>
         </div>
         <!--底部词义-->
         <div class="wordBot clearfix">
           <!--词义解释-->
-          <div class="meanBox" id="meanBox" style="display: none;">
-            <div class="wordMean">T恤衫</div>
+          <div class="meanBox" id="meanBox" v-show="thisWordShow">
+            <div class="wordMean">{{thisWord.word_mean}}</div>
             <div class="explainBox">
-              <div class="enSentence" @click="fnReadWord(1)">A T-shirt, please.</div>
-              <div class="chSentence">请（给我）拿一件体恤衫。</div>
+              <div class="enSentence" >{{thisWord.sentence}}</div>
+              <div class="chSentence" >{{thisWord.sentence_mean}}</div>
             </div>
           </div>
           <!--右边表情框-->
           <div class="faceBox">
-            <ul class="beginFace" id="ifKnow" style="display: block">
-              <li class="know" @click="fnKnow()"></li>
-              <li class="noknow" @click="fnNotknow()"></li>
+            <ul class="beginFace" id="ifKnow" v-show="isKnow">
+              <li class="know" @click="fnKnow(1)"></li>
+              <li class="noknow" @click="fnKnow(0)"></li>
             </ul>
-            <ul class="beginFace" id="ifRight" style="display: none">
-              <li class="right" @click="fnRight()"></li>
-              <li class="wrong" @click="fnWrong()"></li>
+            <ul class="beginFace" id="ifRight" v-show="isYes">
+              <li class="right" @click="fnRight(1)"></li>
+              <li class="wrong" @click="fnRight(0)"></li>
             </ul>
-            <div class="num0 num1 num2" id="num" @click="fnReadAgain()" style="display: none"></div>
+            <div :class="{num0:nextAgain===0, num1:nextAgain===1, num2:nextAgain===2}"
+                 id = "num"
+                 @click = "fnReadAgain()"
+                 v-show = "isReadAgain"></div>
           </div>
         </div>
       </div>
       <!--底部内容-->
       <div class="botInfo">
-        <span id="countdown">倒计时： 5</span>
+        <span id="countdown" v-show="showTimer">倒计时： {{setTimeNum}}</span>
         <!--<span>引擎档位： 6</span>-->
-        <span>学习时长： 00:00:30</span>
-        <span>本次学习[生词： 0个　熟词：2个　复习：0个 ]</span>
-        <span>学习进度：8/12</span>
+        <span>学习时长： {{studyTime}}</span>
+        <span>本次学习[生词：{{newWordNum}}个　熟词：{{oldWordNum}}个　复习：{{reviewWordNum}}个 ]</span>
+        <!--<span>学习进度：8/12</span>-->
       </div>
       <audio src="" id="audio" autoplay="autoplay"></audio>
     </div>
@@ -82,8 +85,37 @@
     data() {
       return {
         loading: false,
-        userMsg: {},
-        unitId: 1,
+        userMsg: {},  // 用户信息
+        unitId: 1,   // 单元ID
+        thisWord: {
+          'id': 162,
+          'user_id': 1,
+          'unit_id': 1,
+          'word_name': 'at',
+          'word_mean': 'prep.在',
+          'phonogram': '[æt]',
+          'word_url': '\UploadeFile\Video\at.wav',
+          'sentence': 'Get off at the last stop.',
+          'sentence_mean': '在最后一站下车。',
+          'memory_state': 0,
+          'neworold_word': null,
+          'memory_percent': 0,
+          'random': '2b6fc665-1bcc-4b50-b40a-3380b643a183'
+        },  // 存储当前单词的所有信息
+        thisNewOrOld: 0, // 该单词是不是听过 0：默认没听过   大于0：听过
+        wordState: 1, // 生词还是熟词 1：默认熟词  大于1：生词
+        showTimer: false, // 是否显示倒计时
+        setTimeNum: 5,
+        thisWordShow: false, // 显示或隐藏句子及翻译
+        isKnow: true,
+        isYes: false,
+        isReadAgain: false,
+        nextAgain: 2,
+        timer: {},
+        newWordNum: 0, // 生词数量
+        oldWordNum: 0, // 熟词数量
+        reviewWordNum: 0, // 复习数量
+        studyTime: '00:00:00' // 学习时间
       }
     },
     methods: {
@@ -116,9 +148,8 @@
               });
               break;
             case 1:
-              // 请求成功
-              console.log('请求成功');
-
+              // 请求成功1
+              console.log('请求成功: ' + JSON.stringify(data));
               break;
             case 2:
               // 单词记忆结束，下面开始单词强化
@@ -134,43 +165,199 @@
               this.$alert('到了检验学习成果的时候啦', '学习完毕，下面开始测试！', {
                 confirmButtonText: '确定',
                 callback: () => {
-                  this.$router.push({ path:'/wordStudyTest', query:{ countTestType:0 }});
+                  this.$router.push({path: '/wordStudyTest', query: {countTestType: 0}});
                 }
               });
               break;
             case 4:
-              // 先来学前测试一下吧！
+              // 先来学前测试一下吧
               this.$alert('先了解一下自己的真实水平吧', '先来学前测试一下吧！', {
                 confirmButtonText: '确定',
                 callback: () => {
-                  this.$router.push({ path:'/wordStudyTest', query:{ testType:0 }});
+                  this.$router.push({path: '/wordStudyTest', query: {testType: 0}});
                 }
               });
+              break;
+            default:
+              this.fnsetTimeOut();
+              // console.log(JSON.stringify(data));
+              this.thisWord = data.result[0];
+              // 是不是一个新词
+              if (this.thisWord.memory_percent > 0) {
+                this.thisNewOrOld = 1;
+              } else {
+                this.thisNewOrOld = 0;
+              }
+              this.fnAudioPalyer(this.thisWord.word_url);
               break;
           }
         })
       },
+      // 设置生词、熟词、复习词
+      fnSetWordState() {
+        if (this.thisNewOrOld === 0 && this.wordState === 1) { // 熟词
+          this.oldWordNum ++;
+        } else if (this.thisNewOrOld === 0 && this.wordState > 1) { // 生词
+          this.newWordNum ++;
+        } else if (this.thisNewOrOld === 1) { // 复习词
+          this.reviewWordNum ++;
+        }
+      },
       // 获取下一个单词
       fnGetNextWord() {
-
+        this.fnSetWordState();
+        this.loading = true;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'getnext',
+            id: this.thisWord.id,
+            neworold_word: this.thisNewOrOld,
+            user_id: this.userMsg.ID,
+            unit_id: this.unitId
+          }
+        }).then(res => {
+          this.loading = false;
+          // 重置到新词状态
+          this.fnreset();
+          let data = res.data;
+          switch (data.result) {
+            case 0:
+              // 单词获取失败，请检查您的网络或联系管理员
+              console.log('单词获取失败，请检查您的网络或联系管理员');
+              this.$alert('提示', '单词获取失败，请检查您的网络或联系管理员', {
+                confirmButtonText: '确定',
+                callback: () => {
+                  this.$router.push('/home');
+                }
+              });
+              break;
+            case 1:
+              // 请求成功1
+              console.log('请求成功: ' + JSON.stringify(data));
+              break;
+            case 2:
+              // 单词记忆结束，下面开始单词强化
+              this.$alert('下面是加深记忆时间哦，加油！', '单词记忆结束，下面开始单词强化！', {
+                confirmButtonText: '确定',
+                callback: () => {
+                  this.$router.push('/wordMemory');
+                }
+              });
+              break;
+            case 3:
+              // 学习完毕，下面开始测试
+              this.$alert('到了检验学习成果的时候啦', '学习完毕，下面开始测试！', {
+                confirmButtonText: '确定',
+                callback: () => {
+                  this.$router.push({path: '/wordStudyTest', query: {countTestType: 0}});
+                }
+              });
+              break;
+            case 4:
+              // 先来学前测试一下吧
+              this.$alert('先了解一下自己的真实水平吧', '先来学前测试一下吧！', {
+                confirmButtonText: '确定',
+                callback: () => {
+                  this.$router.push({path: '/wordStudyTest', query: {testType: 0}});
+                }
+              });
+              break;
+            default:
+              this.fnsetTimeOut();
+              // console.log(JSON.stringify(data));
+              this.thisWord = data.result[0];
+              // 是不是一个新词
+              if (this.thisWord.memory_percent > 0) {
+                this.thisNewOrOld = 1;
+              } else {
+                this.thisNewOrOld = 0;
+              }
+              this.fnAudioPalyer(this.thisWord.word_url);
+              break;
+          }
+        })
       },
-      fnReadWord() {
-
+      // 重置到新词状态
+      fnreset() {
+        this.isKnow = true;
+        this.isYes = false;
+        this.isReadAgain = false;
+        this.thisWordShow = false;
+        this.nextAgain = 2;
       },
-      fnKnow() {
-
+      // 播放器播放
+      fnAudioPalyer(url_) {
+        let audio = document.querySelector('#audio');
+        audio.src = this.$url.url2 + url_;
       },
-      fnNotknow() {
-
+      // 认识还是不认识
+      fnKnow(type_) {
+        this.showTimer = false;
+        this.setTimeNum = 5;
+        if (type_ === 1) { // 认识
+          clearInterval(this.timer);
+          this.fnAudioPalyer(this.thisWord.word_url);
+          this.isKnow = false;
+          this.isYes = true;
+          this.thisWordShow = true;
+        } else { // 不认识
+          clearInterval(this.timer);
+          this.isKnow = false;
+          this.isReadAgain = true;
+          this.thisWordShow = true;
+          this.nextAgain = 2;
+          // 该词作为生词，状态+1
+          this.wordState++;
+        }
       },
-      fnRight() {
-
+      // 对的还是错的
+      fnRight(type_) {
+        if (type_ === 1) { // 对的
+          this.isYes = false;
+          this.fnGetNextWord();
+        } else { // 错的
+          this.isYes = false;
+          this.isReadAgain = true;
+          // 该词作为生词，状态+1
+          this.wordState++;
+        }
       },
-      fnWrong() {
-
-      },
+      // 再读两次
       fnReadAgain() {
-
+        console.log(this.nextAgain);
+        if (this.nextAgain === 2) {
+          this.fnAudioPalyer(this.thisWord.word_url);
+          this.nextAgain--;
+        } else if (this.nextAgain === 1) {
+          this.fnAudioPalyer(this.thisWord.word_url);
+          this.nextAgain--;
+        } else if (this.nextAgain === 0) {
+          this.fnGetNextWord();
+        }
+      },
+      // 倒计时五秒，倒计时结束后自动选择
+      fnsetTimeOut() {
+        this.showTimer = true;
+        this.timer = setInterval( () => {
+          this.setTimeNum--;
+          if(this.setTimeNum <= 0) {
+            clearInterval(this.timer);
+            this.fnKnow(0);
+          }
+        }, 1000)
+      },
+      // 开始计时学习时间
+      fnStudyTime() {
+        let time = 0;
+        setInterval( () => {
+          time ++;
+          let hour = parseInt(time / 3600) < 10 ? '0' + parseInt(time / 3600) : parseInt(time / 3600);
+          let minute = parseInt(time % 3600 / 60) < 10 ? '0' + parseInt(time % 3600 / 60) : parseInt(time % 3600 / 60) ;
+          let second = parseInt(time % 60) < 10 ? '0' + parseInt(time % 60) : parseInt(time % 60);
+          this.studyTime = hour + ':' + minute + ':' + second;
+        }, 1000)
       }
     },
     computed: {
@@ -181,10 +368,29 @@
         let unitBoxName = sessionStorage.unit_name;
         let leftTitle = versionBoxName + ' - ' + textbookName + ' - ' + unitBoxName;
         return leftTitle;
+      },
+      // 困难度
+      degreeOfDifficulty() {
+        let difficulty = 0;
+        let length = this.thisWord.word_name.length;
+        if (length <= 3) {
+          difficulty = 1;
+        } else if (length > 3 && length <= 7) {
+          difficulty = 2;
+        } else if (length > 7 && length <= 11) {
+          difficulty = 3;
+        } else if (length > 11 && length <= 15) {
+          difficulty = 4;
+        } else if (length > 15) {
+          difficulty = 5;
+        }
+        return difficulty;
       }
     },
     mounted() {
+      this.fnStudyTime();
       this.fnGetNewWord();
+      this.fnreset();
     },
     created() {
       this.userMsg = JSON.parse(sessionStorage.userMsg);
@@ -449,11 +655,11 @@
     background-image: url(../../static/img/study/forward.png);
   }
 
-  .faceBox > .num0.num1 {
+  .faceBox > .num1 {
     background-image: url(../../static/img/study/digital01.png);
   }
 
-  .faceBox > .num0.num1.num2 {
+  .faceBox > .num2 {
     background-image: url(../../static/img/study/digital02.png);
   }
 
@@ -462,7 +668,7 @@
     color: #666;
     font-size: 14px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     flex-wrap: nowrap;
   }
 </style>

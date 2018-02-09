@@ -174,7 +174,10 @@
         this.fnPushItemList(this.e_cList);
         this.fnPushItemList(this.c_eList);
         this.listenList = this.dataArr;
-        console.log('三种题目分别的数量：'+this.e_cList.length +'-'+ this.c_eList.length +'-'+ this.listenList.length);
+        sessionStorage.e_cList = JSON.stringify(this.e_cList);
+        sessionStorage.c_eList = JSON.stringify(this.c_eList);
+        sessionStorage.listenList = JSON.stringify(this.listenList);
+        // console.log('三种题目分别的数量：'+this.e_cList.length +'-'+ this.c_eList.length +'-'+ this.listenList.length);
       },
       fnPushItemList(arr_) {
         for (let i = 0; i < this.itemsLength; i++) {
@@ -185,14 +188,10 @@
       },
       // 点击播放语音事件
       fnVoicePlaying(item_) {
-
+        this.$bus.emit('audioPlayer', item_.word_url);
       },
       // 计算分数：把处理过后的数组合并在一起，并循环，计算正确题目的个数
       fnNextArrProcessor() {
-        // let e_cArr = this.e_cList.map(item => { return item.checked });
-        // let c_eArr = this.c_eList.map(item => { return item.checked });
-        // let listenArr = this.listenList.map(item => { return item.checked });
-        // let newArr = e_cArr.concat(c_eArr, listenArr);
         // 遍历所有的题目input，获取其选择的项正确或者错误，记录已选的或正确项的index
         // let testObjArr = [];
         let testArr = document.querySelectorAll('.itemList>li');
@@ -286,7 +285,7 @@
     computed: {
       // 0学前测试   1闯关测试
       testType() {
-        let testType_ = this.$route.query.testType ? parseInt(this.$route.query.testType) : 1 ;
+        let testType_ = parseInt(this.$route.query.testType) === 0 ? 0 : 1;
         return testType_;
       },
       // 0没学习直接进入测试   1学完了进入测试

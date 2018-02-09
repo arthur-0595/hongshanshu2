@@ -32,7 +32,7 @@
       },
       // 根据单词数量计算答题时间
       fnSetTimeOut(lietLenth_) {
-        let time = parseInt(lietLenth_) * 20;
+        let time = parseInt(lietLenth_) * 7;
         let timer = setInterval(() => {
           time--;
           this.onlyminute = parseInt(time/60);

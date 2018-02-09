@@ -13,15 +13,21 @@
         audioSrc: ''
       }
     },
-    methods: {},
+    methods: {
+      fnAudioPalyer(url_) {
+        let audio = document.querySelector('#audio');
+        audio.src = this.$url.url2 + url_;
+      }
+    },
     mounted() {
-
     },
     created() {
-
+      this.$bus.on('audioPlayer', (url_) => {
+        this.fnAudioPalyer(url_);
+      });
     },
     beforeDestroy() {
-
+      this.$bus.off('audioPlayer');
     }
   }
 </script>

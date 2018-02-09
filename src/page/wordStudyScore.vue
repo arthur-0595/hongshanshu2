@@ -1,6 +1,6 @@
 <template>
   <div id="studyScore">
-    <scoreHead></scoreHead>
+    <scoreHead :title="scoreTit"></scoreHead>
     <div class="content">
       <!--展示分数框-->
       <div class="scoreBox">
@@ -8,75 +8,38 @@
         <div class="resultBox">
           <div class="left">
             <span class="imgShow"></span>
-            <span class="score">88 分</span>
+            <span class="score">{{score}} 分</span>
           </div>
-          <div class="right">恭喜你，闯关成功，你是响当当的牛人！</div>
+          <div class="right">{{opinion}}</div>
         </div>
       </div>
       <!--看错题和全部试题按钮-->
-      <div class="tabBtns clearfix">
+      <!--<div class="tabBtns clearfix">
         <span class="all">全部试题</span>
         <span class="errItems">只看错题</span>
         <span class="errNum">答错68题</span>
         <span class="rightNum">答对33题</span>
-      </div>
+      </div>-->
       <!--题目列表-->
       <div class="itemBox">
         <h4>英译汉</h4>
         <ul class="itemList">
-          <li class="correct">
+          <li :class="{correct:false}" v-for="(item,index) in e_cList">
             <div class="wordLine">
-              <span class="num">1.</span>
-              <span class="word">anxious</span>
+              <span class="num">{{index + 1}}.</span>
+              <span class="word">{{item.word_name}}</span>
               <span class="isCorrect"></span>
             </div>
             <ul class="selectorBox">
-              <li><span></span>n. 8月</li>
-              <li><span></span>adj. 每一，每一个</li>
-              <li><span></span>n. 长者，前辈</li>
-              <li class="correctLi myLi"><span></span>adj. 忧虑的，焦虑的</li>
+              <li v-for="vo in item.chinese" :class="{correctLi:vo.type === 1}">
+                <span></span>{{vo.content}}
+              </li>
+              <!--<li><span></span>adj. 每一，每一个</li>-->
+              <!--<li><span></span>n. 长者，前辈</li>-->
+              <!--<li class="correctLi myLi"><span></span>adj. 忧虑的，焦虑的</li>-->
             </ul>
           </li>
-          <li class="error">
-            <div class="wordLine">
-              <span class="num">1.</span>
-              <span class="word">anxious</span>
-              <span class="isCorrect"></span>
-            </div>
-            <ul class="selectorBox">
-              <li><span></span>n. 8月</li>
-              <li><span></span>adj. 每一，每一个</li>
-              <li class="myLi"><span></span>n. 长者，前辈</li>
-              <li class="correctLi"><span></span>adj. 忧虑的，焦虑的</li>
-            </ul>
-          </li>
-          <li class="correct">
-            <div class="wordLine">
-              <span class="num">1.</span>
-              <span class="word">anxious</span>
-              <span class="isCorrect"></span>
-            </div>
-            <ul class="selectorBox">
-              <li><span></span>n. 8月</li>
-              <li><span></span>adj. 每一，每一个</li>
-              <li><span></span>n. 长者，前辈</li>
-              <li class="correctLi myLi"><span></span>adj. 忧虑的，焦虑的</li>
-            </ul>
-          </li>
-          <li class="unsel">
-            <div class="wordLine">
-              <span class="num">1.</span>
-              <span class="word">anxious</span>
-              <span class="isCorrect">(未选)</span>
-            </div>
-            <ul class="selectorBox">
-              <li><span></span>n. 8月</li>
-              <li><span></span>adj. 每一，每一个</li>
-              <li><span></span>n. 长者，前辈</li>
-              <li class="correctLi"><span></span>adj. 忧虑的，焦虑的</li>
-            </ul>
-          </li>
-          <li class="error">
+          <!--<li class="error">
             <div class="wordLine">
               <span class="num">1.</span>
               <span class="word">anxious</span>
@@ -101,13 +64,27 @@
               <li><span></span>n. 长者，前辈</li>
               <li class="correctLi"><span></span>adj. 忧虑的，焦虑的</li>
             </ul>
-          </li>
+          </li>-->
         </ul>
       </div>
       <div class="itemBox">
         <h4>汉译英</h4>
         <ul class="itemList">
-          <li class="error">
+          <li :class="{correct:false}" v-for="(item,index) in c_eList">
+            <div class="wordLine">
+              <span class="num">{{index+1}}.</span>
+              <span class="word">{{item.word_mean}}</span>
+              <span class="isCorrect"></span>
+            </div>
+            <ul class="selectorBox">
+              <li v-for="vo in item.english"
+                :class="{correctLi:vo.type === 1}"><span></span>{{vo.content}}</li>
+              <!--<li><span></span>attend</li>-->
+              <!--<li class="myLi"><span></span>arrive</li>-->
+              <!--<li class="correctLi"><span></span>active</li>-->
+            </ul>
+          </li>
+          <!--<li class="error">
             <div class="wordLine">
               <span class="num">1.</span>
               <span class="word">adj. 忧虑的，焦虑的</span>
@@ -132,27 +109,30 @@
               <li><span></span>arrive</li>
               <li class="correctLi"><span></span>active</li>
             </ul>
-          </li>
+          </li>-->
         </ul>
       </div>
       <div class="itemBox">
         <h4>听力理解</h4>
         <ul class="itemList">
-          <li class="error">
+          <li :class="{error:false}" v-for="(item, index) in listenList">
             <div class="wordLine">
-              <span class="num">1.</span>
+              <span class="num">{{index+1}}.</span>
               <span class="readBtn"></span>
-              <span class="word">atract</span>
+              <span class="word"></span>
               <span class="isCorrect"></span>
             </div>
             <ul class="selectorBox">
-              <li><span></span>n. 8月</li>
-              <li><span></span>adj. 每一，每一个</li>
-              <li class="myLi"><span></span>n. 长者，前辈</li>
-              <li class="correctLi"><span></span>adj. 忧虑的，焦虑的</li>
+              <li v-for="vo in item.chinese"
+                  :class="{correctLi:vo.type === 1}"
+                ><span></span>{{vo.content}}
+              </li>
+              <!--<li><span></span>adj. 每一，每一个</li>-->
+              <!--<li class="myLi"><span></span>n. 长者，前辈</li>-->
+              <!--<li class="correctLi"><span></span>adj. 忧虑的，焦虑的</li>-->
             </ul>
           </li>
-          <li class="correct">
+          <!--<li class="correct">
             <div class="wordLine">
               <span class="num">1.</span>
               <span class="readBtn"></span>
@@ -179,16 +159,16 @@
               <li class=""><span></span>n. 长者，前辈</li>
               <li class="correctLi"><span></span>adj. 忧虑的，焦虑的</li>
             </ul>
-          </li>
+          </li>-->
         </ul>
       </div>
       <!--内容底部按钮组-->
       <!--看错题和全部试题按钮-->
       <div class="tabBtns clearfix">
-        <span class="all">全部试题</span>
-        <span class="errItems">只看错题</span>
-        <span class="studyCenter">学习中心</span>
-        <span class="testAgain">重新测试</span>
+        <!--<span class="all">全部试题</span>-->
+        <!--<span class="errItems">只看错题</span>-->
+        <span class="studyCenter" @click="fnGoStudyCenter()">学习中心</span>
+        <span class="testAgain" @click="fnGoBack()" v-show="testType !== 0">重新测试</span>
       </div>
     </div>
     <home-foot></home-foot>
@@ -203,11 +183,75 @@
     name: 'word-study-score',
     components: {scoreHead, homeFoot},
     data() {
-      return {}
+      return {
+        opinionArr: [
+          '不及格，你真的应该好好学习了！',
+          '勉强及格，还需要加油哦，继续学习！',
+          '成绩还可以，不过还需要继续努力啊',
+          '你已经很棒了，不过你还可以做的更好，不是吗？',
+          '很完美，你很棒棒哦'
+        ]
+      }
     },
-    methods: {},
+    methods: {
+      // 返回学习中心
+      fnGoStudyCenter() {
+        this.$router.push('/home');
+      },
+      // 重新测试
+      fnGoBack() {
+        this.$router.go(-1);
+      }
+    },
+    computed: {
+      // 分数
+      score() {
+        return this.$route.query.score;
+      },
+      // 反馈意见
+      opinion() {
+        let opinion_ = '';
+        if (this.score <= 60) {
+          opinion_ = this.opinionArr[0];
+        } else if (this.score > 60 && this.score <= 70) {
+          opinion_ = this.opinionArr[1];
+        } else if (this.score > 70 && this.score <= 80) {
+          opinion_ = this.opinionArr[2];
+        } else if (this.score > 80 && this.score <= 90) {
+          opinion_ = this.opinionArr[3];
+        } else if (this.score > 90 && this.score <= 100) {
+          opinion_ = this.opinionArr[4];
+        } else{
+          opinion_ = '成绩有问题！'
+        }
+        return opinion_;
+      },
+      // 是否是学前测试，左上角标题用
+      scoreType() {
+        let scoreType_ = parseInt(this.$route.query.testType) === 0 ? '学前测试' : '闯关测试';
+        return scoreType_;
+      },
+      // 左上角标题
+      scoreTit() {
+        let title = sessionStorage.version_name + ' - ' + sessionStorage.textbook_name + ' - (' + sessionStorage.unit_name + ') - ' + this.scoreType ;
+        // console.log(title);
+        return title;
+      },
+      // 测试类型
+      testType() {
+        return parseInt(this.$route.query.testType);
+      },
+      e_cList() {
+        return JSON.parse(sessionStorage.e_cList);
+      },
+      c_eList() {
+        return JSON.parse(sessionStorage.c_eList);
+      },
+      listenList() {
+        return JSON.parse(sessionStorage.listenList);
+      }
+    },
     mounted() {
-
     }
   }
 </script>
