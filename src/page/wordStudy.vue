@@ -6,7 +6,6 @@
       <!--<span>今日在线：00:34:40</span>-->
       <!--<span>学习效率：13%</span>-->
     </div>
-
     <!--中间-->
     <div class="centerBox" v-loading="loading">
       <!--学习的单元名字-->
@@ -134,6 +133,7 @@
             unit_id: this.unitId
           }
         }).then(res => {
+          this.fnSaveCourse();
           this.loading = false;
           let data = res.data;
           switch (data.result) {
@@ -218,6 +218,7 @@
             unit_id: this.unitId
           }
         }).then(res => {
+          this.fnSaveCourse();
           this.loading = false;
           // 重置到新词状态
           this.fnreset();
@@ -326,7 +327,6 @@
       },
       // 再读两次
       fnReadAgain() {
-        console.log(this.nextAgain);
         if (this.nextAgain === 2) {
           this.fnAudioPalyer(this.thisWord.word_url);
           this.nextAgain--;
@@ -358,6 +358,22 @@
           let second = parseInt(time % 60) < 10 ? '0' + parseInt(time % 60) : parseInt(time % 60);
           this.studyTime = hour + ':' + minute + ':' + second;
         }, 1000)
+      },
+      // 保存学习记录
+      fnSaveCourse() {
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'SaveStudy',
+            user_id: this.userMsg.ID,
+            version_id: sessionStorage.version_id,
+            textbook_id: sessionStorage.textbook_id,
+          }
+        }).then(res => {
+          let data = res.data;
+          console.log(data);
+        })
       }
     },
     computed: {
@@ -395,6 +411,12 @@
     created() {
       this.userMsg = JSON.parse(sessionStorage.userMsg);
       this.unitId = sessionStorage.unit_id;
+      // 监听ctrl点击事件，播放单词音频
+      document.onkeydown = (event) => {
+        if (event.keyCode === 17) {
+          this.fnAudioPalyer(this.thisWord.word_url);
+        }
+      }
     }
   }
 </script>

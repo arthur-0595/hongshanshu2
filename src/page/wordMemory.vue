@@ -7,7 +7,7 @@
       <!--<span>学习效率：13%</span>-->
     </div>
     <!--中间-->
-    <div class="centerBox">
+    <div class="centerBox" v-loading="loading">
       <!--学习的单元名字-->
       <div class="nameBox">
         <div class="deviceName">智能记忆-词义强化</div>
@@ -21,32 +21,33 @@
       <!--要学习的主要内容-->
       <div class="mainCon">
         <!--中文词义-->
-        <div class="mean">adj.黑色的</div>
+        <div class="mean">{{thisWord.word_mean}}</div>
         <!--中间输入框-->
-        <div class="inputBox">
-          <div class="laba" id="laba" onclick="fnReadWord()"></div>
-          <input type="text" oncopy="return false;" onpaste="return false;" oncut="return false;"/>
+        <div class="inputBox"
+             :class="{wrong:thisWordState === 2 , right:thisWordState === 1}">
+          <div class="laba" id="laba" @click="fnAudioPalyer(thisWord.word_url)"></div>
+          <input type="text" v-model="inputStr" autofocus id="thisInput"
+                 v-focus="isfocus"
+                 :disabled="isdisabled"
+                 oncopy="return false;"
+                 onpaste="return false;"
+                 oncut="return false;"/>
           <div class="isRight"></div>
         </div>
         <!--记忆强度-->
-        <div class="totalBar" title="记忆强度 20%">
-          <div class="curBar"></div>
-        </div>
+        <!--<div class="totalBar" :title="'记忆强度 ' + thisWord. +'%'">-->
+          <!--<div class="curBar"></div>-->
+        <!--</div>-->
         <!--单词和音标-->
-        <!--错误时显示单词状态-->
-        <div class="wordBox"  style="display: none;">
-          <span class="word">black</span>
-          <span class="soundmark">[blæk]</span>
-        </div>
-        <!--正确时显示音标状态-->
-        <div class="wordBox" style="visibility: none;">
-          <span class="rightWord">[blæk]</span>
+        <div class="wordBox"  v-show="showWord">
+          <span class="word">{{thisWord.word_name.replace(/\•/g, '')}}</span>
+          <span class="soundmark">{{thisWord.phonogram}}</span>
         </div>
       </div>
       <!--底部内容-->
       <div class="botInfo clearfix">
         <span>学习时长：{{studyTime}}</span>
-        <span>拼写进度：4/10</span>
+        <span>拼写进度：{{thisWordIndex+1}}/{{wordList.length}}</span>
         <!--<span>错误率：40%</span>-->
       </div>
       <audio src="" id="audio" autoplay="autoplay"></audio>
@@ -60,7 +61,25 @@
     components: {},
     data() {
       return {
+        loading: false,
+        userMsg: {},
+        unitId: 0,
         studyTime: '00:00:00', // 学习时间
+        wordList: [], // 所有单词
+        thisWord: {
+          'id': 15,
+          'word_name': 'ball',
+          'word_mean': 'n.球',
+          'word_url': '\\UploadeFile\\Video\\ball.wav',
+          'phonogram': '[bɔ:l]'
+        }, // 当前单词
+        thisWordIndex: 0, // 当前单词的index
+        showWord: false, // 是否显示当前单词
+        inputStr: '',  // input内输入的内容
+        thisWordState: 0, // 当前的状态，0 未判断  1 正确  2 错误
+        isdisabled: false, // 是否禁止input输入
+        isfocus: false, // 是否自动获得焦点
+        againEnter: 2, // 两次enter进入下一个单词，默认为2，点击--
       }
     },
     methods: {
@@ -83,7 +102,94 @@
         let audio = document.querySelector('#audio');
         audio.src = this.$url.url2 + url_;
       },
-
+      // 请求记忆强化的单词
+      fnGetWordMemoryList() {
+        this.loading = true;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'getwords',
+            unit_id: this.unitId,
+          }
+        }).then(res => {
+          this.loading = false;
+          let data = res.data;
+          this.wordList = data;
+          this.thisWord = data[0];
+          this.thisWordIndex = 0;
+          this.fnAudioPalyer(this.thisWord.word_url);
+        })
+      },
+      // 验证当前正确与否
+      fnVerify() {
+        if (this.againEnter === 2) {
+          this.againEnter --;
+          let wordName = this.thisWord.word_name.replace(/\•/g, '');
+          if (wordName === this.inputStr) { // 填写正确
+            this.thisWordState = 1;
+            this.isdisabled = true;
+            this.showWord = true;
+            this.againEnter --;
+          }else { // 填写错误
+            this.thisWordState = 2;
+            this.isdisabled = true;
+            this.showWord = true;
+          }
+        } else if (this.againEnter === 1) {
+          this.againEnter = 2;
+          this.thisWordState = 0;
+          this.isdisabled = false;
+          this.isfocus = true;
+          this.showWord = false;
+          this.inputStr = '';
+        } else if (this.againEnter === 0) {
+          this.inputStr = '';
+          this.thisWordState = 0;
+          this.isdisabled = false;
+          this.isfocus = true;
+          this.againEnter = 2;
+          this.showWord = false;
+          this.fnUpdateNextWord();
+        }
+      },
+      // 加载下一个单词
+      fnUpdateNextWord() {
+        this.thisWordIndex ++;
+        if (this.thisWordIndex < this.wordList.length) {
+          this.thisWord = this.wordList[this.thisWordIndex];
+          this.fnAudioPalyer(this.thisWord.word_url);
+          console.log(this.thisWord.word_name);
+        } else {
+          this.fnMemoryEvent();
+          this.$alert('记忆强化完成，现在去测试一下吧！', '进入闯关测试', {
+            confirmButtonText: '确定',
+            callback: () => {
+             this.$router.push({
+               name: 'wordStudyTest',
+               query: {
+                 testType: 1
+               }
+             });
+            }
+          });
+        }
+      },
+      // 发送记忆强化完成的消息
+      fnMemoryEvent() {
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'memoryintersive',
+            unit_id: this.unitId,
+            user_id: this.userMsg.ID
+          }
+        }).then(res => {
+          let data = res.data;
+          console.log(data);
+        })
+      }
     },
     computed: {
       // 拼接左上角学习的教材标题
@@ -97,6 +203,28 @@
     },
     mounted() {
       this.fnStudyTime();
+      this.fnGetWordMemoryList();
+    },
+    created() {
+      this.userMsg = JSON.parse(sessionStorage.userMsg);
+      this.unitId = sessionStorage.unit_id;
+      // 监听ctrl点击事件，播放单词音频
+      document.onkeydown = (event) => {
+        if (event.keyCode === 17) { // ctrl
+          this.fnAudioPalyer(this.thisWord.word_url);
+        } else if(event.keyCode === 13) { // enter
+          this.fnVerify();
+        }
+      }
+    },
+    directives: {
+      focus: {
+        update: function (el, {value}) {
+          if (value) {
+            el.focus()
+          }
+        }
+      }
     }
   }
 </script>
@@ -218,11 +346,6 @@
   .mainCon .wordBox .soundmark {
     font-size: 16px;
     color: #959694;
-  }
-
-  .mainCon .wordBox .rightWord {
-    color: #333;
-    font-size: 32px;
   }
 
   .mainCon .inputBox {

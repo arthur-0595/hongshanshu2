@@ -21,11 +21,14 @@ import homeExtendVoice from '@/components/homeExtendVoice';
 
 Vue.use(Router);
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/',
       name: 'login',
+      meta: {
+        name: '红杉树'
+      },
       component: appLogin
     },
     {
@@ -34,26 +37,44 @@ export default new Router({
       children: [
         { // 学习中心
           path: '',
+          meta: {
+            name: '红杉树 - 学习中心'
+          },
           component: homeContent
         },
         { // 我的信息
           path: 'myInfo',
+          meta: {
+            name: '红杉树 - 个人中心'
+          },
           component: homePersonCenter
         },
         { // 单词本
           path: 'wordBook',
+          meta: {
+            name: '红杉树 - 单词本'
+          },
           component: homeWordBook
         },
         { // 记忆追踪
           path: 'homeMemoryTracer',
+          meta: {
+            name: '红杉树 - 记忆追踪'
+          },
           component: homeMemoryTracer
         },
         { // 智能语音
           path: 'homeExtendVoice',
+          meta: {
+            name: '红杉树 - 智能语音'
+          },
           component: homeExtendVoice
         },
         { // 智能口语
           path: 'homeExtendTongue',
+          meta: {
+            name: '红杉树 - 智能口语'
+          },
           component: homeExtendTongue
         }
       ]
@@ -61,48 +82,85 @@ export default new Router({
     { // 单词记忆
       path: '/wordStudy',
       name: 'wordStudy',
+      meta: {
+        name: '红杉树 - 单词记忆'
+      },
       component: wordStudy
     },
     { // 单词记忆强化
       path: '/wordMemory',
       name: 'wordMemory',
+      meta: {
+        name: '红杉树 - 单词强化'
+      },
       component: wordMemory
     },
     { // 智能记忆测试
       path: '/wordStudyTest',
       name: 'wordStudyTest',
+      meta: {
+        name: '红杉树 - 单词记忆测试'
+      },
       component: wordStudyTest
     },
     { // 智能记忆测试分数
       path: '/wordStudyScore',
       name: 'wordStudyScore',
+      meta: {
+        name: '红杉树 - 单词记忆测试分数'
+      },
       component: wordStudyScore
     },
     { // 单词听写
       path: '/wordListen',
       name: 'wordListen',
+      meta: {
+        name: '红杉树 - 单词听写'
+      },
       component: wordListen
     },
     { // 单词默写
       path: '/wordWrite',
       name: 'wordWrite',
+      meta: {
+        name: '红杉树 - 单词默写'
+      },
       component: wordWrite
     },
     { // 句子听力
       path: '/sentenceListen',
       name: 'sentenceListen',
+      meta: {
+        name: '红杉树 - 句子听力'
+      },
       component: sentenceListen
     },
     { // 句子听写
       path: '/sentenceTranslate',
       name: 'sentenceTranslate',
+      meta: {
+        name: '红杉树 - 句子听写'
+      },
       component: sentenceTranslate
     },
     { // 句子默写
       path: '/sentenceWrite',
       name: 'sentenceWrite',
+      meta: {
+        name: '红杉树 - 句子默写'
+      },
       component: sentenceWrite
     }
 
   ]
-})
+});
+
+router.beforeEach((to, from, next) => {
+  window.document.title = to.meta.name;
+  next();
+});
+router.afterEach((to, from, next) => {
+  window.scrollTo(0, 0);
+});
+
+export default router
