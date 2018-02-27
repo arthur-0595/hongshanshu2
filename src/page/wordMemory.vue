@@ -78,7 +78,7 @@
         inputStr: '',  // input内输入的内容
         thisWordState: 0, // 当前的状态，0 未判断  1 正确  2 错误
         isdisabled: false, // 是否禁止input输入
-        isfocus: false, // 是否自动获得焦点
+        isfocus: true, // 是否自动获得焦点
         againEnter: 2, // 两次enter进入下一个单词，默认为2，点击--
       }
     },
@@ -155,7 +155,7 @@
       },
       // 加载下一个单词
       fnUpdateNextWord() {
-        this.thisWordIndex ++;
+        this.thisWordIndex++;
         if (this.thisWordIndex < this.wordList.length) {
           this.thisWord = this.wordList[this.thisWordIndex];
           this.fnAudioPalyer(this.thisWord.word_url);

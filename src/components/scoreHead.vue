@@ -5,7 +5,7 @@
       <span class="back" @click="fnGoStudyCenter()">返回学习中心</span>
       <span class="handPaper"
             @click="fnGoBack()"
-            v-show="scoreType === 1">重新测试</span>
+            v-show="scoreType === 2">重新测试</span>
     </div>
   </div>
 </template>
@@ -32,7 +32,7 @@
       scoreType() {
         let scoreType_ = parseInt(this.$route.query.testType);
         return scoreType_;
-      },
+      }
     },
     mounted() {
 

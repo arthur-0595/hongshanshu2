@@ -10,7 +10,7 @@
     <div class="centerBox" v-loading="loading">
       <!--学习的单元名字-->
       <div class="nameBox">
-        <div class="deviceName">智能听写</div>
+        <div class="deviceName">{{thisTitle}}</div>
         <div class="version">{{thisVersionName}}</div>
         <div class="rightBtn clearfix">
           <!--<span class="help"></span>-->
@@ -22,9 +22,11 @@
       <div class="mainCon">
         <!--单词和音标-->
         <!--错误时显示单词状态-->
-        <div class="wordBox" v-show="showWord">
-          <span class="word">{{thisWord.word_name.replace(/\•/g, '')}}</span>
-          <span class="soundmark">{{thisWord.phonogram}}</span>
+        <div class="wordBox">
+          <div v-show="showWord">
+            <span class="word">{{thisWord.word_name.replace(/\•/g, '')}}</span>
+            <span class="soundmark">{{thisWord.phonogram}}</span>
+          </div>
         </div>
         <!--中间输入框-->
         <div class="inputBox"
@@ -37,24 +39,26 @@
                  onpaste="return false;"
                  oncut="return false;"/>
           <div class="isRight"></div>
+          <!--@keyup.enter="fnVerify()"-->
         </div>
         <!--记忆强度-->
-        <div class="totalBar" title="记忆强度 20%">
-          <div class="curBar"></div>
+        <div class="totalBar" v-show="isTest===1" :title="'记忆强度 '+ thisWord.dictation_percent +'%'">
+          <div class="curBar" :style="{width: thisWord.dictation_percent + '%'}"></div>
         </div>
         <!--中文词义-->
-        <div class="mean">adj.黑色的</div>
+        <div class="mean" v-show="showWord">{{thisWord.word_mean}}</div>
       </div>
       <!--底部内容-->
       <div class="botInfo">
         <!--<span>引擎档位： 6</span>-->
         <span>学习时长： {{studyTime}}</span>
-        <span>本次学习 [ 生词： 0个　熟词：2个　复习：0个 ]</span>
-        <span>学习进度：{{thisWordIndex+1}}/{{wordList.length}}</span>
+        <span v-if="isTest === 1">本次学习 [ 生词： {{newWordNum}}个　熟词：{{oldWordNum}}个　复习：{{reviewWordNum}}个 ]</span>
+        <span v-else>进度：{{thisWordIndex+1}}/{{wordList.length}}</span>
       </div>
       <audio src="" id="audio" autoplay="autoplay"></audio>
     </div>
   </div>
+
 </template>
 
 <script>
@@ -70,20 +74,28 @@
         thisWord: {
           'id': 15,
           'word_name': 'ball',
-          'word_mean': 'n.球',
+          'word_mean': '预设n.球',
           'word_url': '\\UploadeFile\\Video\\ball.wav',
           'phonogram': '[bɔ:l]'
         }, // 当前单词
         wordList: [],
-        thisWordIndex: 0,
-        thisWordState: 0,
-        inputStr: '',
-        isfocus: false,
-        isdisabled: false,
+        thisWordIndex: 0, // 当前单词的index
+        thisWordState: 0, // 当前的状态，0 未判断  1 正确  2 错误
+        theWordNewOrOld: 0, // 该单词是不是听过 0：默认没听过   大于0：听过
+        theWordState: 1, // 生词还是熟词 1：默认熟词  大于1：生词
+        inputStr: '', // input内输入的内容
+        isfocus: true, // 是否自动获得焦点
+        isdisabled: false, // 是否禁止input输入
         newWordNum: 0, // 生词数量
         oldWordNum: 0, // 熟词数量
         reviewWordNum: 0, // 复习数量
         showWord: false, // 是否显示单词释义
+        thisTitle: '智能听写',
+        isTest: 1, // 当前状态 0:学前测试  1:默认，学习  2:闯关测试
+        countTest: 1, // 是否是直接进入测试， 1：未学习进入  2：学习过进入测试
+        testArr: [], // 测试结果组成的数组
+        score: 0, // 测试计算分数
+        againEnter: 2, // 两次enter进入下一个单词，默认为2，点击-1
       }
     },
     methods: {
@@ -93,10 +105,10 @@
       // 开始计时学习时间
       fnStudyTime() {
         let time = 0;
-        setInterval( () => {
-          time ++;
+        setInterval(() => {
+          time++;
           let hour = parseInt(time / 3600) < 10 ? '0' + parseInt(time / 3600) : parseInt(time / 3600);
-          let minute = parseInt(time % 3600 / 60) < 10 ? '0' + parseInt(time % 3600 / 60) : parseInt(time % 3600 / 60) ;
+          let minute = parseInt(time % 3600 / 60) < 10 ? '0' + parseInt(time % 3600 / 60) : parseInt(time % 3600 / 60);
           let second = parseInt(time % 60) < 10 ? '0' + parseInt(time % 60) : parseInt(time % 60);
           this.studyTime = hour + ':' + minute + ':' + second;
         }, 1000)
@@ -115,13 +127,264 @@
           params: {
             method: 'GetDictation',
             user_id: this.userMsg.ID,
-            unit_id: this.unitId,
+            unit_id: this.unitId
           }
         }).then(res => {
           this.loading = false;
           let data = res.data;
-          this.thisWord = data[0];
+          if (data[0]) {
+            this.thisWord = data[0];
+            console.log(this.thisWord);
+            this.fnAudioPalyer(this.thisWord.word_url);
+            // 单词状态重置为默认，熟词
+            this.theWordState = 1;
+            // 根据当前单词的记忆强度值来判断该词是否是一个已经学过的单词
+            if (this.thisWord.dictation_percent > 1) {
+              this.theWordNewOrOld = 1;
+            } else {
+              this.theWordNewOrOld = 0;
+            }
+          } else if (data.msg === '学前测试') {
+            console.log('学前测试');
+            this.thisTitle = '智能听写 - 学前测试';
+            this.isTest = 0;// 设定当前状态为学前测试
+            this.fnGetDictationTest(0);// 参数为0：学前测试
+            this.$alert('先来学前测试一下吧 : )', '进入学前测试！', {
+              confirmButtonText: '确定',
+              callback: () => {
+                return false;
+              }
+            })
+          } else if (data.msg === '听写完毕') {
+            console.log('听写完毕，准备进入测试');
+            this.thisTitle = '智能听写 - 闯关测试';
+            this.isTest = 2;// 设定当前状态为闯关测试
+            this.countTest = 2;// 设定为学习完毕进入测试
+            this.fnGetDictationTest(1);// 参数为1：闯关测试
+            this.$alert('学习完毕，下面来检验一下学习成果吧 : )', '进入闯关测试！', {
+              confirmButtonText: '确定',
+              callback: () => {
+                return false;
+              }
+            })
+          } else if (data.msg === '无数据') {
+            console.log('没有新的单词数据，请联系客服');
+            this.$alert('注意，没有新的单词数据，请联系相关客服', '点击按钮返回学习中心', {
+              confirmButtonText: '返回学习中心',
+              callback: () => {
+                this.$router.push('/home');
+              }
+            })
+          } else if (data.status == 0) {
+            console.log('错误信息，请联系客服');
+            this.$alert('警告，错误信息，请尝试刷新，若该问题依然存在请联系相关客服！', '点击按钮返回学习中心', {
+              confirmButtonText: '返回学习中心',
+              callback: () => {
+                this.$router.push('/home');
+              }
+            })
+          }
         })
+      },
+      // 获取所有测试单词
+      fnGetDictationTest(beforeTest_) {
+        console.log('测试：' + beforeTest_);
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'GetDictationTest',
+            user_id: this.userMsg.ID,
+            unit_id: this.unitId,
+            before: beforeTest_ // 0：学前测试 1：闯关测试
+          }
+        }).then(res => {
+          let data = res.data;
+          if (data[0]) {
+            this.wordList = data;
+            this.thisWord = data[0];
+            this.fnAudioPalyer(this.thisWord.word_url);
+          } else {
+            this.$alert('单词获取失败，请联系客服人员!', '点击返回学习中心', {
+              confirmButtonText: '返回学习中心',
+              callback: () => {
+                this.$router.push('/home');
+              }
+            })
+          }
+        })
+      },
+      // 验证当前正确与否
+      fnVerify() {
+        // 先判断是不是测试
+        if (this.isTest !== 1) {
+          // 如果input框内字符长度为0，则给出提示但并不载入下一条
+          if (this.inputStr.length < 1) {
+            this.$message({
+              message: '一点都不会吗？',
+              type: 'warning'
+            });
+            return false;
+          }
+          let thisWordName = this.thisWord.word_name.replace(/\•/g, '');
+          let thisStatus = 0; // 当前测试单词的状态
+          if (this.inputStr === thisWordName) {
+            thisStatus = 1;// 正确
+          } else {
+            thisStatus = 0;// 错误
+          }
+          let thisWordObj = {
+            id: this.thisWord.id,
+            this_name: this.thisWord.word_name.replace(/\•/g, ''),
+            this_mean: this.thisWord.word_mean,
+            this_url: this.thisWord.word_url,
+            myVal: this.inputStr,
+            status: thisStatus
+          };
+          this.testArr.push(thisWordObj);
+          // 加载下一个测试单词
+          this.fnOpenNextTestWord();
+        } else { // 不是测试，当前状态为学习
+          if (this.againEnter === 2) {
+            this.againEnter--;
+            let wordName = this.thisWord.word_name.replace(/\•/g, '');
+            if (wordName === this.inputStr) { // 填写正确
+              this.thisWordState = 1;
+              this.isdisabled = true;
+              this.showWord = true;
+              this.againEnter--;
+            } else { // 填写错误
+              this.thisWordState = 2;
+              this.isdisabled = true;
+              this.showWord = true;
+              // 错误，单词状态设置为生词
+              this.theWordState++;
+            }
+          } else if (this.againEnter === 1) {
+            this.againEnter = 2;
+            this.thisWordState = 0;
+            this.isdisabled = false;
+            this.isfocus = true;
+            this.showWord = false;
+            this.inputStr = '';
+          } else if (this.againEnter === 0) {
+            this.inputStr = '';
+            this.thisWordState = 0;
+            this.isdisabled = false;
+            this.isfocus = true;
+            this.againEnter = 2;
+            this.showWord = false;
+            this.fnUpdataWordState();
+          }
+        }
+      },
+      // 修改单词的学习状态
+      fnUpdataWordState() {
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'UpdateState',
+            id: this.thisWord.id,
+            userid: this.userMsg.ID,
+            word_state: this.theWordState
+          }
+        }).then(res => {
+          let data = res.data;
+          if (data.msg === '更改成功') {
+            this.fnAllWordState();
+            this.fnGetWord();
+          }
+        })
+      },
+      // 载入下一个“测试”单词
+      fnOpenNextTestWord() {
+        this.thisWordIndex++;
+        if (this.thisWordIndex < this.wordList.length) {
+          this.inputStr = '';
+          this.thisWord = this.wordList[this.thisWordIndex];
+          this.fnAudioPalyer(this.thisWord.word_url);
+        } else {
+          // 测试完成事件
+          this.$alert('测试完成，看看分数吧！', '点击查看测试结果', {
+            confirmButtonText: '确定',
+            callback: () => {
+              this.fnCountTestScore();
+            }
+          });
+        }
+      },
+      // 计算测试分数
+      fnCountTestScore() {
+        let num = 0;
+        this.testArr.forEach(item => {
+          if (item.status === 1) {
+            num++;
+          }
+        });
+        this.score = Math.round((num / this.testArr.length) * 100);
+        this.fnSubmitScore();
+        sessionStorage.testArr = JSON.stringify(this.testArr);
+      },
+      // 发送测试成绩
+      fnSubmitScore() {
+        let textbook_id = sessionStorage.textbook_id;
+        let study_type = sessionStorage.type_id;
+        let type_ = this.isTest == 0 ? 0 : 1;
+
+        // console.log('user_id:' + userMsg.ID);
+        // console.log('textbook_id:' + textbook_id);
+        // console.log('test_type:' + test_type);
+        // console.log('test_score:' + this.score);
+        // console.log('test_number:' + this.dataLength);
+        // console.log('study_type:' + study_type);
+        // console.log('type:' + this.testType);
+        // console.log('unit_id:' + this.unitId);
+        // console.log('count:' + this.countTestType);
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'SaveTestRecord',
+            user_id: this.userMsg.ID,
+            textbook_id: textbook_id,
+            test_type: this.thisVersionName,
+            test_score: this.score,
+            test_number: this.testArr.length,
+            study_type: study_type,
+            type: type_, // 0学前测试 1学后测试
+            unit_id: this.unitId,
+            count: this.countTest
+          }
+        }).then(res => {
+          let data = res.data;
+          if (data.msg === '保存成功') {
+            this.$router.push({
+              name: 'scorePage',
+              query: {
+                score: this.score,
+                testType: this.isTest
+              }
+            });
+          } else {
+            this.$alert('提交成绩失败，请重试！', '请尝试重新提交或联系管理员', {
+              confirmButtonText: '确定',
+              callback: () => {
+                return
+              }
+            });
+          }
+        })
+      },
+      // 更新生词熟词以及复习单词的数量
+      fnAllWordState() {
+        if (this.theWordNewOrOld === 0 && this.theWordState === 1) { // 熟词
+          this.oldWordNum++;
+        } else if (this.theWordNewOrOld === 0 && this.theWordState > 1) { // 生词
+          this.newWordNum++;
+        } else if (this.theWordNewOrOld === 1) { // 复习
+          this.reviewWordNum++;
+        }
       }
     },
     computed: {
@@ -132,7 +395,7 @@
         let unitBoxName = sessionStorage.unit_name;
         let leftTitle = versionBoxName + ' - ' + textbookName + ' - ' + unitBoxName;
         return leftTitle;
-      },
+      }
     },
     mounted() {
       this.fnStudyTime();
@@ -145,7 +408,7 @@
       document.onkeydown = (event) => {
         if (event.keyCode === 17) { // ctrl
           this.fnAudioPalyer(this.thisWord.word_url);
-        } else if(event.keyCode === 13) { // enter
+        } else if (event.keyCode === 13) {
           this.fnVerify();
         }
       }

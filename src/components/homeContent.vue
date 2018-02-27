@@ -99,7 +99,8 @@
         showUnitBox: false,
         versionBoxTitle: '选择版本',
         unitBoxTitle: '选择单元',
-        deviceBoxTitle: '智能记忆'
+        deviceBoxTitle: '智能记忆',
+        typeId: 1,
       }
     },
     methods: {
@@ -121,10 +122,6 @@
                 // 此处回调唤起选择教材事件
                 this.fnShowSelfBox(1);
                 return
-                // this.$message({
-                //   type: 'info',
-                //   message: `action: ${ action }`
-                // });
               }
             });
           }
@@ -224,6 +221,7 @@
       // console.log('打开学习中心：(缓存)' + sessionStorage.type_id);
     },
     created() {
+      this.typeId = sessionStorage.type_id;
       this.fnUpdateCourseMsg();
       this.fnUpdateUnitList();
       // 监听选择完课本打开选择单元组件的事件

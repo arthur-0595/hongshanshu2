@@ -85,7 +85,7 @@
       return {
         loading: false,
         userMsg: {},  // 用户信息
-        unitId: 1,   // 单元ID
+        unitId: 1,  // 单元ID
         thisWord: {
           'id': 162,
           'user_id': 1,
@@ -204,7 +204,7 @@
         }
       },
       // 获取下一个单词
-      fnGetNextWord() {
+      fnGetNextWord(thisstate_) {
         this.fnSetWordState();
         this.loading = true;
         this.$ajax({
@@ -213,7 +213,7 @@
           params: {
             method: 'getnext',
             id: this.thisWord.id,
-            neworold_word: this.thisNewOrOld,
+            neworold_word: thisstate_,
             user_id: this.userMsg.ID,
             unit_id: this.unitId
           }
@@ -317,7 +317,7 @@
       fnRight(type_) {
         if (type_ === 1) { // 对的
           this.isYes = false;
-          this.fnGetNextWord();
+          this.fnGetNextWord(1);
         } else { // 错的
           this.isYes = false;
           this.isReadAgain = true;
@@ -334,7 +334,7 @@
           this.fnAudioPalyer(this.thisWord.word_url);
           this.nextAgain--;
         } else if (this.nextAgain === 0) {
-          this.fnGetNextWord();
+          this.fnGetNextWord(2);
         }
       },
       // 倒计时五秒，倒计时结束后自动选择
@@ -372,7 +372,7 @@
           }
         }).then(res => {
           let data = res.data;
-          console.log(data);
+          // console.log(data);
         })
       }
     },
@@ -413,7 +413,7 @@
       this.unitId = sessionStorage.unit_id;
       // 监听ctrl点击事件，播放单词音频
       document.onkeydown = (event) => {
-        if (event.keyCode === 17) {
+        if (event.keyCode === 17) { // ctrl
           this.fnAudioPalyer(this.thisWord.word_url);
         }
       }

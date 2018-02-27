@@ -233,7 +233,7 @@
       },
       // 左上角标题
       scoreTit() {
-        let title = sessionStorage.version_name + ' - ' + sessionStorage.textbook_name + ' - (' + sessionStorage.unit_name + ') - ' + this.scoreType ;
+        let title = sessionStorage.version_name + ' - ' + sessionStorage.textbook_name + ' - (' + sessionStorage.unit_name + ') - ' + this.scoreType;
         // console.log(title);
         return title;
       },

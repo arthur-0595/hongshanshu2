@@ -27,8 +27,10 @@
       // 获取缓存中的模块ID,若未undefined,则设置默认为 1智能记忆
       fnSetTypeId() {
         let typeId = sessionStorage.type_id;
+        console.log('类型：' + typeId);
         if (typeId) { // 如果缓存中存在typeId ，则设置vuex中typeId的值
           this.$store.commit('updateTypeId', typeId);
+          this.$store.commit('updateDeviceBoxTitle', sessionStorage.type_name);
         } else {
           typeId = 1;
           this.$store.commit('updateTypeId', typeId);
@@ -38,8 +40,6 @@
     },
     computed: {},
     mounted() {
-      // 设置模块类型默认为 1 智能记忆
-      sessionStorage.type_id = 1;
     },
     created() {
       this.fnSetTypeId();

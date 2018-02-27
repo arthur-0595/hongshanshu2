@@ -11,6 +11,7 @@ import wordWrite from '@/page/wordWrite'
 import sentenceListen from '@/page/sentenceListen'
 import sentenceTranslate from '@/page/sentenceTranslate'
 import sentenceWrite from '@/page/sentenceWrite'
+import scorePage from '@/page/scorePage'
 
 import homeContent from '@/components/homeContent'
 import homePersonCenter from '@/components/homePersonCenter';
@@ -150,6 +151,14 @@ const router = new Router({
         name: '红杉树 - 句子默写'
       },
       component: sentenceWrite
+    },
+    { // 听写默写 - 测试结果页面
+      path: '/scorePage',
+      name: 'scorePage',
+      meta: {
+        name: '红杉树 - 测试结果'
+      },
+      component: scorePage
     }
 
   ]

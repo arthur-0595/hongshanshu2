@@ -61,13 +61,15 @@
       fnclickItem(type_) {
         let typeId = type_ + 1;
         sessionStorage.type_id = typeId;
+        sessionStorage.type_name = this.moduleList[type_].name;
         this.$store.commit('updateTypeId', typeId);
         this.$store.commit('updateDeviceBoxTitle', this.moduleList[type_].name);
         this.fnTabSelf();
       },
       // 获取默认选中类型
       showType(index_) {
-        let typeId = this.$store.state.typeId;
+        let typeId = sessionStorage.type_id;
+        this.$store.commit('updateTypeId', typeId);
         if (typeId <= 3 && (index_ + 1) <= 3) {
           return true
         } else if (typeId > 3 && (index_ + 1) > 3) {
