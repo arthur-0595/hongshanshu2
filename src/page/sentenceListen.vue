@@ -25,25 +25,33 @@
       <div class="mainCon">
         <div class="sentenceBox">
           <!--正确的句子，答错 显示，答对不显示-->
-          <div class="correctSentence"
-               :style="{visibility: showSentence?'visible':'hidden'}">
+          <div class="correctSentence "
+             :class="{
+                practiceColor: thisSentenceState==1,
+                errorColor: thisSentenceState>1
+              }"
+             :style="{visibility: showSentence?'visible':'hidden'}">
             {{thisSentence.sentence}}
           </div>
           <div class="mySentence clearfix">
             <!--一开始要写单词的格子 upWord表示填写了的单词  red表示填写错误的单词-->
             <ul class="lineBox clearfix" style="display: block;">
               <li v-for="item in sentenceArr1"
-                :class="{
-                  punctuation: fnjudge(item),
-                  answerItem: !fnjudge(item)
-                }">
+                  :class="{
+                    punctuation: fnjudge(item),
+                    answerItem: !fnjudge(item)
+                  }"
+                  :data-main="item"
+                  @click="fnClearItem($event)">
                 {{fnjudge(item) ? item : ''}}
               </li>
               <!--<li class="punctuation" >?</li>-->
               <!--<li class="upWord" >qqq</li>-->
               <!--<li class="upWord red" >wwww</li>-->
             </ul>
-            <span class="brush" style="display: block;"></span>
+            <span class="brush"
+                  v-show="showClearBtn"
+                  @click="fnClearAll()"></span>
             <span class="laba" @click="fnAudioPalyer(thisSentence.sentence_url)"></span>
           </div>
         </div>
@@ -57,17 +65,25 @@
           <div class="tipBox" v-show="showMsg"><span></span>请仔细听！</div>
           <div class="wordsBox clearfix">
             <!--一开始打乱的单词-->
-            <ul class="randomWords clearfix" style="display:block">
+            <ul class="randomWords clearfix" v-show="!showSentence">
               <li v-for="item in sentenceArr2"
-                @click="fnClickItem(item, $event)">{{item}}</li>
-              <!--<li class="hide">you</li>-->
+                  @click="fnClickItem(item, $event)"
+                  :id="item + 'LiHtml'">{{item}}
+              </li>
+              <!--<li class="hideThisItem">you</li>-->
             </ul>
             <!--答完显示中文，无论对错-->
             <div class="meaning" v-show="showSentence">{{thisSentence.sentence_mean}}</div>
             <!--开始是哭脸，答对下一题 forword 答错 练习 practice-->
-            <div class="face forword"></div>
+            <div class="face forword "
+                @click="fnVerify()"
+                v-show="!showPractice"></div>
+            <div class="face forword practice"
+              v-show="showPractice"
+              @click="fnClickPracticeBtn()"></div>
             <div class="overtime" style="display: none;">
-              <span></span>超时了，再快点儿！</div>
+              <span></span>超时了，再快点儿！
+            </div>
           </div>
         </div>
       </div>
@@ -118,6 +134,8 @@
         testArr: [], // 测试结果组成的数组
         score: 0, // 测试计算分数
         againEnter: 2, // 两次判断进入下一个单词，默认为2，点击-1
+        showClearBtn: true, // 是否显示清除按钮
+        showPractice: false, // 是否显示练习按钮
       }
     },
     methods: {
@@ -143,9 +161,9 @@
       // 倒计时五秒，倒计时结束后自动选择
       fnsetTimeOut() {
         this.showTimer = true;
-        this.timer = setInterval( () => {
+        this.timer = setInterval(() => {
           this.setTimeNum--;
-          if(this.setTimeNum <= 0) {
+          if (this.setTimeNum <= 0) {
             clearInterval(this.timer);
             console.log('倒计时结束！');
           }
@@ -166,10 +184,10 @@
         }).then(res => {
           this.loading = false;
           let data = res.data;
-          console.log(data);
+          // console.log(data);
           if (data[0]) { // 进入例句听力学习
-            console.log('开始例句听力学习');
-
+            this.thisSentence = data[0];
+            this.fnAudioPalyer(this.thisSentence.sentence_url);
           } else if (data == 4) { // 学前测试
             this.$alert('先来学前测试一下吧 : )', '进入学前测试！', {
               confirmButtonText: '确定',
@@ -196,6 +214,14 @@
             })
           } else if (data == 3) { // 没有可学习的内容
             this.$alert('没有可学习的内容，请联系客服人员 : (', '返回学习中心', {
+              confirmButtonText: '返回学习中心',
+              callback: () => {
+                this.$router.push('/home');
+                return false;
+              }
+            })
+          } else if (data == 0) { // 报错
+            this.$alert('服务器报错，请联系客服人员 : (', '返回学习中心', {
               confirmButtonText: '返回学习中心',
               callback: () => {
                 this.$router.push('/home');
@@ -241,10 +267,197 @@
       // 点选答案的单词选项事件
       fnClickItem(item_, event) {
         let answerItem = document.querySelector('li.answerItem');
-        console.log(answerItem);
+
         answerItem.innerHTML = item_;
         answerItem.className = 'upWord';
-        event.target.className = 'hide';
+        event.target.className = 'hideThisItem';
+      },
+      // 点击清除所有答案选项事件
+      fnClearAll() {
+        let allUpWord = document.querySelectorAll('li.upWord');
+        let allHideItem = document.querySelectorAll('.randomWords>li.hideThisItem');
+
+        allUpWord.forEach(item => {
+          item.innerHTML = '';
+          item.className = 'answerItem';
+        });
+        allHideItem.forEach(item => {
+          item.className = '';
+        })
+      },
+      // 点击已选答案选项，清除当前选项内容
+      fnClearItem(event) {
+        if (event.target.innerText === '') {
+          return false;
+        }
+        let itemInnerHtml = event.target.innerText;
+        event.target.innerHTML = '';
+        event.target.className = 'answerItem';
+
+        let thisId = '#' + itemInnerHtml + 'LiHtml';
+        let answerThisItem = document.querySelector(thisId);
+        answerThisItem.className = '';
+      },
+      // 验证当前正确与否
+      fnVerify() {
+        let allUpWord = document.querySelectorAll('li.upWord');
+        // 一个答案都未选择时，直接弹出提示，不进行后面的验证
+        if (allUpWord.length === 0) {
+          this.$alert(
+            '在多听几次吧，你可以的！',
+            '一点都不会吗？'
+          ).then(() => {
+            return false;
+          });
+        }
+        let topAnswer = '';
+        allUpWord.forEach(item => {
+          topAnswer += item.innerHTML;
+        });
+        // console.log('自己的答案：' + topAnswer);
+        let rightAnswer = '';
+        let thisSentence = this.fnSentenceProcessor(this.thisSentence.sentence);
+        rightAnswer = this.fnProcessorRightSentence(thisSentence);
+        // console.log('正确答案：' + rightAnswer);
+        // 先判断当前是不是测试
+        if (this.isTest !== 1) {
+          // 当状态不为学习时
+          // 判断正确与否，并构建本次答案对象
+          let answerType = 1;// 默认为正确
+          answerType = (topAnswer === rightAnswer) ? 1 : 2;
+          let thisanswerSentence = '';
+          let allAnswerLi = document.querySelectorAll('ul.lineBox>li');
+          allAnswerLi.forEach(item => {
+            thisanswerSentence += item.innerText + ' ';
+          });
+          let thisAnswerObj = {
+            this_name: this.thisSentence.sentence,
+            this_mean: this.thisSentence.sentence_mean,
+            status: answerType,
+            myVal: thisanswerSentence
+          };
+          this.testArr.push(thisAnswerObj);
+          // 加载下一个测试句子
+          this.fnOpenNextTestSentence();
+        } else { // 当前状态为学习
+          if (this.againEnter === 2) {
+            this.againEnter--;
+            this.showSentence = true;
+            this.showClearBtn = false;
+            if (topAnswer === rightAnswer) { // 填写正确
+              this.thisSentenceState = 1;
+              this.showPractice = false;
+
+              this.againEnter--;
+            } else { // 填写错误
+              this.thisSentenceState = 2;
+              this.showPractice = true;
+
+              // 错误，单词状态设置为生词
+              this.thisSentenceState++;
+            }
+          } else if (this.againEnter === 1) {
+            this.againEnter = 2;
+            this.showWord = false;
+            this.showClearBtn = true;
+            this.fnClearAll();
+          } else if (this.againEnter === 0) {
+            this.againEnter = 2;
+            this.showWord = false;
+            this.showClearBtn = true;
+            this.fnGetNextSentence();
+          }
+        }
+      },
+      // 载入下一个“测试”单词
+      fnOpenNextTestSentence() {
+        this.thisSentenceIndex++;
+        if (this.thisSentenceIndex < this.sentenceList.length) {
+          this.thisSentence = this.sentenceList[this.thisSentenceIndex];
+          this.fnAudioPalyer(this.thisSentence.sentence_url);
+          this.fnClearAll();
+        } else { // 测试完成事件
+          this.$alert('测试完成，去看看你的分数吧！',
+            '点击查看测试结果！'
+          ).then(() => {
+            this.fnCountTestScore();
+          })
+        }
+      },
+      // 计算测试分数
+      fnCountTestScore() {
+        let num = 0;
+        this.testArr.forEach(item => {
+          if (item.status === 1) {
+            num++;
+          }
+        });
+        this.score = Math.round((num / this.testArr.length) * 100);
+        this.fnSubmitScore();
+        sessionStorage.testArr = JSON.stringify(this.testArr);
+      },
+      // 发送测试成绩
+      fnSubmitScore() {
+        let textbook_id = sessionStorage.textbook_id;
+        let study_type = sessionStorage.type_id;
+        let type_ = this.isTest == 0 ? 0 : 1;
+
+        // console.log('user_id:' + userMsg.ID);
+        // console.log('textbook_id:' + textbook_id);
+        // console.log('test_type:' + test_type);
+        // console.log('test_score:' + this.score);
+        // console.log('test_number:' + this.dataLength);
+        // console.log('study_type:' + study_type);
+        // console.log('type:' + this.testType);
+        // console.log('unit_id:' + this.unitId);
+        // console.log('count:' + this.countTestType);
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'SaveTestRecord',
+            user_id: this.userMsg.ID,
+            textbook_id: textbook_id,
+            test_type: this.thisVersionName,
+            test_score: this.score,
+            test_number: this.testArr.length,
+            study_type: study_type,
+            type: type_, // 0学前测试 1学后测试
+            unit_id: this.unitId,
+            count: this.countTest
+          }
+        }).then(res => {
+          let data = res.data;
+          if (data.msg === '保存成功') {
+            console.log(data);
+            this.$router.push({
+              name: 'scorePage',
+              query: {
+                score: this.score,
+                testType: this.isTest
+              }
+            });
+          } else {
+            this.$alert('提交成绩失败，请重试！', '请尝试重新提交或联系管理员', {
+              confirmButtonText: '确定',
+              callback: () => {
+                return
+              }
+            });
+          }
+        })
+      },
+      // 点击练习按钮事件
+      fnClickPracticeBtn() {
+        // 当前状态为错误时，则直接调用清除所有选项事件，即为练习功能
+        if (this.thisSentenceState>1) {
+          this.fnClearAll();
+          this.fnAudioPalyer(this.thisSentence.sentence_url);
+          this.againEnter = 2;
+          this.showPractice = false;
+          this.showSentence = false;
+          return false;
+        }
       },
       // 处理句子的拼接格式
       fnSentenceProcessor(sentence_) {
@@ -256,57 +469,76 @@
         sentence_ = sentence_.replace(/(\w+)(\,|\.|\?|\!{1})(\s{1})/g, '$1 $2$3');
         return sentence_;
       },
+      // 测试时处理正确句子的格式之后进行对比
+      fnProcessorRightSentence(sentence_) {
+        sentence_ = sentence_.replace(/\s/g, '');
+        sentence_ = sentence_.replace(/[\.\?\!\,]/g, '');
+        return sentence_;
+      },
       // 判断是否是标点符号的函数
       fnjudge(item_) {
         let reg = /\,|\.|\!|\?/g;
         return reg.test(item_)
-      }
-    },
-    computed: {
-      // 拼接左上角学习的教材标题
-      thisVersionName() {
-        let versionBoxName = sessionStorage.version_name;
-        let textbookName = sessionStorage.textbook_name;
-        let unitBoxName = sessionStorage.unit_name;
-        let leftTitle = versionBoxName + ' - ' + textbookName + ' - ' + unitBoxName;
-        return leftTitle;
       },
-      // 顺序未打乱的句子数组
-      sentenceArr1() {
-        let sen_ = this.fnSentenceProcessor(this.thisSentence.sentence);
-        sen_ = sen_.split(' ');
-        return sen_;
-      },
-      // 顺序已打乱的句子数组
-      sentenceArr2() {
-        let sen_ = this.fnSentenceProcessor(this.thisSentence.sentence);
-        sen_ = sen_.split(' ');
-        sen_.sort(function () {
-          return (0.5 - Math.random());
-        });
-        let reg = /\,|\.|\!|\?/g;
-        sen_.forEach( (item, index) => {
-          if (reg.test(item)) {
-            sen_.splice(index, 1);
-          }
-        });
-        return sen_;
+      // 删除class
+      removeClass(elements, cName) {
+          elements.className = elements.className.replace(new RegExp('(\\s|^)' + cName + '(\\s|$)'), ' ');
       }
-    },
-    mounted() {
-      this.fnGetSentence();
-    },
-    created() {
-      this.userMsg = JSON.parse(sessionStorage.userMsg);
-      this.unitId = sessionStorage.unit_id;
-      this.typeId = sessionStorage.type_id;
-      // 监听ctrl点击事件，播放单词音频
-      document.onkeydown = (event) => {
-        if (event.keyCode === 17) { // ctrl
-          this.fnAudioPalyer(this.thisSentence.sentence_url);
+  },
+  computed: {
+    // 拼接左上角学习的教材标题
+    thisVersionName()
+    {
+      let versionBoxName = sessionStorage.version_name;
+      let textbookName = sessionStorage.textbook_name;
+      let unitBoxName = sessionStorage.unit_name;
+      let leftTitle = versionBoxName + ' - ' + textbookName + ' - ' + unitBoxName;
+      return leftTitle;
+    }
+  ,
+    // 顺序未打乱的句子数组
+    sentenceArr1()
+    {
+      let sen_ = this.fnSentenceProcessor(this.thisSentence.sentence);
+      sen_ = sen_.split(' ');
+      return sen_;
+    }
+  ,
+    // 顺序已打乱的句子数组
+    sentenceArr2()
+    {
+      let sen_ = this.fnSentenceProcessor(this.thisSentence.sentence);
+      sen_ = sen_.split(' ');
+      sen_.sort(function () {
+        return (0.5 - Math.random());
+      });
+      let reg = /\,|\.|\!|\?/g;
+      sen_.forEach((item, index) => {
+        if (reg.test(item)) {
+          sen_.splice(index, 1);
         }
+      });
+      return sen_;
+    }
+  }
+  ,
+  mounted()
+  {
+    this.fnGetSentence();
+  }
+  ,
+  created()
+  {
+    this.userMsg = JSON.parse(sessionStorage.userMsg);
+    this.unitId = sessionStorage.unit_id;
+    this.typeId = sessionStorage.type_id;
+    // 监听ctrl点击事件，播放单词音频
+    document.onkeydown = (event) => {
+      if (event.keyCode === 17) { // ctrl
+        this.fnAudioPalyer(this.thisSentence.sentence_url);
       }
     }
+  }
   }
 </script>
 
@@ -442,6 +674,9 @@
   .mainCon .sentenceBox .correctSentence.practiceColor {
     color: #00bba2;
   }
+  .mainCon .sentenceBox .correctSentence.errorColor {
+    color: #ff4d51;
+  }
 
   .mainCon .sentenceBox .mySentence {
     width: 100%;
@@ -462,9 +697,11 @@
     margin-right: 4px;
     box-sizing: border-box;
   }
+
   .mainCon .sentenceBox .mySentence .lineBox > li.answerItem {
     border-bottom: 1px solid #a6a6a6;
   }
+
   .mainCon .sentenceBox .mySentence .lineBox > li.upWord {
     font-size: 20px;
     border: none;
@@ -569,7 +806,7 @@
     overflow: auto;
   }
 
-  .bottomBox .wordsBox .randomWords li.hide {
+  .bottomBox .wordsBox .randomWords li.hideThisItem {
     visibility: hidden;
   }
 
