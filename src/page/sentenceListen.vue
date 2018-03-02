@@ -26,16 +26,16 @@
         <div class="sentenceBox">
           <!--正确的句子，答错 显示，答对不显示-->
           <div class="correctSentence "
-             :class="{
+               :class="{
                 practiceColor: thisSentenceState==1,
                 errorColor: thisSentenceState>1
               }"
-             :style="{visibility: showSentence?'visible':'hidden'}">
+               :style="{visibility: showSentence?'visible':'hidden'}">
             {{thisSentence.sentence}}
           </div>
           <div class="mySentence clearfix">
             <!--一开始要写单词的格子 upWord表示填写了的单词  red表示填写错误的单词-->
-            <ul class="lineBox clearfix" style="display: block;">
+            <ul class="lineBox clearfix">
               <li v-for="item in sentenceArr1"
                   :class="{
                     punctuation: fnjudge(item),
@@ -56,8 +56,11 @@
           </div>
         </div>
         <!--记忆强度-->
-        <div class="totalBar" :style="{visibility: isTest==1?'visible':'hidden'}">
-          <span class="curBar"></span>
+        <div class="totalBar"
+             :style="{visibility: isTest==1?'visible':'hidden'}"
+             :title="'记忆强度：' + thisSentence.SenHearing_per">
+          <span class="curBar"
+                :style="{width: thisSentence.SenHearing_per + '%'}"></span>
         </div>
         <!--底部盒子内容-->
         <div class="bottomBox">
@@ -73,14 +76,16 @@
               <!--<li class="hideThisItem">you</li>-->
             </ul>
             <!--答完显示中文，无论对错-->
-            <div class="meaning" v-show="showSentence">{{thisSentence.sentence_mean}}</div>
+            <div class="meaning" v-show="showSentence">
+              {{thisSentence.sentence_mean}}
+            </div>
             <!--开始是哭脸，答对下一题 forword 答错 练习 practice-->
             <div class="face forword "
-                @click="fnVerify()"
-                v-show="!showPractice"></div>
+                 @click="fnVerify()"
+                 v-show="!showPractice"></div>
             <div class="face forword practice"
-              v-show="showPractice"
-              @click="fnClickPracticeBtn()"></div>
+                 v-show="showPractice"
+                 @click="fnClickPracticeBtn()"></div>
             <div class="overtime" style="display: none;">
               <span></span>超时了，再快点儿！
             </div>
@@ -188,6 +193,14 @@
           if (data[0]) { // 进入例句听力学习
             this.thisSentence = data[0];
             this.fnAudioPalyer(this.thisSentence.sentence_url);
+            // 单词状态重置为默认熟词
+            this.theSentenceState = 1;
+            // 记忆强度大于0说明该词是一个学过的词
+            if (this.thisSentence.SenHearing_per > 0) {
+              this.theSentenceNewOrOld = 1;
+            } else {
+              this.theSentenceNewOrOld = 0;
+            }
           } else if (data == 4) { // 学前测试
             this.$alert('先来学前测试一下吧 : )', '进入学前测试！', {
               confirmButtonText: '确定',
@@ -233,8 +246,76 @@
       },
       // 请求下一个句子
       fnGetNextSentence() {
-        console.log('请求下一个句子');
+        this.fnAllSentenceState();
+        this.loading = true;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'getnextSentence',
+            id: this.thisSentence.id,
+            neworold_word: this.theSentenceState,
+            user_id: this.userMsg.ID,
+            unit_id: this.unitId,
+            type: this.typeId
+          }
+        }).then(res => {
+          this.loading = false;
+          let data = res.data;
+          // console.log(data);
+          if (data[0]) { // 进入例句听力学习
+            this.thisSentence = data[0];
+            this.fnAudioPalyer(this.thisSentence.sentence_url);
+            // 单词状态重置为默认熟词
+            this.theSentenceState = 1;
+            // 记忆强度大于0说明该词是一个学过的词
+            if (this.thisSentence.SenHearing_per > 0) {
+              this.theSentenceNewOrOld = 1;
+            } else {
+              this.theSentenceNewOrOld = 0;
+            }
+          } else if (data == 4) { // 学前测试
+            this.$alert('先来学前测试一下吧 : )', '进入学前测试！', {
+              confirmButtonText: '确定',
+              callback: () => {
+                console.log('开始学前测试');
+                this.thisTitle = '例句听力 - 学前测试';
+                this.isTest = 0;
+                this.fnGetTestList();
 
+                return false;
+              }
+            })
+          } else if (data == 2) { // 闯关测试
+            this.$alert('学习完毕，现在去测试一下吧 : )', '进入闯关测试！', {
+              confirmButtonText: '确定',
+              callback: () => {
+                console.log('开始闯关测试');
+                this.thisTitle = '例句听力 - 闯关测试';
+                this.isTest = 2;
+                this.fnGetTestList();
+
+                return false;
+              }
+            })
+          } else if (data == 3) { // 没有可学习的内容
+            this.$alert('没有可学习的内容，请联系客服人员 : (', '返回学习中心', {
+              confirmButtonText: '返回学习中心',
+              callback: () => {
+                this.$router.push('/home');
+                return false;
+              }
+            })
+          } else if (data == 0) { // 报错
+            this.$alert('服务器报错，请联系客服人员 : (', '返回学习中心', {
+              confirmButtonText: '返回学习中心',
+              callback: () => {
+                this.$router.push('/home');
+                return false;
+              }
+            })
+          }
+        })
       },
       // 获取测试内容
       fnGetTestList() {
@@ -324,7 +405,7 @@
           // 当状态不为学习时
           // 判断正确与否，并构建本次答案对象
           let answerType = 1;// 默认为正确
-          answerType = (topAnswer === rightAnswer) ? 1 : 2;
+          answerType = (topAnswer === rightAnswer) ? 1 : 0;
           let thisanswerSentence = '';
           let allAnswerLi = document.querySelectorAll('ul.lineBox>li');
           allAnswerLi.forEach(item => {
@@ -354,17 +435,18 @@
               this.showPractice = true;
 
               // 错误，单词状态设置为生词
-              this.thisSentenceState++;
+              this.theSentenceState = 2;
             }
           } else if (this.againEnter === 1) {
             this.againEnter = 2;
-            this.showWord = false;
+            this.showSentence = false;
             this.showClearBtn = true;
             this.fnClearAll();
           } else if (this.againEnter === 0) {
             this.againEnter = 2;
-            this.showWord = false;
+            this.showSentence = false;
             this.showClearBtn = true;
+            this.fnClearAll();
             this.fnGetNextSentence();
           }
         }
@@ -450,7 +532,7 @@
       // 点击练习按钮事件
       fnClickPracticeBtn() {
         // 当前状态为错误时，则直接调用清除所有选项事件，即为练习功能
-        if (this.thisSentenceState>1) {
+        if (this.thisSentenceState > 1) {
           this.fnClearAll();
           this.fnAudioPalyer(this.thisSentence.sentence_url);
           this.againEnter = 2;
@@ -482,63 +564,65 @@
       },
       // 删除class
       removeClass(elements, cName) {
-          elements.className = elements.className.replace(new RegExp('(\\s|^)' + cName + '(\\s|$)'), ' ');
-      }
-  },
-  computed: {
-    // 拼接左上角学习的教材标题
-    thisVersionName()
-    {
-      let versionBoxName = sessionStorage.version_name;
-      let textbookName = sessionStorage.textbook_name;
-      let unitBoxName = sessionStorage.unit_name;
-      let leftTitle = versionBoxName + ' - ' + textbookName + ' - ' + unitBoxName;
-      return leftTitle;
-    }
-  ,
-    // 顺序未打乱的句子数组
-    sentenceArr1()
-    {
-      let sen_ = this.fnSentenceProcessor(this.thisSentence.sentence);
-      sen_ = sen_.split(' ');
-      return sen_;
-    }
-  ,
-    // 顺序已打乱的句子数组
-    sentenceArr2()
-    {
-      let sen_ = this.fnSentenceProcessor(this.thisSentence.sentence);
-      sen_ = sen_.split(' ');
-      sen_.sort(function () {
-        return (0.5 - Math.random());
-      });
-      let reg = /\,|\.|\!|\?/g;
-      sen_.forEach((item, index) => {
-        if (reg.test(item)) {
-          sen_.splice(index, 1);
+        elements.className = elements.className.replace(new RegExp('(\\s|^)' + cName + '(\\s|$)'), ' ');
+      },
+      // 更新生词熟词以及复习单词的数量
+      fnAllSentenceState() {
+        if (this.theSentenceNewOrOld === 0 && this.theSentenceState === 1) { // 熟词
+          this.oldWordNum++;
+        } else if (this.theSentenceNewOrOld === 0 && this.theSentenceState > 1) { // 生词
+          this.newWordNum++;
+        } else if (this.theSentenceNewOrOld > 0) { // 复习
+          this.reviewWordNum++;
         }
-      });
-      return sen_;
-    }
-  }
-  ,
-  mounted()
-  {
-    this.fnGetSentence();
-  }
-  ,
-  created()
-  {
-    this.userMsg = JSON.parse(sessionStorage.userMsg);
-    this.unitId = sessionStorage.unit_id;
-    this.typeId = sessionStorage.type_id;
-    // 监听ctrl点击事件，播放单词音频
-    document.onkeydown = (event) => {
-      if (event.keyCode === 17) { // ctrl
-        this.fnAudioPalyer(this.thisSentence.sentence_url);
+      }
+    },
+    computed: {
+      // 拼接左上角学习的教材标题
+      thisVersionName() {
+        let versionBoxName = sessionStorage.version_name;
+        let textbookName = sessionStorage.textbook_name;
+        let unitBoxName = sessionStorage.unit_name;
+        let leftTitle = versionBoxName + ' - ' + textbookName + ' - ' + unitBoxName;
+        return leftTitle;
+      },
+      // 顺序未打乱的句子数组
+      sentenceArr1() {
+        let sen_ = this.fnSentenceProcessor(this.thisSentence.sentence);
+        sen_ = sen_.split(' ');
+        return sen_;
+      },
+      // 顺序已打乱的句子数组
+      sentenceArr2() {
+        let sen_ = this.fnSentenceProcessor(this.thisSentence.sentence);
+        sen_ = sen_.split(' ');
+        sen_.sort(function () {
+          return (0.5 - Math.random());
+        });
+        let reg = /\,|\.|\!|\?/g;
+        sen_.forEach((item, index) => {
+          if (reg.test(item)) {
+            sen_.splice(index, 1);
+          }
+        });
+        return sen_;
+      }
+    },
+    mounted() {
+      this.fnGetSentence();
+      this.fnStudyTime();
+    },
+    created() {
+      this.userMsg = JSON.parse(sessionStorage.userMsg);
+      this.unitId = sessionStorage.unit_id;
+      this.typeId = sessionStorage.type_id;
+      // 监听ctrl点击事件，播放单词音频
+      document.onkeydown = (event) => {
+        if (event.keyCode === 17) { // ctrl
+          this.fnAudioPalyer(this.thisSentence.sentence_url);
+        }
       }
     }
-  }
   }
 </script>
 
@@ -674,6 +758,7 @@
   .mainCon .sentenceBox .correctSentence.practiceColor {
     color: #00bba2;
   }
+
   .mainCon .sentenceBox .correctSentence.errorColor {
     color: #ff4d51;
   }

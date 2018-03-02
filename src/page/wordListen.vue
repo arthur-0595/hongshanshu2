@@ -188,7 +188,7 @@
       },
       // 获取所有测试单词
       fnGetDictationTest(beforeTest_) {
-        console.log('测试：' + beforeTest_);
+        this.loading = true;
         this.$ajax({
           method: 'GET',
           url: this.$url.url0,
@@ -199,6 +199,7 @@
             before: beforeTest_ // 0：学前测试 1：闯关测试
           }
         }).then(res => {
+          this.loading = false;
           let data = res.data;
           if (data[0]) {
             this.wordList = data;
@@ -262,7 +263,6 @@
             }
           } else if (this.againEnter === 1) {
             this.againEnter = 2;
-            this.thisWordState = 0;
             this.isdisabled = false;
             this.isfocus = true;
             this.showWord = false;
