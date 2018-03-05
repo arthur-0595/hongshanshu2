@@ -26,6 +26,7 @@
             <div class="laba">默写</div>
             <input type="text" v-model="inputStr" autofocus id="thisInput"
                    v-focus="isfocus"
+                   :class="{wrong: thisSentenceState>1}"
                    :disabled="isdisabled"
                    oncopy="return false;"
                    onpaste="return false;"
@@ -36,12 +37,15 @@
           <!--记忆强度-->
           <div class="totalBar"
                :style="{visibility: isTest==1?'visible':'hidden'}"
-               :title="'记忆强度：' + thisSentence.SenHearing_per">
+               :title="'记忆强度：' + thisSentence.SenWrite_per">
           <span class="curBar"
-                :style="{width: thisSentence.SenHearing_per + '%'}"></span>
+                :style="{width: thisSentence.SenWrite_per + '%'}"></span>
           </div>
           <!--正确的句子，答对显示 wordBox 答错显示 wordBox1样式-->
-          <div class="wordBox"  v-show="showSentence">
+          <div class="wordBox"
+               :class="{wordBox1: thisSentenceState>1}"
+               v-show="showSentence">
+            <!--v-show="showSentence"-->
             {{thisSentence.sentence}}
           </div>
         </div>
@@ -135,7 +139,7 @@
                 // 单词状态重置为默认熟词
                 this.theSentenceState = 1;
                 // 记忆强度大于0说明该词是一个学过的词
-                if (this.thisSentence.Sentranslate_per > 0) {
+                if (this.thisSentence.SenWrite_per > 0) {
                   this.theSentenceNewOrOld = 1;
                 } else {
                   this.theSentenceNewOrOld = 0;
@@ -207,7 +211,7 @@
                 // 单词状态重置为默认熟词
                 this.theSentenceState = 1;
                 // 记忆强度大于0说明该词是一个学过的词
-                if (this.thisSentence.Sentranslate_per > 0) {
+                if (this.thisSentence.SenWrite_per > 0) {
                   this.theSentenceNewOrOld = 1;
                 } else {
                   this.theSentenceNewOrOld = 0;
@@ -291,12 +295,11 @@
               // 当状态不为学习时
               // 如果input框内字符长度为0，则给出提示但并不载入下一条
               if (this.inputStr.length < 1) {
-                this.$alert(
-                  '在仔细想想看哦，你可以的！',
-                  '一点都不会吗？'
-                ).then(() => {
-                  return false;
+                this.$message({
+                  message: '一点都不会吗？',
+                  type: 'warning'
                 });
+                return false;
               }
               // 判断正确与否，并构建本次答案对象
               let answerType = 1;// 默认为正确
@@ -330,14 +333,15 @@
                 this.showSentence = false;
                 this.isdisabled = false;
                 this.isfocus = true;
+                this.thisSentenceState = 0;
                 this.inputStr = '';
-                this.fnClearAll();
               } else if (this.againEnter === 0) {
                 this.againEnter = 2;
                 this.showSentence = false;
                 this.isdisabled = false;
                 this.isfocus = true;
                 this.inputStr = '';
+                this.thisSentenceState = 0;
                 this.fnGetNextSentence();
               }
             }
@@ -436,6 +440,21 @@
             } else {
               return sentence_;
             }
+          },
+          // 保存最后一次学习记录
+          fnSaveStudy() {
+            this.$ajax({
+              method: 'GET',
+              url: this.$url.url1,
+              params: {
+                method: 'Study',
+                user_id: this.userMsg.ID,
+                unit_id: this.unitId
+              }
+            }).then(res => {
+              let data = res.data;
+              console.log('保存最后一次学习记录' + data);
+            })
           }
         },
       computed: {
@@ -456,6 +475,7 @@
         this.userMsg = JSON.parse(sessionStorage.userMsg);
         this.unitId = sessionStorage.unit_id;
         this.typeId = sessionStorage.type_id;
+        this.fnSaveStudy();
         // 监听ctrl点击事件，播放单词音频
         document.onkeydown = (event) => {
           if (event.keyCode === 13) {
@@ -569,6 +589,7 @@
     word-wrap: break-word;
   }
   .mainCon .wordBox.wordBox1{
+    /*color: #CD5C5C;*/
     color:rgb(217, 198, 161);
   }
   .mainCon .inputBox{
@@ -589,6 +610,9 @@
     font-size:28px;
     color:#333;
   }
+  .mainCon .inputBox input.wrong {
+    color: red;
+  }
   .mainCon .inputBox .laba{
     position: absolute;
     top:0;
@@ -599,7 +623,7 @@
     color:#999;
     font-size:18px;
   }
-  .mainCon .inputBox .isRight{
+  .mainCon .inputBox .isRight, .mainCon .inputBox .isWrong{
     position: absolute;
     top:0;
     right: -60px;

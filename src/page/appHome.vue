@@ -34,7 +34,9 @@
         } else {
           typeId = 1;
           this.$store.commit('updateTypeId', typeId);
+          this.$store.commit('updateDeviceBoxTitle', '智能记忆');
           sessionStorage.type_id = typeId;
+          sessionStorage.type_name = '智能记忆';
         }
       }
     },

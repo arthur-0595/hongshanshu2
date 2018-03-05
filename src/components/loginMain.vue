@@ -100,6 +100,14 @@
     },
     mounted() {
 
+    },
+    created() {
+      // 监听回车事件，播放单词音频
+      document.onkeydown = (event) => {
+        if (event.keyCode === 13) {
+          this.fnToLogin();
+        }
+      }
     }
   }
 </script>

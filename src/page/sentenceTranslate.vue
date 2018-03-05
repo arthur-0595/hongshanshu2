@@ -566,6 +566,21 @@
         } else if (this.theSentenceNewOrOld > 0) { // 复习
           this.reviewWordNum++;
         }
+      },
+      // 保存最后一次学习记录
+      fnSaveStudy() {
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'Study',
+            user_id: this.userMsg.ID,
+            unit_id: this.unitId
+          }
+        }).then(res => {
+          let data = res.data;
+          console.log('保存最后一次学习记录' + data);
+        })
       }
     },
     computed: {
@@ -607,6 +622,7 @@
       this.userMsg = JSON.parse(sessionStorage.userMsg);
       this.unitId = sessionStorage.unit_id;
       this.typeId = sessionStorage.type_id;
+      this.fnSaveStudy();
       // 监听ctrl点击事件，播放单词音频
       // document.onkeydown = (event) => {
       //   if (event.keyCode === 17) { // ctrl

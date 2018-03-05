@@ -100,7 +100,7 @@
         versionBoxTitle: '选择版本',
         unitBoxTitle: '选择单元',
         deviceBoxTitle: '智能记忆',
-        typeId: 1,
+        typeId: 1
       }
     },
     methods: {
@@ -108,20 +108,19 @@
       fnShowSelfBox(type_) {
         if (type_ === 1) {
           this.showVersionBox = true;
-          this.$emit("showCoverBox", true);
+          this.$emit('showCoverBox', true);
         } else if (type_ === 2) {
           let textbook_id = sessionStorage.textbook_id;
-          if(textbook_id) { // 有缓存的课程ID
+          if (textbook_id) { // 有缓存的课程ID
             this.$bus.emit('getUnitList', textbook_id);
             this.showUnitBox = true;
-            this.$emit("showCoverBox", true);
-          }else{ // 没有缓存的课程ID，弹出提示，点击确认自动弹出选择课程窗口
+            this.$emit('showCoverBox', true);
+          } else { // 没有缓存的课程ID，弹出提示，点击确认自动弹出选择课程窗口
             this.$alert('需要先选择教材哦: )', '提示', {
               confirmButtonText: '确定',
-              callback: action => {
+              callback: () => {
                 // 此处回调唤起选择教材事件
                 this.fnShowSelfBox(1);
-                return
               }
             });
           }
@@ -151,12 +150,41 @@
         let unit_id = sessionStorage.unit_id;
         let unit_name = sessionStorage.unit_name;
         if(version_id && version_name && textbook_id && textbook_name && unit_id && unit_name){
-          this.$store.commit('updateVersionBoxTitle' , version_name + ' - ' + textbook_name);
-          this.$store.commit('updateVersionId' , version_id);
-          this.$store.commit('updateTextbookId' , textbook_id);
-          this.$store.commit('updateUnitBoxTitle' , unit_name);
-          this.$store.commit('updateUnitId' , unit_id);
+          this.$store.commit('updateVersionBoxTitle', version_name + ' - ' + textbook_name);
+          this.$store.commit('updateVersionId', version_id);
+          this.$store.commit('updateTextbookId', textbook_id);
+          this.$store.commit('updateUnitBoxTitle', unit_name);
+          this.$store.commit('updateUnitId', unit_id);
+        } else {
+          this.fnGetStudyRecord();
         }
+      },
+      // 点击获取最后一次学习记录
+      fnGetStudyRecord() {
+        let user_id = JSON.parse(sessionStorage.userMsg).ID;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url1,
+          params: {
+            method: 'SelectStudy',
+            user_id: user_id
+          }
+        }).then(res => {
+          let data = res.data;
+          console.log('最后一次学习记录：');
+          console.log(data);
+          sessionStorage.version_id = data[0].version_id;
+          sessionStorage.version_name = data[0].version_name;
+          sessionStorage.textbook_id = data[0].textbook_id;
+          sessionStorage.textbook_name = data[0].textbook_name;
+          sessionStorage.unit_id = data[0].unit_id;
+          sessionStorage.unit_name = data[0].unit_name;
+          this.$store.commit('updateVersionBoxTitle', data[0].version_name + ' - ' + data[0].textbook_name);
+          this.$store.commit('updateVersionId', data[0].version_id);
+          this.$store.commit('updateTextbookId', data[0].textbook_id);
+          this.$store.commit('updateUnitBoxTitle', data[0].unit_name);
+          this.$store.commit('updateUnitId', data[0].unit_id);
+        })
       },
       // 获取缓存中的课程id,以更新单元列表内容
       fnUpdateUnitList() {
@@ -217,8 +245,6 @@
       }
     },
     mounted() {
-      // console.log('打开学习中心：(VUEX)' + this.$store.state.typeId);
-      // console.log('打开学习中心：(缓存)' + sessionStorage.type_id);
     },
     created() {
       this.typeId = sessionStorage.type_id;
