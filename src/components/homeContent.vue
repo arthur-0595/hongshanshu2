@@ -14,8 +14,20 @@
         {{this.$store.state.deviceBoxTitle}}
         <span>▼</span>
       </div>
-      <div class="link">测试中心<span>▼</span></div>
-      <div class="link" @click="fnGoHomeMemoryTracer()">记忆追踪</div>
+      <div class="link" @click.stop.prevent="fnshowTestContent()">
+        测试中心<span>▼</span>
+        <ul class="testContent" v-show="showTestContent"
+            v-loading="loading1">
+          <li>已学测试<span>({{totalnumber}})</span></li>
+          <li>生词测试<span>({{newwordnumber}})</span></li>
+          <li>熟词测试<span>({{oldwordnumber}})</span></li>
+          <li>五维测试</li>
+          <li>测试记录</li>
+        </ul>
+      </div>
+      <div class="link" @click="fnGoHomeMemoryTracer()">
+        记忆追踪<span v-show="memorytracking_count">({{memorytracking_count}})</span>
+      </div>
       <div class="link" @click="fnGoWordBook()">单词本</div>
       <div class="link" v-if="false">操作指南</div>
     </div>
@@ -40,19 +52,19 @@
         <div class="speed mRight">速度：20个/小时</div>
         <div>
           <span class="mRight">单元进度：</span>
-          <span class="totalProgress mRight">
-	    				<span class="curProgress"></span>
+          <span class="totalProgress mRight" :title="'单元进度：' + unitProgress">
+	    				<span class="curProgress" :style="{width: unitProgress}"></span>
           </span>
-          <span class="percent">20%</span>
+          <span class="percent">{{unitProgress}}</span>
         </div>
       </div>
       <div class="coursePro clearfix">
         <div class="mRight">
           <span class="mRight">课程进度：</span>
-          <span class="totalProgress mRight">
-	    				<span class="curProgress"></span>
+          <span class="totalProgress mRight" :title="'课程进度：' + courseProgress">
+	    				<span class="curProgress" :style="{width: courseProgress}"></span>
           </span>
-          <span class="percent">20%</span>
+          <span class="percent">{{courseProgress}}</span>
         </div>
         <div class="studyAgain">再学一遍</div>
       </div>
@@ -61,10 +73,10 @@
     <div class="conBot">
       <div class="botLeft">
         <div class="review">课程总单词量</div>
-        <h3 class="reviewNum">{{this.$store.state.courseNum}}个</h3>
+        <h3 class="reviewNum">{{textbook_total}}个</h3>
         <div class="reviewBtn">
-          <span>智能复习</span>
-          <span>测试复习</span>
+          <span>智能复习<i>({{review_count}})</i></span>
+          <span>测试复习<i>({{review_count}})</i></span>
         </div>
       </div>
       <div class="botCenter"
@@ -97,10 +109,21 @@
         showDeviceBox: false,
         showVersionBox: false,
         showUnitBox: false,
+        userMsg: {}, // 个人信息
         versionBoxTitle: '选择版本',
         unitBoxTitle: '选择单元',
         deviceBoxTitle: '智能记忆',
-        typeId: 1
+        unit_total: 0, // 该单元单词总数
+        study_unit: 0, // 该单元学习单词数
+        textbook_total: 0, // 该课本单词总数
+        study_textbook: 0, // 该课本学习单词数
+        memorytracking_count: 0, // 记忆追踪个数
+        review_count: 0, // 智能复习个数
+        showTestContent: false, // 显示测试中心列表
+        loading1: false, // 测试中心显示loading
+        oldwordnumber: 0, // 熟词数量
+        newwordnumber: 0, // 生词数量
+        totalnumber: 0, // 已学数量
       }
     },
     methods: {
@@ -233,6 +256,92 @@
       fnGoHomeMemoryTracer() {
         this.$router.replace('/home/homeMemoryTracer');
         this.$store.commit('updateShowGoStudyCenter');
+      },
+      // 获取课程进度
+      fnGetStudyProgress() {
+        let typeId = sessionStorage.type_id;
+        let unitId = sessionStorage.unit_id;
+        let textbookId = sessionStorage.textbook_id;
+        if (typeId && unitId && textbookId) {
+          this.$ajax({
+            method: 'GET',
+            url: this.$url.url0,
+            params: {
+              method: 'GetProgress',
+              user_id: userMsg.ID,
+              unit_id: unitId,
+              type_id: typeId,
+              textbook_id: textbookId
+            }
+          }).then(res => {
+            let data = res.data;
+            if (data.msg == '无数据') {
+              this.$alert('提示', '该课程无数据，请更换其他课程或联系管理员！', {
+                confirmButtonText: '确定',
+                callback: () => {
+                  return false;
+                }
+              });
+            } else {
+              this.unit_total = data.unit_total;
+              this.study_unit = data.study_unit;
+              this.textbook_total = data.textbook_total;
+              this.study_textbook = data.study_textbook;
+              this.memorytracking_count = data.Memorytracking_count;
+              this.review_count = data.Review_count;
+            }
+          })
+        } else {
+          console.log('少东西呢');
+          console.log('typeId:' + typeId);
+          console.log('unitId:' + unitId);
+          console.log('userMsg:' + userMsg);
+          console.log('textbookId:' + textbookId);
+          return false;
+        }
+      },
+      // 切换显示或隐藏测试列表中心
+      fnshowTestContent() {
+        this.showTestContent = this.showTestContent ? false : true;
+        if (this.showTestContent) {
+          this.fnGetTextNum();
+        }
+      },
+      // 获取测试中心相关测试的数量
+      fnGetTextNum() {
+        this.loading1 = true;
+        let typeId = sessionStorage.type_id;
+        let textbookId = sessionStorage.textbook_id;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'GetTestNumber',
+            user_id: userMsg.ID,
+            textbook_id: textbookId,
+            type_id: typeId
+          }
+        }).then(res => {
+          this.loading1 = false;
+          let data = res.data;
+          this.oldwordnumber = data.oldwordnumber;
+          this.newwordnumber = data.newwordnumber;
+          this.totalnumber = data.totalnumber;
+        })
+      },
+      // 发送更新当前学习相关信息的事件
+      fnSendMsg() {
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'UserClose',
+            user_id: this.userMsg.ID
+          }
+        }).then(res => {
+          let data = res.data;
+          console.log(data);
+        })
       }
     },
     computed: {
@@ -242,23 +351,43 @@
       },
       typeName() {
         return this.$store.state.deviceBoxTitle;
+      },
+      // 单元进度
+      unitProgress() {
+        if (this.study_unit === 0 && this.unit_total === 0) {
+          return 0;
+        }
+        return parseInt(this.study_unit / this.unit_total * 100) + '%';
+      },
+      // 课程进度
+      courseProgress() {
+        return parseInt(this.study_textbook / this.textbook_total * 100) + '%';
       }
     },
     mounted() {
+      // 获取进度
+      this.fnGetStudyProgress();
+      // 发送更新当前学习信息的消息
+      this.fnSendMsg();
     },
     created() {
-      this.typeId = sessionStorage.type_id;
+      this.userMsg = JSON.parse(sessionStorage.userMsg);
       this.fnUpdateCourseMsg();
       this.fnUpdateUnitList();
       // 监听选择完课本打开选择单元组件的事件
       this.$bus.on('openUnitModule', () => {
         this.fnShowSelfBox(2);
       });
+      // 监听获取当前课程进度事件
+      this.$bus.on('getStudyProgress', () => {
+        this.fnGetStudyProgress();
+      });
     },
     // 组件销毁时，解除监听
     beforeDestroy() {
       this.$bus.off('getUnitList');
       this.$bus.off('openUnitModule');
+      this.$bus.off('getUnitProgress');
     }
   }
 </script>
@@ -302,12 +431,31 @@
     font-size: 14px;
     padding: 0;
     margin-right: 20px;
+    position: relative;
   }
 
   .content > .categoryBtn .link:hover {
     color: #333;
     background-color: transparent;
     cursor: pointer;
+  }
+
+  .content > .categoryBtn .link .testContent{
+    width: 100px;
+    position: absolute;
+    right: -20px;top: 84%;
+    border: 1px solid #333;
+    border-bottom: none;
+  }
+
+  .content > .categoryBtn .link .testContent li{
+    width: 100%;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    background-color: #fff;
+    color: #333;
+    border-bottom: 1px solid #333;
   }
 
   /* 学习进度*/

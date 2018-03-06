@@ -83,7 +83,7 @@ const store = new Vuex.Store({
       }else{
         state.showGoStudyCenter = !state.showGoStudyCenter;
       }
-    },
+    }
   },
   actions: {
 

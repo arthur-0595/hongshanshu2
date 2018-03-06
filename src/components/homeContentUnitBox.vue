@@ -8,7 +8,7 @@
       <ul class="unitList clearfix" id="unitList">
         <li v-for="(item,index) in unitList"
           @click="fnclickUnitItem(item)"
-            :title="'学习次数：'+item.study_count+'---学前测试分数:'+item.score+'---闯关测试最高得分:'+item.top_score">
+          :title="'学习次数：'+item.study_count+'---学前测试分数:'+item.score+'---闯关测试最高得分:'+item.top_score">
           <div class="unitName">{{item.unit_name}}</div>
           <div class="markList">
             <span>{{item.study_count}}</span>
@@ -55,9 +55,11 @@
       fnclickUnitItem(obj_) {
         this.$store.commit('updateUnitBoxTitle', obj_.unit_name);
         this.$store.commit('updateUnitId', obj_.id);
-        this.fnTabSelf();
         sessionStorage.unit_id = obj_.id;
         sessionStorage.unit_name = obj_.unit_name;
+        this.$bus.emit('getStudyProgress');
+        this.fnTabSelf();
+        return false;
       }
     },
     computed: {
