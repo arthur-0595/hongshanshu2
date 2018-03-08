@@ -134,7 +134,6 @@
           let data = res.data;
           if (data[0]) {
             this.thisWord = data[0];
-            console.log(this.thisWord);
             this.fnAudioPalyer(this.thisWord.word_url);
             // 单词状态重置为默认，熟词
             this.theWordState = 1;
@@ -398,7 +397,6 @@
           }
         }).then(res => {
           let data = res.data;
-          console.log('保存最后一次学习记录' + data);
         })
       }
     },

@@ -65,6 +65,7 @@
         this.$store.commit('updateTypeId', typeId);
         this.$store.commit('updateDeviceBoxTitle', this.moduleList[type_].name);
         this.fnTabSelf();
+        this.$bus.emit('getStudyProgress');
       },
       // 获取默认选中类型
       showType(index_) {

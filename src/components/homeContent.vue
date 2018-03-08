@@ -1,5 +1,5 @@
 <template>
-  <section class="content" id="home-con">
+  <section class="content" id="home-con" v-loading="loading">
     <!--中间顶部按钮-->
     <div class="categoryBtn clearfix">
       <div class="leftBtn curProgramName" @click="fnShowSelfBox(1)">
@@ -49,7 +49,7 @@
     <!--学习进度-->
     <div class="progressBox clearfix">
       <div class="unitPro clearfix">
-        <div class="speed mRight">速度：20个/小时</div>
+        <div class="speed mRight">速度：{{todaySpeed}}个/小时</div>
         <div>
           <span class="mRight">单元进度：</span>
           <span class="totalProgress mRight" :title="'单元进度：' + unitProgress">
@@ -66,7 +66,7 @@
           </span>
           <span class="percent">{{courseProgress}}</span>
         </div>
-        <div class="studyAgain">再学一遍</div>
+        <div class="studyAgain" @click="fnClearStudyRecord()">再学一遍</div>
       </div>
     </div>
     <!--底部复习-->
@@ -81,16 +81,16 @@
       </div>
       <div class="botCenter"
            @click="fnGoToStudy()"
-        :class="{ type1: typeNum === 1,type2: typeNum === 2,
+           :class="{ type1: typeNum === 1,type2: typeNum === 2,
                   type3: typeNum === 3,type4: typeNum === 4,
                   type5: typeNum === 5,type6: typeNum === 6}">
         <span class="tit">{{typeName}}</span>
       </div>
       <div class="botRight">
         <div class="review">今日学习效率</div>
-        <div class="proPer">20%</div>
-        <div class="time">在线时长：01:40:00</div>
-        <div class="time">有效时长：01:20:00</div>
+        <div class="proPer">{{todayPercentage}}%</div>
+        <div class="time">在线时长：{{Login_all}}</div>
+        <div class="time">今日在线：{{Login_today}}</div>
       </div>
     </div>
   </section>
@@ -103,7 +103,7 @@
 
   export default {
     name: 'home-content',
-    components: {homeContentDeviceBox, homeContentUnitBox, homeContentVersionBox },
+    components: {homeContentDeviceBox, homeContentUnitBox, homeContentVersionBox},
     data() {
       return {
         showDeviceBox: false,
@@ -120,10 +120,15 @@
         memorytracking_count: 0, // 记忆追踪个数
         review_count: 0, // 智能复习个数
         showTestContent: false, // 显示测试中心列表
+        loading: false, // 显示当前组件loading
         loading1: false, // 测试中心显示loading
         oldwordnumber: 0, // 熟词数量
         newwordnumber: 0, // 生词数量
         totalnumber: 0, // 已学数量
+        todaySpeed: 0, // 今日学习速度
+        Login_all: '00:00:00', // 在线时长
+        Login_today: '00:00:00', // 今日在线
+        todayPercentage: 0, // 今日学习效率
       }
     },
     methods: {
@@ -172,7 +177,7 @@
         let textbook_name = sessionStorage.textbook_name;
         let unit_id = sessionStorage.unit_id;
         let unit_name = sessionStorage.unit_name;
-        if(version_id && version_name && textbook_id && textbook_name && unit_id && unit_name){
+        if (version_id && version_name && textbook_id && textbook_name && unit_id && unit_name) {
           this.$store.commit('updateVersionBoxTitle', version_name + ' - ' + textbook_name);
           this.$store.commit('updateVersionId', version_id);
           this.$store.commit('updateTextbookId', textbook_id);
@@ -194,8 +199,6 @@
           }
         }).then(res => {
           let data = res.data;
-          console.log('最后一次学习记录：');
-          console.log(data);
           sessionStorage.version_id = data[0].version_id;
           sessionStorage.version_name = data[0].version_name;
           sessionStorage.textbook_id = data[0].textbook_id;
@@ -217,7 +220,7 @@
       // 去学习了
       fnGoToStudy() {
         console.log('去学习了,学习类型：' + this.$store.state.typeId);
-        switch ( parseInt(this.$store.state.typeId) ) {
+        switch (parseInt(this.$store.state.typeId)) {
           case 1:
             console.log('单词记忆教材:' + this.$store.state.textbookId + '单元：' + this.$store.state.unitId);
             this.$router.push('./wordStudy');
@@ -268,7 +271,7 @@
             url: this.$url.url0,
             params: {
               method: 'GetProgress',
-              user_id: userMsg.ID,
+              user_id: this.userMsg.ID,
               unit_id: unitId,
               type_id: typeId,
               textbook_id: textbookId
@@ -292,11 +295,11 @@
             }
           })
         } else {
-          console.log('少东西呢');
-          console.log('typeId:' + typeId);
-          console.log('unitId:' + unitId);
-          console.log('userMsg:' + userMsg);
-          console.log('textbookId:' + textbookId);
+          console.log('获取课程进度失败');
+          // console.log('typeId:' + typeId);
+          // console.log('unitId:' + unitId);
+          // console.log('userMsg:' + this.userMsg);
+          // console.log('textbookId:' + textbookId);
           return false;
         }
       },
@@ -317,7 +320,7 @@
           url: this.$url.url0,
           params: {
             method: 'GetTestNumber',
-            user_id: userMsg.ID,
+            user_id: this.userMsg.ID,
             textbook_id: textbookId,
             type_id: typeId
           }
@@ -333,16 +336,94 @@
       fnSendMsg() {
         this.$ajax({
           method: 'GET',
-          url: this.$url.url0,
+          url: this.$url.url1,
           params: {
             method: 'UserClose',
             user_id: this.userMsg.ID
           }
         }).then(res => {
           let data = res.data;
-          console.log(data);
+          let thisStudy = data.study_words + data.study_sentence;
+          // 定义每小时应该学习的数量为40
+          let oneHourStudyNum = 40;
+          if (data.result == 1) {
+            // 先判断token
+            if (data.token != sessionStorage.token) {
+              this.$alert('账号已在其他设备登录，若非本人操作，请尝试重新登陆并修改密码', '警告').then(() => {
+                this.$router.push('/');
+              });
+            }
+            // 计算今日学习速度
+            this.todaySpeed = Math.round(thisStudy / (data.Login_today / 3600));
+            this.Login_all = this.fnupdateAllTime(data.Login_all);
+            this.Login_today = this.fnupdateAllTime(data.Login_today);
+            this.fnupdateStudyTime(data.Login_all, data.Login_today);
+            //今日学习效率
+            this.todayPercentage = Math.round(this.todaySpeed / oneHourStudyNum * 100) > 100 ? 100 : Math.round(this.todaySpeed / oneHourStudyNum * 100);
+          }
         })
-      }
+      },
+      // 计算时间的函数
+      fnupdateAllTime(login_all) {
+        let hour = parseInt(login_all / 3600) < 10 ? ('0' + parseInt(login_all / 3600)) : parseInt(login_all / 3600);
+        let minute = parseInt((login_all - (hour * 3600)) / 60) < 10 ? ('0' + parseInt((login_all - (hour * 3600)) / 60)) : parseInt((login_all - (hour * 3600)) / 60);
+        let seconds = parseInt(login_all - (hour * 3600) - (minute * 60)) < 10 ? ('0' + parseInt(login_all - (hour * 3600) - (minute * 60))) : parseInt(login_all - (hour * 3600) - (minute * 60));
+
+        let time = `${hour} : ${minute} : ${seconds}`;
+        return time;
+      },
+      // 点击在学一次按钮，清空本教材学习记录
+      fnClearStudyRecord() {
+        if (this.unitProgress == '100%') {
+          this.$alert(
+            '确定再学一次吗，该操作将清空本单元学习进度（不包括学前测试记录）！',
+            '提示'
+          ).then(() => {
+            this.fnSendAgainLearn();
+          })
+        } else {
+          this.$message({
+            message: '注意哦，这个单元你还没有学完呢！',
+            type: 'warning'
+          });
+        }
+      },
+      // 发送在学一次事件
+      fnSendAgainLearn() {
+        let unit_id = sessionStorage.unit_id;
+        let type_id = sessionStorage.type_id;
+        this.loading = true;
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params: {
+            method: 'AgainLearn',
+            user_id: this.userMsg.ID,
+            unit_id: unit_id,
+            type_id: type_id
+          }
+        }).then(res => {
+          this.loading = false;
+          let data = res.data;
+          if (data.msg === '成功') {
+            this.$message({
+              message: '本单元学习记录已清除成功！',
+              type: 'success'
+            });
+            this.study_unit = 0;
+          }
+        })
+      },
+      // 在线时间不断增加
+      fnupdateStudyTime(time1_, time2_) {
+        setInterval(() => {
+          time1_++;
+          time2_++;
+          this.Login_all = this.fnupdateAllTime(time1_);
+          this.Login_today = this.fnupdateAllTime(time2_);
+        }, 1000);
+      },
+
     },
     computed: {
       typeNum() {
@@ -355,7 +436,7 @@
       // 单元进度
       unitProgress() {
         if (this.study_unit === 0 && this.unit_total === 0) {
-          return 0;
+          return '0%';
         }
         return parseInt(this.study_unit / this.unit_total * 100) + '%';
       },
@@ -440,15 +521,16 @@
     cursor: pointer;
   }
 
-  .content > .categoryBtn .link .testContent{
+  .content > .categoryBtn .link .testContent {
     width: 100px;
     position: absolute;
-    right: -20px;top: 84%;
+    right: -20px;
+    top: 84%;
     border: 1px solid #333;
     border-bottom: none;
   }
 
-  .content > .categoryBtn .link .testContent li{
+  .content > .categoryBtn .link .testContent li {
     width: 100%;
     height: 32px;
     line-height: 32px;
@@ -573,22 +655,28 @@
     opacity: .9;
     position: relative;
   }
-  .conBot > .botCenter.type1{
+
+  .conBot > .botCenter.type1 {
     background: url(../../static/img/remember.png) no-repeat center center;
   }
-  .conBot > .botCenter.type2{
+
+  .conBot > .botCenter.type2 {
     background: url(../../static/img/listen.png) no-repeat center center;
   }
-  .conBot > .botCenter.type3{
+
+  .conBot > .botCenter.type3 {
     background: url(../../static/img/write.png) no-repeat center center;
   }
-  .conBot > .botCenter.type4{
+
+  .conBot > .botCenter.type4 {
     background: url(../../static/img/sentenceListen.png) no-repeat center center;
   }
-  .conBot > .botCenter.type5{
+
+  .conBot > .botCenter.type5 {
     background: url(../../static/img/sentenceTranslate.png) no-repeat center center;
   }
-  .conBot > .botCenter.type6{
+
+  .conBot > .botCenter.type6 {
     background: url(../../static/img/sentenceWrite.png) no-repeat center center;
   }
 

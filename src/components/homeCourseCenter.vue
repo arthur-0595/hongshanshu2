@@ -178,7 +178,9 @@
     },
     methods: {
       fnOpenStudyType(type_) {
-        if(type_ <= 6) {
+        if (type_ <= 6) {
+          this.$store.commit('updateShowGoStudyCenter');
+          this.$router.replace('/home');
           this.$bus.emit('openStudyType', type_);
         } else if (type_ === 7) { // 智能语音
           this.$router.replace('/home/homeExtendVoice');

@@ -261,7 +261,6 @@
           }
         }).then(res => {
           let data = res.data;
-          console.log(data);
           if (data.msg) {
             this.$router.push({
               path: './wordStudyScore',

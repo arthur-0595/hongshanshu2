@@ -64,6 +64,7 @@
               this.password = '';
               break;
             case 2:
+              sessionStorage.token = data.token;
               sessionStorage.userMsg = JSON.stringify(data.info[0]);
               this.$store.commit('updateUserMsg', data.info[0]);
               this.$store.commit('updateUserId', data.info[0].ID);
