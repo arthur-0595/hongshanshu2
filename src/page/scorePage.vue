@@ -81,7 +81,13 @@
       },
       // 左上角标题
       scoreTit() {
-        let title = sessionStorage.version_name + ' - ' + sessionStorage.textbook_name + ' - (' + sessionStorage.unit_name + ') - ' + this.scoreType;
+        let title = '';
+        if (this.$route.query.scoreTit) {
+          title = this.$route.query.scoreTit;
+        } else {
+          title = sessionStorage.version_name + ' - ' + sessionStorage.textbook_name + ' - (' + sessionStorage.unit_name + ') - ' + this.scoreType;
+
+        }
         return title;
       }
     },

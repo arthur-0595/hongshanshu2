@@ -43,49 +43,56 @@
     </ul>
     <!--闯关列表-->
     <ul class="passPoint clearfix" >
-      <!--<li class="beforeStudy">-->
-        <!--<h3>学前测试</h3>-->
-        <!--<div class="testBtn" style="display:block">开始测试</div>-->
-        <!--&lt;!&ndash;<div class="score" style="display:block">90分</div>&ndash;&gt;-->
-      <!--</li>-->
-      <!--已经测试了的 -->
-      <li class="unlocked "
-          v-for="item in studyList"
+      <!--
+      <li class="beforeStudy">
+        <h3>学前测试</h3>
+        <div class="testBtn" style="display:block">开始测试</div>
+        <div class="score" style="display:block">90分</div>
+      </li>
+      -->
+      <li v-for="item in studyList"
           :class="{
             beforeStudy: item.type==1,
-            afterStudy: item.type==3
+            afterStudy: item.type==3,
+            unlocked: item.type==2&&item.allow==1
             }">
-        <!--hasTest-->
-        <h3 v-if="item.type==1">学前测试</h3>
+        <!---->
+        <h4>{{item.v_name}}</h4>
         <div  v-if="item.type==1"
               class="testBtn"
-              v-show="true">开始测试</div>
-        <div v-if="item.type==1" class="score" v-show="false">90分</div>
+              v-show="item.allow==1"
+              @click="fnGoTest(item)">开始测试</div>
+        <div v-if="item.type==1" class="score" v-show="item.allow==0">
+          {{item.score}}分
+        </div>
 
-        <h4 v-if="item.type==2">{{item.v_name}}</h4>
         <div v-if="item.type==2" class="locked"></div>
         <div v-if="item.type==2" class="botLine clearfix">
+          <span v-if="item.type_id!==2">配对</span>
+          <span>听写</span>
+          <span @click="fnGoTest(item)">闯关</span>
+        </div>
+
+        <div  v-if="item.type==3"
+              class="testBtn"
+              v-show="item.allow==1"
+              @click="fnGoTest(item)">开始测试</div>
+        <div v-if="item.type==3" class="locked"></div>
+      </li>
+      <!--
+      <li class="">
+        <h4>第二关</h4>
+        <div class="locked"></div>
+        <div class="botLine clearfix">
           <span>配对</span>
           <span>听写</span>
           <span>闯关</span>
         </div>
-        <h3 v-if="item.type==3">学后测试</h3>
-        <div v-if="item.type==3" class="locked"></div>
-      </li>
-      <!--没锁,可以点击学习-->
-      <!--<li class="">-->
-        <!--<h4>第二关</h4>-->
-        <!--<div class="locked"></div>-->
-        <!--<div class="botLine clearfix">-->
-          <!--<span>配对</span>-->
-          <!--<span>听写</span>-->
-          <!--<span>闯关</span>-->
-        <!--</div>-->
-      <!--</li>-->
-      <li class="afterStudy">
+      </li>      <li class="afterStudy">
         <h3>学后测试111</h3>
         <div class="locked"></div>
       </li>
+      -->
     </ul>
   </div>
 </template>
@@ -149,16 +156,27 @@
           }
         }).then(res => {
           let data = res.data;
-          console.log(data);
+          // console.log(data);
           this.studyList = data;
         })
       },
+      // 跳转测试页面
+      fnGoTest(item_) {
+        this.$router.push({
+          name: 'intelligentVoiceLetterTest',
+          query: {
+            id: item_.id,
+            typeId: item_.type_id,
+            typeName: item_.v_name
+          }
+        });
+      }
     },
     computed: {
 
     },
     mounted() {
-
+      this.fnGetStudyList({id:2});
     },
     created() {
       this.userMsg = JSON.parse(sessionStorage.userMsg);
@@ -277,8 +295,10 @@
   }
 
   .passPoint > li .botLine {
-    width: 83%;
+    width: 100%;
     margin: 8px auto;
+    display: inline-flex;
+    justify-content: space-around;
   }
 
   .passPoint > li .botLine > span {
@@ -289,10 +309,11 @@
     color: #fff;
     text-align: center;
     font-size: 14px;
+    margin: 0 15px;
   }
 
-  .passPoint > li .botLine > span:nth-child(2) {
-    margin: 0 12px;
+  .beforeStudy   li .botLine > span, .afterStudy   li .botLine > span {
+    margin: 0 30px;
   }
 
   .passPoint > li.beforeStudy .testBtn {
@@ -374,16 +395,17 @@
   .testType .topBtn .typeBtn1 {
     float: left;
     line-height: 80px;
-    background-color: #fff;
+    /*background-color: #fff;*/
     width: 180px;
     text-align: center;
     font-size: 17px;
     cursor: pointer;
+    background-color: #008c72;
+    color: #fff;
   }
 
   .testType .topBtn .typeBtn1:hover {
-    background-color: #008c72;
-    color: #fff;
+
   }
 
   .testType .testList {

@@ -12,6 +12,9 @@ import sentenceListen from '@/page/sentenceListen'
 import sentenceTranslate from '@/page/sentenceTranslate'
 import sentenceWrite from '@/page/sentenceWrite'
 import scorePage from '@/page/scorePage'
+import intelligentVoiceLetterStudy from '@/page/intelligentVoiceLetterStudy'
+import intelligentVoiceLetterTest from '@/page/intelligentVoiceLetterTest'
+import intelligentVoiceLetterTestScore from '@/page/intelligentVoiceLetterTestScore'
 
 import homeContent from '@/components/homeContent'
 import homePersonCenter from '@/components/homePersonCenter';
@@ -159,6 +162,30 @@ const router = new Router({
         name: '红杉树 - 测试结果'
       },
       component: scorePage
+    },
+    { // 智能语音 - 字母拼读学习页面
+      path: '/intelligentVoiceLetterStudy',
+      name: 'intelligentVoiceLetterStudy',
+      meta: {
+        name: '红杉树 - 智能语音 - 字母拼读学习'
+      },
+      component: intelligentVoiceLetterStudy
+    },
+    { // 智能语音 - 字母拼读测试页面
+      path: '/intelligentVoiceLetterTest',
+      name: 'intelligentVoiceLetterTest',
+      meta: {
+        name: '红杉树 - 智能语音 - 字母拼读测试'
+      },
+      component: intelligentVoiceLetterTest
+    },
+    { // 智能语音 - 字母拼读测试结果页面
+      path: '/intelligentVoiceLetterTestScore',
+      name: 'intelligentVoiceLetterTestScore',
+      meta: {
+        name: '红杉树 - 智能语音 - 字母拼读测试结果'
+      },
+      component: intelligentVoiceLetterTestScore
     }
 
   ]
