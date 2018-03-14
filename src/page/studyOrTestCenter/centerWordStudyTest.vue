@@ -105,9 +105,9 @@
 </template>
 
 <script>
-  import testHead from '../components/testHead'
-  import homeFoot from '../components/homeFoot'
-  import audioTag from '../components/audioTag'
+  import testHead from '../../components/testHead'
+  import homeFoot from '../../components/homeFoot'
+  import audioTag from '../../components/audioTag'
 
   export default {
     name: 'word-study-test',
@@ -115,7 +115,9 @@
     data() {
       return {
         loading: false,
-        unitId: 0,
+        userMsg: {},
+        typeId: 0,
+        textbookTd: 0,
         dataArr: [],
         dataLength: 0,
         itemsLength: 0,
@@ -125,18 +127,22 @@
         score: 0,
         test_type: '我是左上角标题',
         testObjArr: [],
+        tit: '记忆追踪 - 智能复习'
       }
     },
     methods: {
       // 获取测试所有题目
       fnGetTestList() {
+        console.log('测试复习');
         this.loading = true;
         this.$ajax({
           method: 'GET',
           url: this.$url.url1,
           params: {
-            method: 'getwords',
-            unit_id: this.unitId
+            method: 'TestReview',
+            user_id: this.userMsg.ID,
+            textbookid: this.textbookTd,
+            type: this.typeId
           }
         }).then(res => {
           this.loading = false;
@@ -225,45 +231,33 @@
             correctNum++
           }
         });
-        this.score = Math.round( (correctNum / this.testObjArr.length) * 100 ) ;
+        this.score = Math.round((correctNum / this.testObjArr.length) * 100);
         sessionStorage.testList = JSON.stringify(this.testObjArr);
         console.log('分数：' + this.score + '- 答对个数：' + correctNum);
         this.fnSubmitScore();
       },
       // 提交成绩事件
       fnSubmitScore() {
-        let textbook_id = sessionStorage.textbook_id;
-        let study_type = sessionStorage.type_id;
-        let userMsg = JSON.parse(sessionStorage.userMsg);
-        // console.log('user_id:' + userMsg.ID);
-        // console.log('textbook_id:' + textbook_id);
-        // console.log('test_type:' + test_type);
-        // console.log('test_score:' + this.score);
-        // console.log('test_number:' + this.dataLength);
-        // console.log('study_type:' + study_type);
-        // console.log('type:' + this.testType);
-        // console.log('unit_id:' + this.unitId);
-        // console.log('count:' + this.countTestType);
         this.$ajax({
           method: 'GET',
           url: this.$url.url0,
           params: {
             method: 'SaveTestRecord',
-            user_id: userMsg.ID,
-            textbook_id: textbook_id,
-            test_type: this.test_type,
+            user_id: this.userMsg.ID,
+            textbook_id: this.textbookTd,
+            test_type: this.tit + ' - 智能记忆',
             test_score: this.score,
             test_number: this.dataLength,
-            study_type: study_type,
-            type: this.testType, // 0学前测试 1学后测试
-            unit_id: this.unitId,
+            study_type: this.typeId,
+            type: 3, // 0学前测试 1学后测试
+            unit_id: 1,
             count: this.countTestType
           }
         }).then(res => {
           let data = res.data;
-          if (data.msg) {
+          if (data.msg == '保存成功') {
             this.$router.push({
-              path: './wordStudyScore',
+              name: 'wordStudyScore',
               query: {
                 score: this.score,
                 testType: this.testType,
@@ -300,10 +294,12 @@
     },
     mounted() {
       this.fnGetTestList();
-      this.test_type = sessionStorage.version_name + sessionStorage.textbook_name + ' - ' + this.scoreType + ' ( ' + sessionStorage.unit_name + ' )';
+      this.test_type = '记忆追踪 - 智能记忆 - 测试复习';
     },
     created() {
-      this.unitId = sessionStorage.unit_id;
+      this.userMsg = JSON.parse(sessionStorage.userMsg);
+      this.textbookTd = sessionStorage.textbook_id;
+      this.typeId = sessionStorage.type_id;
       // 监听提交成绩事件
       this.$bus.on('submitGrade', () => {
         // this.$alert('提交成绩啦！', '提交', {
@@ -330,90 +326,105 @@
 </script>
 
 <style scoped>
-  .content{
-    width:1000px;
-    min-height:800px;
-    margin:70px auto 20px;
+  .content {
+    width: 1000px;
+    min-height: 800px;
+    margin: 70px auto 20px;
     background-color: #fff;
     padding: 10px;
     box-sizing: border-box;
   }
-  .content>.itemBox{
-    margin-top:10px;
-    width:100%;
+
+  .content > .itemBox {
+    margin-top: 10px;
+    width: 100%;
   }
-  .content>.itemBox>h4{
-    height:36px;
+
+  .content > .itemBox > h4 {
+    height: 36px;
     line-height: 36px;
-    color:#fff;
+    color: #fff;
     background-color: #008c72;
-    font-size:16px;
-    padding:0 10px;
+    font-size: 16px;
+    padding: 0 10px;
     box-sizing: border-box;
   }
-  .content>.itemBox>ul{
-    width:100%;
-    border:1px solid #ccc;
-    border-top:none;
+
+  .content > .itemBox > ul {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-top: none;
     display: flex;
     justify-content: flex-start;
     flex-wrap: wrap;
     box-sizing: border-box;
   }
-  .content>.itemBox>ul>li{
-    width:50%;
-    padding:20px;
+
+  .content > .itemBox > ul > li {
+    width: 50%;
+    padding: 20px;
     background-color: #fdfbf4;
-    border-right:1px dashed #959595;
-    border-top:1px dashed #959595;
+    border-right: 1px dashed #959595;
+    border-top: 1px dashed #959595;
     box-sizing: border-box;
   }
-  .content>.itemBox>ul>li.selItem{
+
+  .content > .itemBox > ul > li.selItem {
     background-color: #eee9e3;
   }
-  .content>.itemBox>ul>li:nth-child(2n){
-    border-right:none;
+
+  .content > .itemBox > ul > li:nth-child(2n) {
+    border-right: none;
   }
-  .content>.itemBox>ul>li:nth-child(1),
-  .content>.itemBox>ul>li:nth-child(2){
-    border-top:none;
+
+  .content > .itemBox > ul > li:nth-child(1),
+  .content > .itemBox > ul > li:nth-child(2) {
+    border-top: none;
   }
-  .content>.itemBox>ul>li .wordLine{
-    color:#333;
-    font-weight:600;
+
+  .content > .itemBox > ul > li .wordLine {
+    color: #333;
+    font-weight: 600;
     line-height: 30px;
-    font-size:18px;
+    font-size: 18px;
     font-family: "SimSun";
   }
-  .content>.itemBox>ul>li .wordLine .readBtn{
+
+  .content > .itemBox > ul > li .wordLine .readBtn {
     display: inline-block;
     vertical-align: top;
-    width:80px;
-    height:30px;
-    background: url(../../static/img/study/hearing-1.png) no-repeat left  center;
+    width: 80px;
+    height: 30px;
+    background: url(../../../static/img/study/hearing-1.png) no-repeat left center;
     cursor: pointer;
   }
-  .content>.itemBox>ul>li .wordLine .readBtn:hover{
+
+  .content > .itemBox > ul > li .wordLine .readBtn:hover {
     opacity: .7;
   }
-  .content>.itemBox>ul>li .selectorBox{
-    margin-left:20px;margin-top:10px;
+
+  .content > .itemBox > ul > li .selectorBox {
+    margin-left: 20px;
+    margin-top: 10px;
   }
-  .content>.itemBox>ul>li .selectorBox label{
+
+  .content > .itemBox > ul > li .selectorBox label {
     display: block;
     line-height: 28px;
     position: relative;
-    padding-left:26px;
+    padding-left: 26px;
     cursor: pointer;
-    color:#666;
-    font-size:16px;
+    color: #666;
+    font-size: 16px;
   }
-  .content>.itemBox>ul>li .selectorBox label input{
+
+  .content > .itemBox > ul > li .selectorBox label input {
     position: absolute;
-    top:5px;
-    left:0;
+    top: 5px;
+    left: 0;
   }
-  .content>.itemBox>ul>li .selectorBox label:hover{
+
+  .content > .itemBox > ul > li .selectorBox label:hover {
     background-color: #ccc;
   }
 </style>

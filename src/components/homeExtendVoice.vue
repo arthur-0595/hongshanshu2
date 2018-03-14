@@ -55,7 +55,8 @@
             beforeStudy: item.type==1,
             afterStudy: item.type==3,
             unlocked: item.type==2&&item.allow==1
-            }">
+            }"
+          v-if="item.v_name != '学后测试'">
         <!---->
         <h4>{{item.v_name}}</h4>
         <div  v-if="item.type==1"
@@ -68,8 +69,9 @@
 
         <div v-if="item.type==2" class="locked"></div>
         <div v-if="item.type==2" class="botLine clearfix">
-          <span v-if="item.type_id!==2">配对</span>
-          <span>听写</span>
+          <span v-if="item.type_id!==2"
+            @click="fnGoListenStudy(item)">辩音</span>
+          <span @click="fnGoStudy(item)">听写</span>
           <span @click="fnGoTest(item)">闯关</span>
         </div>
 
@@ -88,7 +90,8 @@
           <span>听写</span>
           <span>闯关</span>
         </div>
-      </li>      <li class="afterStudy">
+      </li>
+      <li class="afterStudy">
         <h3>学后测试111</h3>
         <div class="locked"></div>
       </li>
@@ -162,8 +165,54 @@
       },
       // 跳转测试页面
       fnGoTest(item_) {
+        // console.log(item_);
+        if (item_.type_id === 2) { // 字母
+          this.$router.push({
+            name: 'intelligentVoiceLetterTest',
+            query: {
+              id: item_.id,
+              typeId: item_.type_id,
+              typeName: item_.v_name
+            }
+          });
+        } else { // 非字母
+          this.$router.push({
+            name: 'intelligentVoicewordTest',
+            query: {
+              id: item_.id,
+              typeId: item_.type_id,
+              typeName: item_.v_name
+            }
+          });
+        }
+      },
+      // 跳转学习页面
+      fnGoStudy(item_) {
+        console.log(item_);
+        if (item_.type_id === 2) { // 字母
+          this.$router.push({
+            name: 'intelligentVoiceLetterStudy',
+            query: {
+              id: item_.id,
+              typeId: item_.type_id,
+              typeName: item_.v_name
+            }
+          });
+        } else { // 非字母
+          this.$router.push({
+            name: 'intelligentVoicewordListen',
+            query: {
+              id: item_.id,
+              typeId: item_.type_id,
+              typeName: item_.v_name
+            }
+          });
+        }
+      },
+      // 跳转辩音学习页面
+      fnGoListenStudy(item_) {
         this.$router.push({
-          name: 'intelligentVoiceLetterTest',
+          name: 'intelligentVoicewordStudy',
           query: {
             id: item_.id,
             typeId: item_.type_id,
@@ -297,7 +346,7 @@
   .passPoint > li .botLine {
     width: 100%;
     margin: 8px auto;
-    display: inline-flex;
+    display: flex;
     justify-content: space-around;
   }
 
@@ -310,6 +359,7 @@
     text-align: center;
     font-size: 14px;
     margin: 0 15px;
+    flex: 1;
   }
 
   .beforeStudy   li .botLine > span, .afterStudy   li .botLine > span {

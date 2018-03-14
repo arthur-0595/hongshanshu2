@@ -1,23 +1,14 @@
 <template>
   <div id="sentenceListen">
-    <!--最顶部信息-->
     <div class="topInfo">
-      <!--<span>今日有效：00:20:40</span>-->
-      <!--<span>今日在线：00:34:40</span>-->
-      <!--<span>学习效率：13%</span>-->
     </div>
     <!--中间-->
     <div class="centerBox" v-loading="loading">
       <!--学习的单元名字-->
       <div class="nameBox">
-        <div class="deviceName">{{thisTitle}}</div>
-        <div class="version">{{thisVersionName}}</div>
+        <div class="deviceName">句子听力</div>
+        <div class="version">{{tit}}</div>
         <div class="rightBtn clearfix">
-          <!--<span  class="repeat">-->
-          <!--<label for="repeat"><input type="checkbox" id="repeat"/>重复1播放</label>-->
-          <!--</span>-->
-          <!--<span class="help"></span>-->
-          <!--<span class="skin"></span>-->
           <span class="close" @click="fnclosePage()"></span>
         </div>
       </div>
@@ -112,9 +103,8 @@
       return {
         loading: false,
         userMsg: {},
-        unitId: 0,
+        textbookTd: 0,
         typeId: 1, // 类别ID
-        thisTitle: '例句听力',
         studyTime: '00:00:00', // 学习时间
         showTimer: false, // 是否显示倒计时
         setTimeNum: 20, // 倒计时
@@ -141,6 +131,7 @@
         againEnter: 2, // 两次判断进入下一个单词，默认为2，点击-1
         showClearBtn: true, // 是否显示清除按钮
         showPractice: false, // 是否显示练习按钮
+        tit: '记忆追踪 - 智能复习'
       }
     },
     methods: {
@@ -174,16 +165,16 @@
           }
         }, 1000)
       },
-      // 请求首个句子
+      // 请求句子
       fnGetSentence() {
         this.loading = true;
         this.$ajax({
           method: 'GET',
           url: this.$url.url1,
           params: {
-            method: 'Sentence',
+            method: 'Review',
             user_id: this.userMsg.ID,
-            unit_id: this.unitId,
+            textbookid: this.textbookTd,
             type: this.typeId
           }
         }).then(res => {
@@ -196,124 +187,41 @@
             // 单词状态重置为默认熟词
             this.theSentenceState = 1;
             // 记忆强度大于0说明该词是一个学过的词
-            if (this.thisSentence.SenHearing_per > 0) {
+            if (this.thisSentence.percent > 0) {
               this.theSentenceNewOrOld = 1;
             } else {
               this.theSentenceNewOrOld = 0;
             }
-          } else if (data == 4) { // 学前测试
-            this.$alert('先来学前测试一下吧 : )', '进入学前测试！', {
-              confirmButtonText: '确定',
-              callback: () => {
-                console.log('开始学前测试');
-                this.thisTitle = '例句听力 - 学前测试';
-                this.isTest = 0;
-                this.fnGetTestList();
-
-                return false;
-              }
-            })
-          } else if (data == 2) { // 闯关测试
-            this.$alert('学习完毕，现在去测试一下吧 : )', '进入闯关测试！', {
-              confirmButtonText: '确定',
-              callback: () => {
-                console.log('开始闯关测试');
-                this.thisTitle = '例句听力 - 闯关测试';
-                this.isTest = 2;
-                this.fnGetTestList();
-
-                return false;
-              }
-            })
-          } else if (data == 3) { // 没有可学习的内容
-            this.$alert('没有可学习的内容，请联系客服人员 : (', '返回学习中心', {
-              confirmButtonText: '返回学习中心',
-              callback: () => {
-                this.$router.push('/home');
-                return false;
-              }
-            })
-          } else if (data == 0) { // 报错
-            this.$alert('服务器报错，请联系客服人员 : (', '返回学习中心', {
-              confirmButtonText: '返回学习中心',
-              callback: () => {
-                this.$router.push('/home');
-                return false;
-              }
-            })
+          } else {
+            this.$alert('复习完毕咯，点击返回', '返回')
+              .then(() => {
+                this.$router.go(-1);
+              })
           }
         })
       },
-      // 请求下一个句子
-      fnGetNextSentence() {
-        this.fnAllSentenceState();
-        this.loading = true;
+      // 修改单词的学习状态
+      fnUpdataWordState() {
         this.$ajax({
           method: 'GET',
           url: this.$url.url1,
           params: {
-            method: 'getnextSentence',
+            method: 'Upper',
             id: this.thisSentence.id,
-            neworold_word: this.theSentenceState,
-            user_id: this.userMsg.ID,
-            unit_id: this.unitId,
-            type: this.typeId
+            type: this.typeId,
+            trueornot: this.theSentenceState
           }
         }).then(res => {
-          this.loading = false;
           let data = res.data;
           // console.log(data);
-          if (data[0]) { // 进入例句听力学习
-            this.thisSentence = data[0];
-            this.fnAudioPalyer(this.thisSentence.sentence_url);
-            // 单词状态重置为默认熟词
-            this.theSentenceState = 1;
-            // 记忆强度大于0说明该词是一个学过的词
-            if (this.thisSentence.SenHearing_per > 0) {
-              this.theSentenceNewOrOld = 1;
-            } else {
-              this.theSentenceNewOrOld = 0;
-            }
-          } else if (data == 4) { // 学前测试
-            this.$alert('先来学前测试一下吧 : )', '进入学前测试！', {
-              confirmButtonText: '确定',
-              callback: () => {
-                console.log('开始学前测试');
-                this.thisTitle = '例句听力 - 学前测试';
-                this.isTest = 0;
-                this.fnGetTestList();
-
-                return false;
-              }
-            })
-          } else if (data == 2) { // 闯关测试
-            this.$alert('学习完毕，现在去测试一下吧 : )', '进入闯关测试！', {
-              confirmButtonText: '确定',
-              callback: () => {
-                console.log('开始闯关测试');
-                this.thisTitle = '例句听力 - 闯关测试';
-                this.isTest = 2;
-                this.fnGetTestList();
-
-                return false;
-              }
-            })
-          } else if (data == 3) { // 没有可学习的内容
-            this.$alert('没有可学习的内容，请联系客服人员 : (', '返回学习中心', {
-              confirmButtonText: '返回学习中心',
-              callback: () => {
-                this.$router.push('/home');
-                return false;
-              }
-            })
-          } else if (data == 0) { // 报错
-            this.$alert('服务器报错，请联系客服人员 : (', '返回学习中心', {
-              confirmButtonText: '返回学习中心',
-              callback: () => {
-                this.$router.push('/home');
-                return false;
-              }
-            })
+          if (data == 1) {
+            this.fnAllSentenceState();
+            this.fnGetSentence();
+          } else {
+            this.$alert('修改状态失败，将返回前一页', '点击返回' )
+              .then(() => {
+                this.$router.go(-1);
+              })
           }
         })
       },
@@ -324,9 +232,10 @@
           method: 'GET',
           url: this.$url.url1,
           params: {
-            method: 'getSentence',
-            unit_id: this.unitId,
-            type: 1
+            method: 'TestReview',
+            user_id: this.userMsg.ID,
+            textbookid: this.textbookTd,
+            type: this.typeId
           }
         }).then(res => {
           this.loading = false;
@@ -447,7 +356,7 @@
             this.showSentence = false;
             this.showClearBtn = true;
             this.fnClearAll();
-            this.fnGetNextSentence();
+            this.fnUpdataWordState();
           }
         }
       },
@@ -483,16 +392,6 @@
         let textbook_id = sessionStorage.textbook_id;
         let study_type = sessionStorage.type_id;
         let type_ = this.isTest == 0 ? 0 : 1;
-
-        // console.log('user_id:' + userMsg.ID);
-        // console.log('textbook_id:' + textbook_id);
-        // console.log('test_type:' + test_type);
-        // console.log('test_score:' + this.score);
-        // console.log('test_number:' + this.dataLength);
-        // console.log('study_type:' + study_type);
-        // console.log('type:' + this.testType);
-        // console.log('unit_id:' + this.unitId);
-        // console.log('count:' + this.countTestType);
         this.$ajax({
           method: 'GET',
           url: this.$url.url0,
@@ -500,7 +399,7 @@
             method: 'SaveTestRecord',
             user_id: this.userMsg.ID,
             textbook_id: textbook_id,
-            test_type: this.thisVersionName,
+            test_type: this.tit + ' - 句子听力',
             test_score: this.score,
             test_number: this.testArr.length,
             study_type: study_type,
@@ -511,12 +410,12 @@
         }).then(res => {
           let data = res.data;
           if (data.msg === '保存成功') {
-            console.log(data);
             this.$router.push({
               name: 'scorePage',
               query: {
                 score: this.score,
-                testType: this.isTest
+                testType: this.isTest,
+                scoreTit: this.tit + ' - 句子听力'
               }
             });
           } else {
@@ -576,31 +475,8 @@
           this.reviewWordNum++;
         }
       },
-      // 保存最后一次学习记录
-      fnSaveStudy() {
-        this.$ajax({
-          method: 'GET',
-          url: this.$url.url1,
-          params: {
-            method: 'Study',
-            user_id: this.userMsg.ID,
-            unit_id: this.unitId
-          }
-        }).then(res => {
-          let data = res.data;
-          console.log('保存最后一次学习记录' + data);
-        })
-      }
     },
     computed: {
-      // 拼接左上角学习的教材标题
-      thisVersionName() {
-        let versionBoxName = sessionStorage.version_name;
-        let textbookName = sessionStorage.textbook_name;
-        let unitBoxName = sessionStorage.unit_name;
-        let leftTitle = versionBoxName + ' - ' + textbookName + ' - ' + unitBoxName;
-        return leftTitle;
-      },
       // 顺序未打乱的句子数组
       sentenceArr1() {
         let sen_ = this.fnSentenceProcessor(this.thisSentence.sentence);
@@ -624,14 +500,20 @@
       }
     },
     mounted() {
-      this.fnGetSentence();
       this.fnStudyTime();
+      if (this.$route.query.type == 'reviewTest') {
+        console.log('现在是复习测试哦');
+        this.fnGetTestList();
+        this.isTest = 3;
+        this.tit = '记忆追踪 - 测试复习';
+      } else {
+        this.fnGetSentence();
+      }
     },
     created() {
       this.userMsg = JSON.parse(sessionStorage.userMsg);
-      this.unitId = sessionStorage.unit_id;
+      this.textbookTd = sessionStorage.textbook_id;
       this.typeId = sessionStorage.type_id;
-      this.fnSaveStudy();
       // 监听ctrl点击事件，播放单词音频
       document.onkeydown = (event) => {
         if (event.keyCode === 17) { // ctrl
@@ -646,7 +528,7 @@
   #sentenceListen {
     width: 100%;
     height: 100%;
-    background: url(../../static/img/study/space-bg.jpg) no-repeat 0 0;
+    background: url(../../../static/img/study/space-bg.jpg) no-repeat 0 0;
     position: relative;
   }
 
@@ -661,7 +543,7 @@
   .centerBox {
     width: 870px;
     height: 540px;
-    background: url(../../static/img/study/space-bg-small.png) no-repeat 0 0;
+    background: url(../../../static/img/study/space-bg-small.png) no-repeat 0 0;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -712,27 +594,27 @@
   }
 
   .rightBtn > span.help {
-    background-image: url(../../static/img/study/help-light.png);
+    background-image: url(../../../static/img/study/help-light.png);
   }
 
   .rightBtn > span.skin {
-    background-image: url(../../static/img/study/skin-light.png);
+    background-image: url(../../../static/img/study/skin-light.png);
   }
 
   .rightBtn > span.close {
-    background-image: url(../../static/img/study/close-light.png);
+    background-image: url(../../../static/img/study/close-light.png);
   }
 
   .rightBtn > span.help:hover {
-    background-image: url(../../static/img/study/help-light-hover.png);
+    background-image: url(../../../static/img/study/help-light-hover.png);
   }
 
   .rightBtn > span.skin:hover {
-    background-image: url(../../static/img/study/skin-light-hover.png);
+    background-image: url(../../../static/img/study/skin-light-hover.png);
   }
 
   .rightBtn > span.close:hover {
-    background-image: url(../../static/img/study/close-light-hover.png);
+    background-image: url(../../../static/img/study/close-light-hover.png);
   }
 
   .rightBtn > span.repeat {
@@ -827,7 +709,7 @@
   .mainCon .sentenceBox .mySentence .brush {
     width: 30px;
     height: 34px;
-    background: url(../../static/img/study/brush.png) no-repeat center bottom;
+    background: url(../../../static/img/study/brush.png) no-repeat center bottom;
     float: left;
   }
 
@@ -841,7 +723,7 @@
     height: 34px;
     background-repeat: no-repeat;
     background-position: center bottom;
-    background-image: url(../../static/img/study/deep-laba1.png);
+    background-image: url(../../../static/img/study/deep-laba1.png);
     float: right;
     cursor: pointer;
   }
@@ -851,7 +733,7 @@
   }
 
   .mainCon .sentenceBox .mySentence .laba.laba1 {
-    background-image: url(../../static/img/study/deep-laba2.png);
+    background-image: url(../../../static/img/study/deep-laba2.png);
   }
 
   /*记忆强度*/
@@ -893,7 +775,7 @@
     vertical-align: top;
     width: 40px;
     height: 40px;
-    background: url(../../static/img/study/mute-light.png) no-repeat center center;
+    background: url(../../../static/img/study/mute-light.png) no-repeat center center;
   }
 
   .bottomBox .wordsBox {
@@ -917,12 +799,12 @@
     height: 52px;
     background-repeat: no-repeat;
     background-position: center right;
-    background-image: url(../../static/img/study/cry.png);
+    background-image: url(../../../static/img/study/cry.png);
     background-size: 52px 52px;
   }
 
   .bottomBox .wordsBox .face.forword {
-    background-image: url(../../static/img/study/arrow.png);
+    background-image: url(../../../static/img/study/arrow.png);
   }
 
   .bottomBox .wordsBox .face.forword:hover {
@@ -931,7 +813,7 @@
   }
 
   .bottomBox .wordsBox .face.forword.practice {
-    background-image: url(../../static/img/study/practise.png);
+    background-image: url(../../../static/img/study/practise.png);
   }
 
   .bottomBox .wordsBox .randomWords > li {
@@ -974,7 +856,7 @@
     vertical-align: top;
     width: 50px;
     height: 40px;
-    background: url(../../static/img/study/rain-light.png) no-repeat center center;
+    background: url(../../../static/img/study/rain-light.png) no-repeat center center;
   }
 
   /*底部信息*/

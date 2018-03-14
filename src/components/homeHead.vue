@@ -34,7 +34,7 @@
     </div>
     <div class="top2">
       <div class="header2">
-        您所在位置：智能单词-学习中心
+        您所在位置：学习中心
         <div class="toStudyCenter"
              v-show="showGoStudyCenter"
             @click="fnGoStudyCenter()">返回学习中心</div>

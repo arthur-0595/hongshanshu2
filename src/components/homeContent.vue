@@ -75,8 +75,8 @@
         <div class="review">课程总单词量</div>
         <h3 class="reviewNum">{{textbook_total}}个</h3>
         <div class="reviewBtn">
-          <span>智能复习<i>({{review_count}})</i></span>
-          <span>测试复习<i>({{review_count}})</i></span>
+          <span @click="fnGoReviewStudy(review_count)">智能复习<i>({{review_count}})</i></span>
+          <span @click="fnGoReviewTest(review_count)">测试复习<i>({{review_count}})</i></span>
         </div>
       </div>
       <div class="botCenter"
@@ -109,6 +109,8 @@
         showDeviceBox: false,
         showVersionBox: false,
         showUnitBox: false,
+        typeId: 0,
+        textbookTd: 0,
         userMsg: {}, // 个人信息
         versionBoxTitle: '选择版本',
         unitBoxTitle: '选择单元',
@@ -257,6 +259,13 @@
       },
       // 打开记忆追踪
       fnGoHomeMemoryTracer() {
+        if (this.memorytracking_count <= 0) {
+          this.$message({
+            message: '记忆追踪里没有可供学习的单词或句子哦',
+            type: 'warning'
+          });
+          return
+        }
         this.$router.replace('/home/homeMemoryTracer');
         this.$store.commit('updateShowGoStudyCenter');
       },
@@ -423,7 +432,110 @@
           this.Login_today = this.fnupdateAllTime(time2_);
         }, 1000);
       },
-
+      // 智能复习事件
+      fnGoReviewStudy(num_) {
+        if (num_<1) {
+          this.$message({
+            message: '可供复习的数量不足！',
+            type: 'warning'
+          });
+          return;
+        }
+        this.typeId = sessionStorage.type_id;
+        switch (parseInt(this.typeId)){
+          case 1:
+            this.$router.push({
+              name: 'centerWordStudy'
+            });
+            break;
+          case 2:
+            this.$router.push({
+              name: 'centerWordListen'
+            });
+            break;
+          case 3:
+            this.$router.push({
+              name: 'centerWordWrite'
+            });
+            break;
+          case 4:
+            this.$router.push({
+              name: 'centerSentenceListen'
+            });
+            break;
+          case 5:
+            this.$router.push({
+              name: 'centerSentenceTranslate'
+            });
+            break;
+          case 6:
+            this.$router.push({
+              name: 'centerSentenceWrite'
+            });
+            break;
+        }
+      },
+      // 测试复习事件
+      fnGoReviewTest(num_) {
+        if (num_<1) {
+          this.$message({
+            message: '可供复习的数量不足！',
+            type: 'warning'
+          });
+          return;
+        }
+        this.typeId = sessionStorage.type_id;
+        switch (parseInt(this.typeId)){
+          case 1:
+            this.$router.push({
+              name: 'centerWordStudyTest',
+              query: {
+                type: 'reviewTest'
+              }
+            });
+            break;
+          case 2:
+            this.$router.push({
+              name: 'centerWordListen',
+              query: {
+                type: 'reviewTest'
+              }
+            });
+            break;
+          case 3:
+            this.$router.push({
+              name: 'centerWordWrite',
+              query: {
+                type: 'reviewTest'
+              }
+            });
+            break;
+          case 4:
+            this.$router.push({
+              name: 'centerSentenceListen',
+              query: {
+                type: 'reviewTest'
+              }
+            });
+            break;
+          case 5:
+            this.$router.push({
+              name: 'centerSentenceTranslate',
+              query: {
+                type: 'reviewTest'
+              }
+            });
+            break;
+          case 6:
+            this.$router.push({
+              name: 'centerSentenceWrite',
+              query: {
+                type: 'reviewTest'
+              }
+            });
+            break;
+        }
+      }
     },
     computed: {
       typeNum() {
@@ -453,6 +565,8 @@
     },
     created() {
       this.userMsg = JSON.parse(sessionStorage.userMsg);
+      this.textbookTd = sessionStorage.textbook_id;
+      this.typeId = sessionStorage.type_id;
       this.fnUpdateCourseMsg();
       this.fnUpdateUnitList();
       // 监听选择完课本打开选择单元组件的事件

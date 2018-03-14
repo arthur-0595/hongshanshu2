@@ -6,6 +6,9 @@
       <span class="handPaper"
             @click="fnGoBack()"
             v-show="scoreType === 2">重新测试</span>
+      <span class="handPaper"
+            @click="fnGoBack()"
+            v-show="showBack">重新测试</span>
     </div>
   </div>
 </template>
@@ -32,6 +35,14 @@
       scoreType() {
         let scoreType_ = parseInt(this.$route.query.testType);
         return scoreType_;
+      },
+      showBack() {
+        let tit = this.$route.query.scoreTit;
+        if (tit && tit.length > 6) {
+          return true;
+        } else {
+          return false;
+        }
       }
     },
     mounted() {

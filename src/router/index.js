@@ -14,7 +14,18 @@ import sentenceWrite from '@/page/sentenceWrite'
 import scorePage from '@/page/scorePage'
 import intelligentVoiceLetterStudy from '@/page/intelligentVoiceLetterStudy'
 import intelligentVoiceLetterTest from '@/page/intelligentVoiceLetterTest'
-import intelligentVoiceLetterTestScore from '@/page/intelligentVoiceLetterTestScore'
+import intelligentVoicewordStudy from '@/page/intelligentVoicewordStudy'
+import intelligentVoicewordListen from '@/page/intelligentVoicewordListen'
+import intelligentVoicewordTest from '@/page/intelligentVoicewordTest'
+import intelligentVoicewordTestScore from '@/page/intelligentVoicewordTestScore'
+// 学习和测试中心页面
+import centerWordStudy from '@/page/studyOrTestCenter/centerWordStudy'
+import centerWordListen from '@/page/studyOrTestCenter/centerWordListen'
+import centerWordWrite from '@/page/studyOrTestCenter/centerWordWrite'
+import centerSentenceListen from '@/page/studyOrTestCenter/centerSentenceListen'
+import centerSentenceTranslate from '@/page/studyOrTestCenter/centerSentenceTranslate'
+import centerSentenceWrite from '@/page/studyOrTestCenter/centerSentenceWrite'
+import centerWordStudyTest from '@/page/studyOrTestCenter/centerWordStudyTest'
 
 import homeContent from '@/components/homeContent'
 import homePersonCenter from '@/components/homePersonCenter';
@@ -179,13 +190,93 @@ const router = new Router({
       },
       component: intelligentVoiceLetterTest
     },
-    { // 智能语音 - 字母拼读测试结果页面
-      path: '/intelligentVoiceLetterTestScore',
-      name: 'intelligentVoiceLetterTestScore',
+    { // 智能语音 - 单词拼读 - 辩音
+      path: '/intelligentVoicewordStudy',
+      name: 'intelligentVoicewordStudy',
       meta: {
-        name: '红杉树 - 智能语音 - 字母拼读测试结果'
+        name: '红杉树 - 智能语音 - 字母拼读 - 听写'
       },
-      component: intelligentVoiceLetterTestScore
+      component: intelligentVoicewordStudy
+    },
+    { // 智能语音 - 单词拼读 - 听写
+      path: '/intelligentVoicewordListen',
+      name: 'intelligentVoicewordListen',
+      meta: {
+        name: '红杉树 - 智能语音 - 字母拼读 - 辩音'
+      },
+      component: intelligentVoicewordListen
+    },
+    { // 智能语音 - 单词拼读 - 闯关
+      path: '/intelligentVoicewordTest',
+      name: 'intelligentVoicewordTest',
+      meta: {
+        name: '红杉树 - 智能语音 - 字母拼读 - 闯关'
+      },
+      component: intelligentVoicewordTest
+    },
+    { // 智能语音 - 单词拼读 - 成绩
+      path: '/intelligentVoicewordTestScore',
+      name: 'intelligentVoicewordTestScore',
+      meta: {
+        name: '红杉树 - 智能语音 - 字母拼读 - 成绩'
+      },
+      component: intelligentVoicewordTestScore
+    },
+    { // 智能复习 - 智能记忆
+      path: '/studyOrTestCenter/centerWordStudy',
+      name: 'centerWordStudy',
+      meta: {
+        name: '智能复习 - 智能记忆'
+      },
+      component: centerWordStudy
+    },
+    { // 智能复习 - 智能听写
+      path: '/studyOrTestCenter/centerWordListen',
+      name: 'centerWordListen',
+      meta: {
+        name: '智能复习 - 智能听写'
+      },
+      component: centerWordListen
+    },
+    { // 智能复习 - 智能默写
+      path: '/studyOrTestCenter/centerWordWrite',
+      name: 'centerWordWrite',
+      meta: {
+        name: '智能复习 - 智能默写'
+      },
+      component: centerWordWrite
+    },
+    { // 智能复习 - 句子听力
+      path: '/studyOrTestCenter/centerSentenceListen',
+      name: 'centerSentenceListen',
+      meta: {
+        name: '智能复习 - 句子听力'
+      },
+      component: centerSentenceListen
+    },
+    { // 智能复习 - 句子听写
+      path: '/studyOrTestCenter/centerSentenceTranslate',
+      name: 'centerSentenceTranslate',
+      meta: {
+        name: '智能复习 - 句子听写'
+      },
+      component: centerSentenceTranslate
+    },
+    { // 智能复习 - 句子默写
+      path: '/studyOrTestCenter/centerSentenceWrite',
+      name: 'centerSentenceWrite',
+      meta: {
+        name: '智能复习 - 句子默写'
+      },
+      component: centerSentenceWrite
+    },
+    { // 智能复习 - 智能记忆测试
+      path: '/studyOrTestCenter/centerWordStudyTest',
+      name: 'centerWordStudyTest',
+      meta: {
+        name: '智能复习 - 智能记忆 - 测试复习'
+      },
+      component: centerWordStudyTest
     }
 
   ]

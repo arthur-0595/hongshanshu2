@@ -24,7 +24,7 @@
     methods: {
       // 返回按钮
       fnclosePage() {
-        this.$router.push('/home');
+        this.$router.go(-1);
       },
       // 提交成绩
       fnSubmitGrade() {

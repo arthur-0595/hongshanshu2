@@ -1,17 +1,13 @@
 <template>
   <div id="wordListen">
-    <!--最顶部信息-->
     <div class="topInfo">
-      <!--<span>今日有效：00:20:40</span>-->
-      <!--<span>今日在线：00:34:40</span>-->
-      <!--<span>学习效率：13%</span>-->
     </div>
     <!--中间-->
     <div class="centerBox" v-loading="loading">
       <!--学习的单元名字-->
       <div class="nameBox">
-        <div class="deviceName">{{thisTitle}}</div>
-        <div class="version">{{thisVersionName}}</div>
+        <div class="deviceName">智能听写</div>
+        <div class="version">{{tit}}</div>
         <div class="rightBtn clearfix">
           <!--<span class="help"></span>-->
           <!--<span class="skin"></span>-->
@@ -69,7 +65,8 @@
       return {
         loading: false,
         userMsg: {},
-        unitId: 0,
+        typeId: 0,
+        textbookTd: 0,
         studyTime: '00:00:00', // 学习时间
         thisWord: {
           'id': 15,
@@ -90,12 +87,12 @@
         oldWordNum: 0, // 熟词数量
         reviewWordNum: 0, // 复习数量
         showWord: false, // 是否显示单词释义
-        thisTitle: '智能听写',
         isTest: 1, // 当前状态 0:学前测试  1:默认，学习  2:闯关测试
         countTest: 1, // 是否是直接进入测试， 1：未学习进入  2：学习过进入测试
         testArr: [], // 测试结果组成的数组
         score: 0, // 测试计算分数
         againEnter: 2, // 两次enter进入下一个单词，默认为2，点击-1
+        tit: '记忆追踪 - 智能复习'
       }
     },
     methods: {
@@ -123,79 +120,47 @@
         this.loading = true;
         this.$ajax({
           method: 'GET',
-          url: this.$url.url0,
+          url: this.$url.url1,
           params: {
-            method: 'GetDictation',
+            method: 'Review',
             user_id: this.userMsg.ID,
-            unit_id: this.unitId
+            textbookid: this.textbookTd,
+            type: this.typeId
           }
         }).then(res => {
           this.loading = false;
           let data = res.data;
+          console.log(data);
           if (data[0]) {
             this.thisWord = data[0];
             this.fnAudioPalyer(this.thisWord.word_url);
             // 单词状态重置为默认，熟词
             this.theWordState = 1;
             // 根据当前单词的记忆强度值来判断该词是否是一个已经学过的单词
-            if (this.thisWord.dictation_percent > 1) {
+            if (this.thisWord.percent > 1) {
               this.theWordNewOrOld = 1;
             } else {
               this.theWordNewOrOld = 0;
             }
-          } else if (data.msg === '学前测试') {
-            console.log('学前测试');
-            this.thisTitle = '智能听写 - 学前测试';
-            this.isTest = 0;// 设定当前状态为学前测试
-            this.fnGetDictationTest(0);// 参数为0：学前测试
-            this.$alert('先来学前测试一下吧 : )', '进入学前测试！', {
-              confirmButtonText: '确定',
-              callback: () => {
-                return false;
-              }
-            })
-          } else if (data.msg === '听写完毕') {
-            console.log('听写完毕，准备进入测试');
-            this.thisTitle = '智能听写 - 闯关测试';
-            this.isTest = 2;// 设定当前状态为闯关测试
-            this.countTest = 2;// 设定为学习完毕进入测试
-            this.fnGetDictationTest(1);// 参数为1：闯关测试
-            this.$alert('学习完毕，下面来检验一下学习成果吧 : )', '进入闯关测试！', {
-              confirmButtonText: '确定',
-              callback: () => {
-                return false;
-              }
-            })
-          } else if (data.msg === '无数据') {
-            console.log('没有新的单词数据，请联系客服');
-            this.$alert('注意，没有新的单词数据，请联系相关客服', '点击按钮返回学习中心', {
-              confirmButtonText: '返回学习中心',
-              callback: () => {
-                this.$router.push('/home');
-              }
-            })
-          } else if (data.status == 0) {
-            console.log('错误信息，请联系客服');
-            this.$alert('警告，错误信息，请尝试刷新，若该问题依然存在请联系相关客服！', '点击按钮返回学习中心', {
-              confirmButtonText: '返回学习中心',
-              callback: () => {
-                this.$router.push('/home');
-              }
-            })
+          }else {
+            this.$alert('复习完毕咯，点击返回', '返回')
+              .then(() => {
+                this.$router.go(-1);
+              })
           }
         })
       },
       // 获取所有测试单词
-      fnGetDictationTest(beforeTest_) {
+      fnGetDictationTest() {
         this.loading = true;
         this.$ajax({
           method: 'GET',
-          url: this.$url.url0,
+          url: this.$url.url1,
           params: {
-            method: 'GetDictationTest',
+            method: 'TestReview',
             user_id: this.userMsg.ID,
-            unit_id: this.unitId,
-            before: beforeTest_ // 0：学前测试 1：闯关测试
+            textbookid: this.textbookTd,
+            type: this.typeId
           }
         }).then(res => {
           this.loading = false;
@@ -281,18 +246,23 @@
       fnUpdataWordState() {
         this.$ajax({
           method: 'GET',
-          url: this.$url.url0,
+          url: this.$url.url1,
           params: {
-            method: 'UpdateState',
+            method: 'Upper',
             id: this.thisWord.id,
-            userid: this.userMsg.ID,
-            word_state: this.theWordState
+            trueornot: this.theWordState,
+            type: this.typeId
           }
         }).then(res => {
           let data = res.data;
-          if (data.msg === '更改成功') {
+          if (data == 1) {
             this.fnAllWordState();
             this.fnGetWord();
+          }else {
+            this.$alert('修改状态失败，将返回前一页', '点击返回' )
+              .then(() => {
+                this.$router.go(-1);
+              })
           }
         })
       },
@@ -330,16 +300,6 @@
         let textbook_id = sessionStorage.textbook_id;
         let study_type = sessionStorage.type_id;
         let type_ = this.isTest == 0 ? 0 : 1;
-
-        // console.log('user_id:' + userMsg.ID);
-        // console.log('textbook_id:' + textbook_id);
-        // console.log('test_type:' + test_type);
-        // console.log('test_score:' + this.score);
-        // console.log('test_number:' + this.dataLength);
-        // console.log('study_type:' + study_type);
-        // console.log('type:' + this.testType);
-        // console.log('unit_id:' + this.unitId);
-        // console.log('count:' + this.countTestType);
         this.$ajax({
           method: 'GET',
           url: this.$url.url0,
@@ -347,7 +307,7 @@
             method: 'SaveTestRecord',
             user_id: this.userMsg.ID,
             textbook_id: textbook_id,
-            test_type: this.thisVersionName,
+            test_type: this.tit + ' - 智能听写',
             test_score: this.score,
             test_number: this.testArr.length,
             study_type: study_type,
@@ -362,7 +322,8 @@
               name: 'scorePage',
               query: {
                 score: this.score,
-                testType: this.isTest
+                testType: this.isTest,
+                scoreTit: this.tit + ' - 智能听写'
               }
             });
           } else {
@@ -384,40 +345,25 @@
         } else if (this.theWordNewOrOld === 1) { // 复习
           this.reviewWordNum++;
         }
-      },
-      // 保存最后一次学习记录
-      fnSaveStudy() {
-        this.$ajax({
-          method: 'GET',
-          url: this.$url.url1,
-          params: {
-            method: 'Study',
-            user_id: this.userMsg.ID,
-            unit_id: this.unitId
-          }
-        }).then(res => {
-          let data = res.data;
-        })
       }
     },
     computed: {
-      // 拼接左上角学习的教材标题
-      thisVersionName() {
-        let versionBoxName = sessionStorage.version_name;
-        let textbookName = sessionStorage.textbook_name;
-        let unitBoxName = sessionStorage.unit_name;
-        let leftTitle = versionBoxName + ' - ' + textbookName + ' - ' + unitBoxName;
-        return leftTitle;
-      }
     },
     mounted() {
       this.fnStudyTime();
-      this.fnGetWord();
+      if (this.$route.query.type == 'reviewTest') {
+        console.log('现在是复习测试哦');
+        this.fnGetDictationTest();
+        this.isTest = 3;
+        this.tit = '记忆追踪 - 测试复习';
+      } else {
+        this.fnGetWord();
+      }
     },
     created() {
       this.userMsg = JSON.parse(sessionStorage.userMsg);
-      this.unitId = sessionStorage.unit_id;
-      this.fnSaveStudy();
+      this.textbookTd = sessionStorage.textbook_id;
+      this.typeId = sessionStorage.type_id;
       // 监听ctrl点击事件，播放单词音频
       document.onkeydown = (event) => {
         if (event.keyCode === 17) { // ctrl
@@ -443,7 +389,7 @@
   #wordListen {
     width: 100%;
     height: 100%;
-    background: url(../../static/img/study/space-bg.jpg) no-repeat 0 0;
+    background: url(../../../static/img/study/space-bg.jpg) no-repeat 0 0;
     position: relative;
   }
 
@@ -458,7 +404,7 @@
   .centerBox {
     width: 870px;
     height: 540px;
-    background: url(../../static/img/study/space-bg-small.png) no-repeat 0 0;
+    background: url(../../../static/img/study/space-bg-small.png) no-repeat 0 0;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -509,27 +455,27 @@
   }
 
   .rightBtn > span.help {
-    background-image: url(../../static/img/study/help-light.png);
+    background-image: url(../../../static/img/study/help-light.png);
   }
 
   .rightBtn > span.skin {
-    background-image: url(../../static/img/study/skin-light.png);
+    background-image: url(../../../static/img/study/skin-light.png);
   }
 
   .rightBtn > span.close {
-    background-image: url(../../static/img/study/close-light.png);
+    background-image: url(../../../static/img/study/close-light.png);
   }
 
   .rightBtn > span.help:hover {
-    background-image: url(../../static/img/study/help-light-hover.png);
+    background-image: url(../../../static/img/study/help-light-hover.png);
   }
 
   .rightBtn > span.skin:hover {
-    background-image: url(../../static/img/study/skin-light-hover.png);
+    background-image: url(../../../static/img/study/skin-light-hover.png);
   }
 
   .rightBtn > span.close:hover {
-    background-image: url(../../static/img/study/close-light-hover.png);
+    background-image: url(../../../static/img/study/close-light-hover.png);
   }
 
   /*学习主要内容*/
@@ -592,7 +538,7 @@
     height: 60px;
     background-repeat: no-repeat;
     background-position: center left;
-    background-image: url(../../static/img/study/deep-laba1.png);
+    background-image: url(../../../static/img/study/deep-laba1.png);
     cursor: pointer;
   }
 
@@ -601,7 +547,7 @@
   }
 
   .mainCon .inputBox .laba.laba1 {
-    background-image: url(../../static/img/study/deep-laba2.png);
+    background-image: url(../../../static/img/study/deep-laba2.png);
   }
 
   .mainCon .inputBox .isRight {
@@ -616,11 +562,11 @@
   }
 
   .mainCon .inputBox.right .isRight {
-    background-image: url(../../static/img/study/spell_right.png);
+    background-image: url(../../../static/img/study/spell_right.png);
   }
 
   .mainCon .inputBox.wrong .isRight {
-    background-image: url(../../static/img/study/spell_wrong.png);
+    background-image: url(../../../static/img/study/spell_wrong.png);
   }
 
   .mainCon .inputBox.wrong input {

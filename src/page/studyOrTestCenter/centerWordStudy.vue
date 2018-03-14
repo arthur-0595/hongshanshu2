@@ -1,20 +1,13 @@
 <template>
   <div class="wordStudy" id="wordStudy">
-    <!--最顶部信息-->
     <div class="topInfo">
-      <!--<span>今日有效：00:20:40</span>-->
-      <!--<span>今日在线：00:34:40</span>-->
-      <!--<span>学习效率：13%</span>-->
     </div>
-    <!--中间-->
     <div class="centerBox" v-loading="loading">
       <!--学习的单元名字-->
       <div class="nameBox">
-        <div class="deviceName">智能记忆-词义记忆</div>
-        <div class="version">{{thisVersionName}}</div>
+        <div class="deviceName">智能记忆</div>
+        <div class="version">{{tit}}</div>
         <div class="rightBtn clearfix">
-          <!--<span class="help"></span>-->
-          <!--<span class="skin"></span>-->
           <span class="close" @click="fnclosePage()"></span>
         </div>
       </div>
@@ -67,7 +60,6 @@
       <!--底部内容-->
       <div class="botInfo">
         <span id="countdown" v-show="showTimer">倒计时： {{setTimeNum}}</span>
-        <!--<span>引擎档位： 6</span>-->
         <span>学习时长： {{studyTime}}</span>
         <span>本次学习[生词：{{newWordNum}}个　熟词：{{oldWordNum}}个　复习：{{reviewWordNum}}个 ]</span>
         <!--<span>学习进度：8/12</span>-->
@@ -85,7 +77,8 @@
       return {
         loading: false,
         userMsg: {},  // 用户信息
-        unitId: 1,  // 单元ID
+        typeId: 0,
+        textbookTd: 0,
         thisWord: {
           'id': 162,
           'user_id': 1,
@@ -114,7 +107,8 @@
         newWordNum: 0, // 生词数量
         oldWordNum: 0, // 熟词数量
         reviewWordNum: 0, // 复习数量
-        studyTime: '00:00:00' // 学习时间
+        studyTime: '00:00:00', // 学习时间
+        tit: '记忆追踪 - 智能复习'
       }
     },
     methods: {
@@ -128,67 +122,29 @@
           method: 'GET',
           url: this.$url.url1,
           params: {
-            method: 'memory',
+            method: 'Review',
             user_id: this.userMsg.ID,
-            unit_id: this.unitId
+            textbookid: this.textbookTd,
+            type: this.typeId
           }
         }).then(res => {
           this.loading = false;
           let data = res.data;
-          switch (data.result) {
-            case 0:
-              // 单词获取失败，请检查您的网络或联系管理员
-              console.log('单词获取失败，请检查您的网络或联系管理员');
-              this.$alert('提示', '单词获取失败，请检查您的网络或联系管理员', {
-                confirmButtonText: '确定',
-                callback: () => {
-                  this.$router.push('/home');
-                }
-              });
-              break;
-            case 1:
-              // 请求成功1
-              console.log('请求成功: ' + JSON.stringify(data));
-              break;
-            case 2:
-              // 单词记忆结束，下面开始单词强化
-              this.$alert('下面是加深记忆时间哦，加油！', '单词记忆结束，下面开始单词强化！', {
-                confirmButtonText: '确定',
-                callback: () => {
-                  this.$router.push('/wordMemory');
-                }
-              });
-              break;
-            case 3:
-              // 学习完毕，下面开始测试
-              this.$alert('到了检验学习成果的时候啦', '学习完毕，下面开始测试！', {
-                confirmButtonText: '确定',
-                callback: () => {
-                  this.$router.push({path: '/wordStudyTest', query: {countTestType: 0}});
-                }
-              });
-              break;
-            case 4:
-              // 先来学前测试一下吧
-              this.$alert('先了解一下自己的真实水平吧', '先来学前测试一下吧！', {
-                confirmButtonText: '确定',
-                callback: () => {
-                  this.$router.push({path: '/wordStudyTest', query: {testType: 0}});
-                }
-              });
-              break;
-            default:
-              this.fnsetTimeOut();
-              // console.log(JSON.stringify(data));
-              this.thisWord = data.result[0];
-              // 是不是一个新词
-              if (this.thisWord.memory_percent > 0) {
-                this.thisNewOrOld = 1;
-              } else {
-                this.thisNewOrOld = 0;
-              }
-              this.fnAudioPalyer(this.thisWord.word_url);
-              break;
+          if (data[0]) {
+            this.fnsetTimeOut();
+            this.thisWord = data[0];
+            this.fnAudioPalyer(this.thisWord.word_url);
+            // 根据当前单词的记忆强度值来判断该词是否是一个已经学过的单词
+            if (this.thisWord.percent > 1) {
+              this.theWordNewOrOld = 1;
+            } else {
+              this.theWordNewOrOld = 0;
+            }
+          }else {
+            this.$alert('复习完毕咯，点击返回', '返回')
+              .then(() => {
+                this.$router.go(-1);
+              })
           }
         })
       },
@@ -202,79 +158,29 @@
           this.reviewWordNum ++;
         }
       },
-      // 获取下一个单词
-      fnGetNextWord(thisstate_) {
-        this.fnSetWordState();
-        this.loading = true;
+      // 修改单词的学习状态
+      fnUpdataWordState() {
         this.$ajax({
           method: 'GET',
           url: this.$url.url1,
           params: {
-            method: 'getnext',
+            method: 'Upper',
             id: this.thisWord.id,
-            neworold_word: thisstate_,
-            user_id: this.userMsg.ID,
-            unit_id: this.unitId
+            type: this.typeId,
+            trueornot: this.theWordState
           }
         }).then(res => {
-          this.loading = false;
-          // 重置到新词状态
-          this.fnreset();
           let data = res.data;
-          switch (data.result) {
-            case 0:
-              // 单词获取失败，请检查您的网络或联系管理员
-              console.log('单词获取失败，请检查您的网络或联系管理员');
-              this.$alert('提示', '单词获取失败，请检查您的网络或联系管理员', {
-                confirmButtonText: '确定',
-                callback: () => {
-                  this.$router.push('/home');
-                }
-              });
-              break;
-            case 1:
-              // 请求成功1
-              console.log('请求成功: ' + JSON.stringify(data));
-              break;
-            case 2:
-              // 单词记忆结束，下面开始单词强化
-              this.$alert('下面是加深记忆时间哦，加油！', '单词记忆结束，下面开始单词强化！', {
-                confirmButtonText: '确定',
-                callback: () => {
-                  this.$router.push('/wordMemory');
-                }
-              });
-              break;
-            case 3:
-              // 学习完毕，下面开始测试
-              this.$alert('到了检验学习成果的时候啦', '学习完毕，下面开始测试！', {
-                confirmButtonText: '确定',
-                callback: () => {
-                  this.$router.push({path: '/wordStudyTest', query: {countTestType: 0}});
-                }
-              });
-              break;
-            case 4:
-              // 先来学前测试一下吧
-              this.$alert('先了解一下自己的真实水平吧', '先来学前测试一下吧！', {
-                confirmButtonText: '确定',
-                callback: () => {
-                  this.$router.push({path: '/wordStudyTest', query: {testType: 0}});
-                }
-              });
-              break;
-            default:
-              this.fnsetTimeOut();
-              // console.log(JSON.stringify(data));
-              this.thisWord = data.result[0];
-              // 是不是一个新词
-              if (this.thisWord.memory_percent > 0) {
-                this.thisNewOrOld = 1;
-              } else {
-                this.thisNewOrOld = 0;
-              }
-              this.fnAudioPalyer(this.thisWord.word_url);
-              break;
+          console.log(data);
+          if (data == 1) {
+            this.fnSetWordState();
+            this.fnGetNewWord();
+            this.fnreset();
+          } else {
+            this.$alert('修改状态失败，将返回前一页', '点击返回' )
+              .then(() => {
+                this.$router.go(-1);
+              })
           }
         })
       },
@@ -315,7 +221,7 @@
       fnRight(type_) {
         if (type_ === 1) { // 对的
           this.isYes = false;
-          this.fnGetNextWord(1);
+          this.fnUpdataWordState();
         } else { // 错的
           this.isYes = false;
           this.isReadAgain = true;
@@ -332,7 +238,7 @@
           this.fnAudioPalyer(this.thisWord.word_url);
           this.nextAgain--;
         } else if (this.nextAgain === 0) {
-          this.fnGetNextWord(2);
+          this.fnUpdataWordState();
         }
       },
       // 倒计时五秒，倒计时结束后自动选择
@@ -356,50 +262,9 @@
           let second = parseInt(time % 60) < 10 ? '0' + parseInt(time % 60) : parseInt(time % 60);
           this.studyTime = hour + ':' + minute + ':' + second;
         }, 1000)
-      },
-      // 保存学习记录
-      /*
-      fnSaveCourse() {
-        this.$ajax({
-          method: 'GET',
-          url: this.$url.url0,
-          params: {
-            method: 'SaveStudy',
-            user_id: this.userMsg.ID,
-            version_id: sessionStorage.version_id,
-            textbook_id: sessionStorage.textbook_id,
-          }
-        }).then(res => {
-          let data = res.data;
-          // console.log(data);
-        })
-      },
-      */
-      // 保存最后一次学习记录
-      fnSaveStudy() {
-        this.$ajax({
-          method: 'GET',
-          url: this.$url.url1,
-          params: {
-            method: 'Study',
-            user_id: this.userMsg.ID,
-            unit_id: this.unitId
-          }
-        }).then(res => {
-          let data = res.data;
-          console.log('保存最后一次学习记录' + data);
-        })
       }
     },
     computed: {
-      // 拼接左上角学习的教材标题
-      thisVersionName() {
-        let versionBoxName = sessionStorage.version_name;
-        let textbookName = sessionStorage.textbook_name;
-        let unitBoxName = sessionStorage.unit_name;
-        let leftTitle = versionBoxName + ' - ' + textbookName + ' - ' + unitBoxName;
-        return leftTitle;
-      },
       // 困难度
       degreeOfDifficulty() {
         let difficulty = 0;
@@ -425,8 +290,8 @@
     },
     created() {
       this.userMsg = JSON.parse(sessionStorage.userMsg);
-      this.unitId = sessionStorage.unit_id;
-      this.fnSaveStudy();
+      this.textbookTd = sessionStorage.textbook_id;
+      this.typeId = sessionStorage.type_id;
       // 监听ctrl点击事件，播放单词音频
       document.onkeydown = (event) => {
         if (event.keyCode === 17) { // ctrl
@@ -441,7 +306,7 @@
   .wordStudy {
     width: 100%;
     height: 100%;
-    background: url(../../static/img/study/space-bg.jpg) no-repeat 0 0;
+    background: url(../../../static/img/study/space-bg.jpg) no-repeat 0 0;
     position: relative;
   }
 
@@ -456,7 +321,7 @@
   .centerBox {
     width: 870px;
     height: 540px;
-    background: url(../../static/img/study/space-bg-small.png) no-repeat 0 0;
+    background: url(../../../static/img/study/space-bg-small.png) no-repeat 0 0;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -507,27 +372,27 @@
   }
 
   .rightBtn > span.help {
-    background-image: url(../../static/img/study/help-light.png);
+    background-image: url(../../../static/img/study/help-light.png);
   }
 
   .rightBtn > span.skin {
-    background-image: url(../../static/img/study/skin-light.png);
+    background-image: url(../../../static/img/study/skin-light.png);
   }
 
   .rightBtn > span.close {
-    background-image: url(../../static/img/study/close-light.png);
+    background-image: url(../../../static/img/study/close-light.png);
   }
 
   .rightBtn > span.help:hover {
-    background-image: url(../../static/img/study/help-light-hover.png);
+    background-image: url(../../../static/img/study/help-light-hover.png);
   }
 
   .rightBtn > span.skin:hover {
-    background-image: url(../../static/img/study/skin-light-hover.png);
+    background-image: url(../../../static/img/study/skin-light-hover.png);
   }
 
   .rightBtn > span.close:hover {
-    background-image: url(../../static/img/study/close-light-hover.png);
+    background-image: url(../../../static/img/study/close-light-hover.png);
   }
 
   /*学习主要内容*/
@@ -577,7 +442,7 @@
     height: 60px;
     background-repeat: no-repeat;
     background-position: center center;
-    background-image: url(../../static/img/study/deep-laba1.png);
+    background-image: url(../../../static/img/study/deep-laba1.png);
     cursor: pointer;
   }
 
@@ -586,7 +451,7 @@
   }
 
   .mainCon .wordName .laba.laba1 {
-    background-image: url(../../static/img/study/deep-laba2.png);
+    background-image: url(../../../static/img/study/deep-laba2.png);
   }
 
   /*记忆强度*/
@@ -674,31 +539,31 @@
   }
 
   .faceBox .beginFace > li.know {
-    background-image: url(../../static/img/study/smile.png);
+    background-image: url(../../../static/img/study/smile.png);
   }
 
   .faceBox .beginFace > li.noknow {
-    background-image: url(../../static/img/study/cry.png);
+    background-image: url(../../../static/img/study/cry.png);
   }
 
   .faceBox .beginFace > li.right {
-    background-image: url(../../static/img/study/correct.png);
+    background-image: url(../../../static/img/study/correct.png);
   }
 
   .faceBox .beginFace > li.wrong {
-    background-image: url(../../static/img/study/wrong.png);
+    background-image: url(../../../static/img/study/wrong.png);
   }
 
   .faceBox > .num0 {
-    background-image: url(../../static/img/study/forward.png);
+    background-image: url(../../../static/img/study/forward.png);
   }
 
   .faceBox > .num1 {
-    background-image: url(../../static/img/study/digital01.png);
+    background-image: url(../../../static/img/study/digital01.png);
   }
 
   .faceBox > .num2 {
-    background-image: url(../../static/img/study/digital02.png);
+    background-image: url(../../../static/img/study/digital02.png);
   }
 
   /*底部信息*/

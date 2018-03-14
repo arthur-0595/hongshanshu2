@@ -330,10 +330,10 @@
                 }
               } else if (this.againEnter === 1) {
                 this.againEnter = 2;
-                this.showSentence = false;
+                this.showSentence = true;
+                this.thisSentenceState = 2;
                 this.isdisabled = false;
                 this.isfocus = true;
-                this.thisSentenceState = 0;
                 this.inputStr = '';
               } else if (this.againEnter === 0) {
                 this.againEnter = 2;

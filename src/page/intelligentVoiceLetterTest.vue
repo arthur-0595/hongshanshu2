@@ -113,6 +113,7 @@
         } else if (this.$route.query.typeName === '学后测试') {
           thistType = 3;
         }
+        console.log(this.$route.query);
         this.$ajax({
           method: 'GET',
           url: this.$url.url1,
@@ -126,13 +127,14 @@
           }
         }).then(res => {
           let data = res.data;
+          console.log(data);
           let testType_ = 0;
           if (thistType === 1) {
             testType_ = 0;
           }else {
             testType_ = 1;
           }
-          if (data == 1) { // 分数提交成功，转入显示成绩页面
+          if (data > 0) { // 分数提交成功，转入显示成绩页面
             this.$router.push({
               name: 'scorePage',
               query: {
@@ -141,6 +143,9 @@
                 scoreTit: this.test_type
               }
             });
+          } else {
+            this.$message.error('提交成绩出错，请重试或联系客服');
+            return false;
           }
         })
       },
@@ -160,6 +165,7 @@
       this.fnGetAllTestList();
       // 监听交卷事件
       this.$bus.on('submitGrade', () => {
+        console.log('监听到交卷');
         this.fnOverTest();
       })
     },
