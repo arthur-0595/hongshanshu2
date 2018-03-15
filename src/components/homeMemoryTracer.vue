@@ -120,7 +120,6 @@
         }).then(res => {
           this.loading = false;
           let data = res.data;
-          console.log(data);
           this.wordList = data;
         })
       },

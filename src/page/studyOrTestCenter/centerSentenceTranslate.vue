@@ -184,7 +184,6 @@
         }).then(res => {
           this.loading = false;
           let data = res.data;
-          console.log(data);
           if (data[0]) { // 进入例句翻译学习
             this.thisSentence = data[0];
             // 单词状态重置为默认熟词

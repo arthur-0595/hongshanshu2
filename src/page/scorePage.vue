@@ -12,8 +12,8 @@
           v-for="(item,index) in testArr">
           <div class="line">
             <span class="num">{{index + 1}}.</span>
-            <span class="laba laba1"
-                  @click="fnVoicePlaying(item.this_url)"></span>
+            <!--<span class="laba laba1"-->
+                  <!--@click="fnVoicePlaying(item.this_url)"></span>-->
             <span class="topic">{{item.this_name}}</span>
             <span class="isCorrect"></span>
           </div>

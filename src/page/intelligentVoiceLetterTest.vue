@@ -189,6 +189,7 @@
   }
   .main{
     width: 1000px;
+    min-height: 600px;
     margin: 0 auto;
     background-color: #fff;
     padding: 20px 30px;
@@ -210,5 +211,6 @@
     border-radius: 4px;
     width: 70%;
     padding:0 10px;
+    font-size: 16px;
   }
 </style>

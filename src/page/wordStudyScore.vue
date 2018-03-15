@@ -31,7 +31,8 @@
               <span class="isCorrect"></span>
             </div>
             <ul class="selectorBox">
-              <li v-for="vo in item.chinese" :class="{correctLi:vo.type === 1}">
+              <li v-for="vo in item.chinese" :class="{correctLi:vo.type === 1}"
+                class="">
                 <span></span>{{vo.content}}
               </li>
               <!--<li><span></span>adj. 每一，每一个</li>-->

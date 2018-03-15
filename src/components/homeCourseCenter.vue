@@ -185,6 +185,9 @@
         } else if (type_ === 7) { // 智能语音
           this.$router.replace('/home/homeExtendVoice');
           this.$store.commit('updateShowGoStudyCenter', true);
+        }else if (type_ === 8) { // 智能阅读
+          this.$router.replace('/home/readpage');
+          // this.$store.commit('updateShowGoStudyCenter', true);
         } else if (type_ === 9) { // 智能口语
           this.$router.replace('/home/homeExtendTongue');
           this.$store.commit('updateShowGoStudyCenter', true);

@@ -352,6 +352,7 @@
           }
         }).then(res => {
           let data = res.data;
+          console.log(data);
           let thisStudy = data.study_words + data.study_sentence;
           // 定义每小时应该学习的数量为40
           let oneHourStudyNum = 40;
@@ -367,7 +368,7 @@
             this.Login_all = this.fnupdateAllTime(data.Login_all);
             this.Login_today = this.fnupdateAllTime(data.Login_today);
             this.fnupdateStudyTime(data.Login_all, data.Login_today);
-            //今日学习效率
+            // 今日学习效率
             this.todayPercentage = Math.round(this.todaySpeed / oneHourStudyNum * 100) > 100 ? 100 : Math.round(this.todaySpeed / oneHourStudyNum * 100);
           }
         })

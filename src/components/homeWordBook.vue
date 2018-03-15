@@ -1,14 +1,16 @@
 <template>
   <div class="wordWrapper">
-    <div class="version">牛津译林版2012(三年级起点) - 三上词组和惯用法</div>
+    <div class="version"> {{version_name}} - {{textbook_name}} - {{unit_name}}</div>
     <div class="centerBtns clearfix">
       <!--单元下拉选择框-->
       <div class="unitSel">
-        选择单元：
-        <select name="" id="">
-          <option value="" selected="selected">Unit1-8</option>
-          <option value="">全部单词</option>
-        </select>
+        <div class="title">选择单元：</div>
+        <div class="unitBox"  @click="showUnitBox = !showUnitBox">
+          {{unit_name}}
+          <ul class="unitList">
+            <li class="unitItem" v-if="showUnitBox" v-for="item in units" @click="showUnitWords(item)"> {{item.unit_name}} </li>
+          </ul>
+        </div>
       </div>
       <!--中间选择按钮-->
       <!--<div class="radioBox">-->
@@ -27,46 +29,27 @@
         <tr class="tHeader">
           <td style="width:50px">序号</td>
           <td style="width:210px">音标（读音 ）</td>
-          <td style="width:210px">单词 <input type="checkbox"/>显示</td>
-          <td>单词 <input type="checkbox"/>词义</td>
+          <td style="width:210px">单词 <input type="checkbox" @click="toShowName"/>显示</td>
+          <td>单词 <input type="checkbox" @click="toShowMean" />词义</td>
         </tr>
-        <tr>
-          <td>1</td>
-          <td>[ei]</td>
-          <td style="display: block;">a</td>
-          <td>conj. 一个</td>
-        </tr>
-        <tr class="gray">
-          <td>2</td>
-          <td>['æʤiktiv]</td>
-          <td>adjective</td>
-          <td>n. 形容词</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>['ɑ:ftə'nu:n]</td>
-          <td>afternoon</td>
-          <td>n. 下午，午后</td>
-        </tr>
-        <tr class="gray">
-          <td>4</td>
-          <td>[ə'gen]</td>
-          <td>again</td>
-          <td>adv. 再一次，又一次</td>
+        <tr v-for="item in words">
+          <td>{{item.id}}</td>
+          <td>{{item.phonogram}} <img class="hearing" @click="reading(item.word_url)" src="../../static/img/study/hearing-1.png" alt=""> </td>
+          <td><span class="hidden" ref="wordName">{{item.word_name}}</span></td>
+          <td><span class="hidden" ref="wordMean" >{{item.word_mean}}</span></td>
         </tr>
       </table>
     </div>
     <!--分页-->
     <div class="pagination">
-      <span class="pre"> <<上一页 </span>
-      <span class="next"> >>下一页 </span>
+      <span class="pre" @click="beforePage"> <<上一页 </span>
+      <span class="next" @click="nextPage"> >>下一页 </span>
       <ul class="pageList clearfix">
-        <li>1</li>
-        <li class="curPage">2</li>
-        <li>3</li>
-        <li>4</li>
+        <li :class="{curPage: item===pageIndex}" v-for="item in pageNum" @click="selectPage(item)">{{item}}</li>
       </ul>
     </div>
+
+    <audio :src="wordUrl" ref="audio" autoplay="autoplay"></audio>
   </div>
 </template>
 
@@ -75,9 +58,135 @@
     name: 'home-word-book',
     components: {},
     data() {
-      return {}
+      return {
+        userMsg: {},
+        version_name: '',
+        textbook_id: 1,
+        textbook_name: '',
+        unit_id: 1,
+        unit_name: '',
+        type_id: 1,
+        units: [],
+        words: [],
+        wordTotal: 0,
+        pageIndex: 1,
+        pageSize: 10,
+        pageNum: [1],
+        showUnitBox: false,
+        showName: false,
+        showMean: false,
+        wordUrl: ''
+      }
     },
-    methods: {},
+    methods: {
+      _getUnits() {
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params:{
+            method: 'GetUnitByTextBookID',
+            user_id: this.userMsg.ID,
+            textbook_id: this.textbook_id,
+            type_id: this.type_id
+          }
+        }).then((res) => {
+          let data = res.data
+          this.units = data
+        })
+      },
+      _getWords(textbook_id, unitId, pageIndex, pageSize) {
+        this.$ajax({
+          method: 'GET',
+          url: this.$url.url0,
+          params:{
+            method: 'GetWordsByUnitID',
+            textbook_id: textbook_id,
+            unit_id: unitId,
+            page_index: pageIndex,
+            page_size: pageSize
+          }
+        }).then((res) => {
+          this.words = res.data.data
+          this.wordTotal = res.data.total
+          this.pageNum = []
+          var n = Math.ceil(this.wordTotal/this.pageSize)
+          for (var i = 0; i < n; i++) {
+            this.pageNum.push(i+1)
+          }
+        })
+      },
+      showUnitWords(item) {
+        var unitId = item.id,
+        pageIndex = 1,
+        pageSize = this.pageSize;
+        this.pageIndex = 1
+        this.unit_id = unitId
+        this.unit_name = item.unit_name
+        this._getWords(this.textbook_id, unitId, pageIndex, pageSize)
+      },
+      selectPage(item) {
+         this.pageIndex = item
+         this._getWords(this.textbook_id, this.unit_id, item, this.pageSize)
+      },
+      beforePage() {
+        this.pageIndex = this.pageIndex-1
+        if(this.pageIndex<1){
+          this.pageIndex = 1
+          return
+        }else{
+          this._getWords(this.textbook_id, this.unit_id, this.pageIndex, this.pageSize)
+        }
+      },
+      nextPage() {
+        this.pageIndex = this.pageIndex + 1
+        if(this.pageIndex>this.pageNum.length){
+          this.pageIndex = this.pageNum.length
+          return
+        }else{
+          this._getWords(this.textbook_id, this.unit_id, this.pageIndex, this.pageSize)
+        }
+      },
+      toShowName() {
+        this.showName = !this.showName
+        if(this.showName){
+          this.$refs.wordName.forEach((item) => {
+            item.style.opacity = '1'
+          })
+        }else{
+          this.$refs.wordName.forEach((item) => {
+            item.style.opacity = ''
+          })
+        }
+      },
+      toShowMean() {
+        this.showMean = !this.showMean
+        if(this.showMean){
+          this.$refs.wordMean.forEach((item) => {
+            item.style.opacity = '1'
+          })
+        }else{
+          this.$refs.wordMean.forEach((item) => {
+            item.style.opacity = ''
+          })
+        }
+      },
+      reading(wordurl) {
+        this.wordUrl = this.$url.url2 + wordurl.replace(/\\/g, '/')
+        this.$refs.audio.play()
+      }
+    },
+    created() {
+      this.userMsg = JSON.parse(sessionStorage.getItem('userMsg'));
+      this.textbook_id = JSON.parse(sessionStorage.getItem('textbook_id'));
+      this.unit_id = JSON.parse(sessionStorage.getItem('unit_id'));
+      this.version_name = sessionStorage.getItem('version_name');
+      this.unit_name = sessionStorage.getItem('unit_name');
+      this.textbook_name = sessionStorage.getItem('textbook_name')
+      this.type_id = JSON.parse(sessionStorage.getItem('type_id'));
+      this._getUnits()
+      this._getWords(this.textbook_id, this.unit_id, this.pageIndex, this.pageSize)
+      
+    },
     mounted() {
 
     }
@@ -124,15 +233,64 @@
   }
 
   .centerBtns .unitSel {
-    float: left;
+    /*float: left;*/
+    height: 32px;
+    line-height: 32px;
+    /*vertical-align: middle;*/
   }
 
-  .centerBtns .unitSel > select {
+  .centerBtns .unitSel > .title {
+    /*display: inline-block;*/
+    float: left;
+    /*width: 60px;*/
+    height: 32px;
+    line-height: 32px;
+  }
+
+/*  .centerBtns .unitSel > select {
     width: 140px;
     height: 32px;
     font-size: 12px;
     cursor: pointer;
     border: 1px solid #ccc;
+  }*/
+
+  .centerBtns .unitSel > .unitBox {
+    position: relative;
+    display: inline-block;
+    box-sizing: border-box;
+    width: 140px;
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
+    padding-left: 10px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    /*overflow: hidden;*/
+  }
+
+   .centerBtns .unitSel > .unitBox > .unitList {
+    position: absolute;
+    box-sizing: border-box;
+    width: 140px;
+    top: 100%;
+    left: -1px;
+    border: 1px solid #ccc; 
+    background-color: #fff;
+    z-index: 10;
+   }
+  
+  .centerBtns .unitSel > .unitBox > .unitList > li {
+    
+    height: 32px;
+    padding-left: 10px;
+    /*border-bottom: 1px solid #ccc;*/
+    /*background-color: green;*/
+  }
+
+  .centerBtns .unitSel > .unitBox > .unitList > li:hover {
+    background-color: #008C72;
+    color: #fff;
   }
 
   .radioBox {
@@ -207,7 +365,7 @@
     width: 100%;
   }
 
-  .wordList > table tr.gray {
+  .wordList > table tr:nth-child(2n) {
     background-color: #f7f7f7;
   }
 
@@ -224,6 +382,27 @@
     border: 1px solid #e8e8e8;
   }
 
+  .wordList > table tr td img.hearing {
+    width: 60px;
+    margin-left: 5px;
+    opacity: 0;
+  }
+  
+  .wordList > table tr td img.hearing:hover {
+    opacity: 1;
+  }
+
+  .wordList > table tr td span.show {
+    opacity: 1;
+  }
+
+  .wordList > table tr td span.hidden {
+    opacity: 0;
+  }
+  
+  .wordList > table tr td:hover span.hidden {
+    opacity: 1;
+  }
   .wordList > table .tHeader {
     background-color: #008c72;
     height: 40px;

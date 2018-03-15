@@ -354,7 +354,6 @@
     mounted() {
       this.fnStudyTime();
       if (this.$route.query.type == 'reviewTest') {
-        console.log('现在是复习测试哦');
         this.fnGetTestList();
         this.isTest = 3;
         this.tit = '记忆追踪 - 测试复习';

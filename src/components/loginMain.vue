@@ -50,7 +50,7 @@
           },
         }).then(res => {
           let data = res.data;
-          // console.log(JSON.stringify(data));
+          console.log(JSON.stringify(data));
           switch (data.result) {
             case 0:
               this.$message.error('登陆失败');

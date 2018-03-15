@@ -1,31 +1,24 @@
 <template>
   <div class="wordWrapper">
     <!--点击基本会话-->
-    <div class="testType" id="testType" style="display: none;">
-      <div class="topBtn clearfix">
-        <div class="typeBtn1" onclick="hideTestType('testType')">基本会话<span>▼</span></div>
+    <div class="testType" id="testType" >
+      <div class="topBtn clearfix" >
+        <div class="typeBtn1" @click='showSpokeType' >{{selectedSpokeType.spoke_name}}<span v-if="!showType">▼</span><span v-else>▲</span></div>
       </div>
-      <div class="testList clearfix">
+      <div class="testList clearfix" v-if="showType">
         <ul class="leftNav">
           <li><span></span>旅游基本用语</li>
         </ul>
         <ul class="rightNav">
-          <li><span></span>基本会话</li>
-          <li class="tested"><span></span>启程和抵达</li>
-          <li><span></span>住宿</li>
-          <li><span></span>餐厅</li>
-          <li><span></span>逛街</li>
-          <li><span></span>观光和娱乐</li>
-          <li><span></span>交通</li>
-          <li><span></span>遇到麻烦</li>
+          <li class="tested" v-for="item in spokeType" @click="selectSpokeTypeItem(item)"><span></span>{{item.spoke_name}}</li>
         </ul>
       </div>
     </div>
     <!--点击某一个图片-->
-    <div class="testInfo" id="testInfo" style="display: none;">
+    <div class="testInfo" id="testInfo" v-if="showTestType">
       <div class="topName clearfix">
-        <span class="name">旅游基础用语 - 基本会话 - 分别</span>
-        <span class="close" onclick="hideTestType('testInfo')">×</span>
+        <span class="name">旅游基础用语 - {{selectedSpokeType.spoke_name}} - {{selectedSpokeTypeItem.spoke_name}}</span>
+        <span class="close" @click="showTestType = !showTestType">×</span>
       </div>
       <div class="conBox">
         <h3>选择训练方式，开始学习：</h3>
@@ -38,49 +31,49 @@
           </tr>
           <tr>
             <td>跟读</td>
-            <td>9句</td>
+            <td>{{testType.total}}句</td>
             <td class="barBox">
-              <span class="totalPro"><i class="curPro"></i></span>
-              <span class="percent">2%</span>
-              <span class="tipNum">6个未录音</span>
+              <span class="totalPro"><i class="curPro" :style="{width: testType.repeatnumber / testType.total + "%"}"></i></span>
+              <span class="percent">{{testType.repeatnumber / testType.total}} %</span>
+              <span class="tipNum">{{testType.total - testType.repeatnumber}} 个未录音</span>
             </td>
-            <td><span class="study">开始</span></td>
+            <td><span class="study" @click="toSpokeRepeat">开始</span></td>
           </tr>
           <tr>
             <td>听力理解</td>
-            <td>9句</td>
+            <td>{{testType.total}}句</td>
             <td class="barBox">
-              <span class="totalPro"><i class="curPro"></i></span>
-              <span class="percent">2%</span>
-              <span class="tipNum">6个未学习</span>
+              <span class="totalPro"><i class="curPro" :style="{width: (testType.listennumber / testType.total)*100 + '%'}"></i></span>
+              <span class="percent">{{Math.ceil((testType.listennumber / testType.total)*100)}} %</span>
+              <span class="tipNum">{{testType.total - testType.listennumber}} 个未学习</span>
             </td>
-            <td><span class="study">开始</span></td>
+            <td><span class="study" @click="toSpokeListen">开始</span></td>
           </tr>
           <tr>
             <td>口语表达</td>
-            <td>9句</td>
+            <td>{{testType.total}}句</td>
             <td class="barBox">
-              <span class="totalPro"><i class="curPro"></i></span>
-              <span class="percent">2%</span>
-              <span class="tipNum">6个未学习</span>
+              <span class="totalPro"><i class="curPro" :style="{width: (testType.oralnumber / testType.total)*100 + '%'}"></i></span>
+              <span class="percent">{{Math.ceil((testType.oralnumber / testType.total)*100)}} %</span>
+              <span class="tipNum">{{testType.total - testType.oralnumber}} 个未学习</span>
             </td>
-            <td><span class="study">开始</span></td>
+            <td><span class="study" @click="toSpokeExpress">开始</span></td>
           </tr>
           <tr>
             <td>闯关测试</td>
-            <td>18句</td>
+            <td>{{testData.length}}句</td>
             <td>
               <span class="untest">未测试</span>
             </td>
-            <td><span class="study">开始</span></td>
+            <td><span class="study" @click="toSpokeTest">开始</span></td>
           </tr>
         </table>
       </div>
     </div>
     <!--内容顶部导航-->
     <ul class="menus clearfix">
-      <li class="typeBtn" onclick="showTestType('testType')">基本会话<span>▼</span></li>
-      <li class="longBox">
+      <li class="typeBtn" >基本会话<span>▼</span></li>
+     <!--  <li class="longBox">
         <div>有效时长：00:20:30</div>
         <div>在线时长：00:20:30</div>
       </li>
@@ -90,50 +83,165 @@
       </li>
       <li class="longBox">
         <img src="../../static/img/study/housekeeper.png" alt="" />
-      </li>
+      </li> -->
     </ul>
     <!--会话列表-->
     <ul class="itemList clearfix">
-      <li class="hasStudy" onclick="showTestType('testInfo')">
-        <img src="../../static/img/study/unit11.jpg" alt="" />
-        <div class="title">问候及初次见面</div>
-      </li>
-      <li onclick="showTestType('testInfo')">
-        <img src="../../static/img/study/unit12.jpg" alt="" />
-        <div class="title">分别</div>
-      </li>
-      <li onclick="showTestType('testInfo')">
-        <img src="../../static/img/study/unit13.jpg" alt="" />
-        <div class="title">致谢和道歉</div>
-      </li>
-      <li onclick="showTestType('testInfo')">
-        <img src="../../static/img/study/unit14.jpg" alt="" />
-        <div class="title">疑问、肯定和否定</div>
-      </li>
-      <li onclick="showTestType('testInfo')">
-        <img src="../../static/img/study/unit15.jpg" alt="" />
-        <div class="title">天气</div>
-      </li>
-      <li onclick="showTestType('testInfo')">
-        <img src="../../static/img/study/unit16.jpg" alt="" />
-        <div class="title">时间</div>
-      </li>
-      <li onclick="showTestType('testInfo')">
-        <img src="../../static/img/study/unit17.jpg" alt="" />
-        <div class="title">约会</div>
+      <li class="hasStudy" v-for="item in spokeTypeItem" @click="selectTestType(item)">
+        <!-- <img src="../../static/img/study/unit11.jpg" alt="" /> -->
+        <img :src="imgUrl + item.spoke_pic" alt="" />
+        <div class="title">{{item.spoke_name}}</div>
       </li>
     </ul>
   </div>
 </template>
 
 <script>
+    import axios from 'axios'
+    import url from '@/api/url'
     export default {
         name: 'homt-extend-tongue',
         components: {},
         data() {
-            return {}
+            return {
+              userId: 1,
+              showType: false,
+              spokeType: [],
+              spokeTypeItem: [],
+              selectedSpokeType: {
+                spoke_name: '基本会话'
+              },
+              selectedSpokeTypeItem: {},
+              testType: {
+                "user_id": 1, 
+                "type_id": 10, 
+                "total": 100, 
+                "repeatnumber": 0, 
+                "listennumber": 0, 
+                "oralnumber": 0, 
+                "score": "未测试"
+              },
+              showTestType: false,
+              testData: [],
+              imgUrl: this.$url.url2 //会话列表类别图片地址
+            }
         },
-        methods: {},
+        methods: {
+
+          //获取口语类别
+          _getSpokeType(fId) {
+            // var newUrl = 'http://192.168.2.127:8091/Areas/Api/Index.ashx'
+            var newUrl = this.$url.url2 + '/Areas/Api/Index.ashx'
+            axios.get(newUrl, {
+              params: {
+                method: 'GetSpokeType',
+                f_id: fId
+              }
+            }).then((res) => {
+              // console.log(res.data)
+              this.spokeType = res.data
+            })
+          },
+
+          //获取口语小类别
+          _getSpokeTypeItem(fId) {
+            // var newUrl = 'http://192.168.2.127:8091/Areas/Api/Index.ashx'
+             var newUrl =  this.$url.url2 + '/Areas/Api/Index.ashx'
+            axios.get(newUrl, {
+              params: {
+                method: 'GetSpokeType',
+                f_id: fId
+              }
+            }).then((res) => {
+              this.spokeTypeItem = res.data
+            })
+          },
+          //选择训练方式
+           _getTestType(typeId) {
+            // var newUrl = 'http://192.168.2.127:8091/Areas/Api/Index.ashx';
+            var newUrl =  this.$url.url2 + '/Areas/Api/Index.ashx'
+            var userId = this.userId;
+            axios.get(newUrl, {
+              params: {
+                method: 'GetSpokenUser',
+                user_id: userId,
+                type_id: typeId
+              }
+            }).then((res) => {
+              this.testType = res.data[0]
+            })
+          },
+          //获取闯关数据
+          _getTestData(typeId) {
+            // var newUrl = 'http://192.168.2.127:8091/Areas/Api/Index.ashx'
+             var newUrl =  this.$url.url2 + '/Areas/Api/Index.ashx'
+            axios.get(newUrl, {
+              params: {
+                method: 'GetSpokenTest',
+                type_id: typeId
+              }
+            }).then((res) => {
+              // console.log(res.data)
+              this.testData = res.data
+            })
+          },
+          //本地存储选择的口语大，小类别
+          _storageType() {
+            //选择的口语大类别
+            var selectedSpokeType = JSON.stringify(this.selectedSpokeType);
+            sessionStorage.setItem('selectedSpokeType', selectedSpokeType);
+            //选择的口语小类别
+            var selectedSpokeTypeItem = JSON.stringify(this.selectedSpokeTypeItem);
+            sessionStorage.setItem('selectedSpokeTypeItem', selectedSpokeTypeItem);
+          },
+
+          //显示隐藏左侧类别选项
+          showSpokeType() {
+            this.showType = !this.showType
+          },
+          selectSpokeTypeItem(item) {
+            var id = item.id;
+            this.selectedSpokeType = item;
+            // console.log(id)
+            this.showType = !this.showType
+            this._getSpokeTypeItem(id)
+          },
+          selectTestType(item) {
+            var typeId = item.id;
+            // console.log(typeId)
+            this.selectedSpokeTypeItem = item;
+            this._getTestType(typeId)
+            this._getTestData(typeId)
+            this.showTestType = !this.showTestType
+          },
+          toSpokeRepeat() {
+            this.$router.replace('/spokeRepeat');
+            var strData = JSON.stringify(this.testData);
+            sessionStorage.setItem('testSpokeData', strData);
+            this._storageType()
+            
+          },
+          toSpokeListen() {
+            this.$router.replace('/spokeListen');
+           this._storageType()
+          },
+          toSpokeExpress() {
+            this.$router.replace('/spokeExpress');
+           this._storageType()
+          },
+          toSpokeTest() {
+            this.$router.replace('/spokeTest');
+            this._storageType()
+          }
+        },
+        created() {
+          // this.spokeTypeItem = this._getSpokeType(2)
+          // this.spokeType = this._getSpokeType(1)
+          // this.userId = JSON.parse(sessionStorage.getItem('userMsg')).ID
+          // console.log(this.userId)
+          this._getSpokeType(1)
+          this._getSpokeTypeItem(2)
+        },
         mounted() {
 
         }
@@ -237,15 +345,16 @@
   .testType .topBtn .typeBtn1{
     float:left;
     line-height: 80px;
-    background-color: #fff;
+    color: #fff;
+    background-color: #008c72;
     width:180px;
     text-align: center;
     font-size: 17px;
     cursor: pointer;
   }
-  .testType .topBtn .typeBtn1:hover{
-    background-color: #008c72;
-    color:#fff;
+  .testType .topBtn .typeBtn1.active{
+   /* background-color: #008c72;
+    color:#fff;*/
   }
   .testType .testList{
     width:100%;
@@ -344,7 +453,7 @@
     box-sizing: border-box;
   }
   .conBox h3{
-    line-height: 60px;
+    line-height: 45px;
     font-size: 17px;
   }
   .conBox .typeList{
@@ -410,6 +519,6 @@
     background-color: orange;
   }
   .conBox .typeList tr td.barBox>.tipNum{
-    margin-left:64px;
+    margin-left: 30px;
   }
 </style>

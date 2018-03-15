@@ -27,6 +27,20 @@ import centerSentenceTranslate from '@/page/studyOrTestCenter/centerSentenceTran
 import centerSentenceWrite from '@/page/studyOrTestCenter/centerSentenceWrite'
 import centerWordStudyTest from '@/page/studyOrTestCenter/centerWordStudyTest'
 
+//智能阅读
+import readPage from '@/page/readPage'
+import readArticle from '@/page/readArticle'
+import readTest from '@/page/readTest'
+import readSortWords from '@/page/readSortWords'
+import readNewWordBook from '@/page/readNewWord'
+
+//智能口语
+import spokeRepeat from '@/page/spokeRepeat'
+import spokeListen from '@/page/spokeListen'
+import spokeExpress from '@/page/spokeExpress'
+import spokeTest from '@/page/spokeTest'
+import spokeSaveScore from '@/page/spokeSaveScore'
+
 import homeContent from '@/components/homeContent'
 import homePersonCenter from '@/components/homePersonCenter';
 import homeWordBook from '@/components/homeWordBook';
@@ -84,6 +98,27 @@ const router = new Router({
             name: '红杉树 - 智能语音'
           },
           component: homeExtendVoice
+        },
+        { // 智能阅读
+          path: 'readpage',
+          meta: {
+            name: '红杉树 - 智能阅读'
+          },
+          component: readPage,
+          children: [
+            {
+              path: 'article',
+              component: readArticle
+            },
+            {
+              path: 'test',
+              component: readTest
+            },
+            {
+              path: 'sortwords',
+              component: readSortWords
+            }
+          ]
         },
         { // 智能口语
           path: 'homeExtendTongue',
@@ -277,7 +312,52 @@ const router = new Router({
         name: '智能复习 - 智能记忆 - 测试复习'
       },
       component: centerWordStudyTest
-    }
+    },
+    //智能口语 - 跟读
+    {
+      path: '/spokeRepeat',
+      name: 'spokeRepeat',
+      meta: {
+        name: '红杉树-口语跟读'
+      },
+      component: spokeRepeat
+    },
+    //智能口语 - 听力理解
+   {
+    path: '/spokeListen',
+    name: 'spokeListen',
+    meta: {
+      name: '红杉树-听力理解'
+    },
+    component: spokeListen
+  },
+    //智能口语 - 口语表达
+   {
+    path: '/spokeExpress',
+    name: 'spokeExpress',
+    meta: {
+      name: '红杉树-口语表达'
+    },
+    component: spokeExpress
+  },
+  //智能口语 - 口语闯关测试
+  {
+    path: '/spokeTest',
+    name: 'spokeTest',
+    meta: {
+      name: '红杉树-口语闯关测试'
+    },
+    component: spokeTest
+  },
+  //智能口语 - 口语闯关保存
+  {
+    path: '/spokeSaveScore',
+    name: 'spokeSaveScore',
+    meta: {
+      name: '红杉树-口语闯关测试'
+    },
+    component: spokeSaveScore
+  },
 
   ]
 });

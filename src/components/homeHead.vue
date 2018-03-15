@@ -107,6 +107,7 @@
       fnGetUserInfo() {
         // 获取用户ID
         let userMsg = JSON.parse(sessionStorage.userMsg);
+        
         if (!userMsg) {
           return
         }
@@ -118,7 +119,6 @@
             user_id: userMsg.ID
           }
         }).then(res => {
-          // console.log( JSON.stringify(res.data) );
           this.userInfo = res.data;
           sessionStorage.userMsg = JSON.stringify(res.data.info[0]);
         })
