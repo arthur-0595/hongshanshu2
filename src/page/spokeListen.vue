@@ -54,12 +54,12 @@
 				listenIndex: 0,
 				listenData: [
 					{
-						"id": 10000, 
+						"id": 27, 
 				        "user_id": 3, 
-				        "type": "", 
-				        "spoke_name": "", 
-				        "sentence": "", 
-				        "sentence_mean": "", 
+				        "type": "会话类别", 
+				        "spoke_name": "类别细目", 
+				        "sentence": "This is English sentence", 
+				        "sentence_mean": "这是中文翻译", 
 				        "sentence_url": ""
 					}
 				],
@@ -94,13 +94,14 @@
 						method: 'GetStartByWay',
 						user_id: this.userId,
 						type_id: this.typeId,
-						way_id: 2,
-						indexNum: 0,
+						way_id: 2
 					}
 				}).then((res) => {
-					// console.log(res)
+					if(this.listenData.length <= 1){
+						console.log("无数据")
+						return
+					}
 					this.listenData = res.data
-					// console.log(this.listenData)
 				})
 			},
 			_GetKnow(isKnow, itemId) {
@@ -174,14 +175,15 @@
 				this._GetKnow(2, this.listenData[this.listenIndex].id)
 			},
 			next() {
+				if(this.listenIndex>= this.listenData.length -1) {
+					return
+				}
 				this.isNext = false
 				this.isKnow = true
 				this.isMean = false
 				this.tipMsg = '这句话的中文意思你知道吗？'
 				this.listenIndex++
-				if(this.listenIndex> this.listenData.length) {
-					return
-				}
+				
 			}
 
 		},

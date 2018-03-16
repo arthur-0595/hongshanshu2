@@ -38,7 +38,7 @@
 		},
 		methods: {
 			close() {
-				console.log('close')
+				// console.log('close')
 				this.$router.replace('/home/readpage/test');
 			},
 			//添加生词
@@ -85,14 +85,13 @@
 				}).then((res) => {
 					var word_mean = res.trans_result[0].dst;	
 					var word = res.trans_result[0].src;
-					console.log(word_mean)
-					console.log(word)
+					// console.log(word_mean)
+					// console.log(word)
 					this.newWord = word
 					this.newWord_mean = word_mean
 				})
 			},
 			selectText(e) {
-				console.log('select')
 				var selectedText = this.funGetSelectText();
 				if(selectedText){
 					// 去除标点符号
@@ -111,9 +110,8 @@
 					var to = 'zh';
 					var str1 = appid + query + salt +key;
 					var sign = MD5(str1);	
-
-					this._queryNewWords(query, appid, salt, from, to, sign)	
-					console.log(e)	
+					// console.log(query)
+					this._queryNewWords(query, appid, salt, from, to, sign)		
 
 					// 获取鼠标坐标
 			        var x = e.pageX;
@@ -147,7 +145,7 @@
 			this.userMsg = JSON.parse(sessionStorage.getItem('userMsg'))
 			this.userId = this.userMsg.id
 			this.article = JSON.parse(sessionStorage.getItem('article'))
-			console.log(this.article)
+			// console.log(this.article)
 		}
 	}
 </script>

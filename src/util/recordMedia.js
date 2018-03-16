@@ -100,6 +100,7 @@ function stopRecord(callback) {
 // 播放录制的音频
 function playRecord() {
     var url = URL.createObjectURL(recorderFile);
+    // var url = HTMLMediaElement.srcObject(recorderFile);
     var dom = document.createElement(videoEnabled ? 'video' : 'audio');
     dom.autoplay = true;
     dom.src = url;

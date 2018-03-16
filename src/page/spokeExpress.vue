@@ -50,7 +50,18 @@
 				userId: 1,
 				typeId: 10,
 				listenIndex: 0,
-				listenData: [],
+				listenData: [
+					{
+						id: 181,
+						sentence: 'Thank you for everything',
+						sentence_mean: '感谢您为我做的一切',
+						sentence_url: "",
+						spoke_name: "分别",
+						type: '基本会话',
+						user_id: 3
+
+					}
+				],
 				isKnow: true,
 				isRight: false,
 				isNext: false,
@@ -83,13 +94,16 @@
 						method: 'GetStartByWay',
 						user_id: this.userId,
 						type_id: this.typeId,
-						way_id: 2,
-						indexNum: 0,
+						way_id: 3
 					}
 				}).then((res) => {
-					// console.log(res)
+					if(this.listenData.length <= 1){
+						console.log("无数据")
+						return
+					}
 					this.listenData = res.data
-					console.log(this.listenData)
+					// console.log(this.listenData)
+
 				})
 			},
 			_GetKnow(isKnow, itemId) {
@@ -103,7 +117,9 @@
 						is_know: isKnow,
 					}
 				}).then((res) => {
-					console.log(res)
+					if(res.data.msg == '更新失败'){
+						console.log(res.data.msg)
+					}	
 				})
 			},
 			_formatTime(t) {
@@ -164,14 +180,15 @@
 				this._GetKnow(2, this.listenData[this.listenIndex].id)
 			},
 			next() {
+				if(this.listenIndex>= this.listenData.length -1) {
+					return
+				}
 				this.isNext = false
 				this.isKnow = true
 				this.isMean = false
 				this.tipMsg = '这句话的中文意思你知道吗？'
 				this.listenIndex++
-				if(this.listenIndex>= this.listenData.length) {
-					return
-				}
+				
 			}
 
 		},

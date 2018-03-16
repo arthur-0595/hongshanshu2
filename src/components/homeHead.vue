@@ -80,6 +80,7 @@
           ],
           next_level: 128
         },
+        personImg: '../../static/img/portrait-1.png'
       }
     },
     methods: {
@@ -121,6 +122,11 @@
         }).then(res => {
           this.userInfo = res.data;
           sessionStorage.userMsg = JSON.stringify(res.data.info[0]);
+
+          //联动展示头像，把计算属性变量给成自定义变量personImg
+          if(this.userInfo.info){
+            this.personImg = this.$url.url2 + this.userInfo.info[0].S_picurl
+          }
         })
       },
       // 点击返回学习中心按钮
@@ -133,11 +139,18 @@
     },
     created() {
       this.fnGetUserInfo();
+      //通过bus 实现兄弟组件直接头像数据改动
+      this.$bus.$on('changePic', content => {
+        console.log(content)
+        this.personImg = content
+      })
+
+     
     },
     computed: {
-      personImg() {
-        return this.userInfo.info ? (this.$url.url2 + this.userInfo.info[0].S_picurl) : '../../static/img/portrait-1.png'
-      },
+      // personImg() {
+      //   return this.userInfo.info ? (this.$url.url2 + this.userInfo.info[0].S_picurl) : '../../static/img/portrait-1.png'
+      // },
       showGoStudyCenter() {
         return this.$store.state.showGoStudyCenter;
       }

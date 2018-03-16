@@ -113,7 +113,7 @@
         } else if (this.$route.query.typeName === '学后测试') {
           thistType = 3;
         }
-        console.log(this.$route.query);
+        // console.log(this.$route.query);
         this.$ajax({
           method: 'GET',
           url: this.$url.url1,
@@ -127,7 +127,7 @@
           }
         }).then(res => {
           let data = res.data;
-          console.log(data);
+          // console.log(data);
           let testType_ = 0;
           if (thistType === 1) {
             testType_ = 0;

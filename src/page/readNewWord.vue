@@ -60,7 +60,7 @@
   					pagesize: pageSize
   				}
   			}).then((res) => {
-  				console.log(res.data)
+  				// console.log(res.data)
   				this.newWords = res.data[0].nword
   				this.pageNum = res.data[0].page
   				this.wordsNum = res.data[0].sum
@@ -142,6 +142,7 @@
 		font-size: 36px;
 		float: right;
 		margin-right: 20px;
+		cursor: pointer;
 	}
 	.centerBtns .unitSel{
 		/*float:left;				*/

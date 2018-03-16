@@ -41,7 +41,17 @@
 		name: 'spokeRepeat',
 		data() {
 			return {
-				spokeData: [],
+				spokeData: [
+					{
+				        id: 27, 
+				        user_id: 3, 
+				        type: "基本会话", 
+				        spoke_name: "问候及初次见面", 
+				        sentence: "Hello! My name is John Smith, nice to meet you.", 
+				        sentence_mean: "您好！我叫约翰史密斯，很高兴见到您。", 
+				        sentence_url: ""
+					 },
+				],
 				spokeType: {},
 				spokeTypeItem: {},
 				indexSentence: 0,
@@ -60,7 +70,8 @@
 			},
 			nextSentence() {
 				if(this.indexSentence >= this.spokeData.length-1) {
-					this.indexSentence = this.spokeData.length-1
+					return
+					// this.indexSentence = this.spokeData.length-1
 				}else{
 					this.indexSentence = this.indexSentence + 1
 				}
@@ -100,7 +111,7 @@
 						id: this.indexSentence 
 					}
 				}).then((res) => {
-					console.log(res.data)
+					// console.log(res.data)
 					this.tune = res.data
 				})
 			},

@@ -32,19 +32,19 @@
       },
       // 根据单词数量计算答题时间
       fnSetTimeOut(lietLenth_) {
-        let time = parseInt(lietLenth_) * 7;
+        let time = parseInt(lietLenth_) * 10;
         let timer = setInterval(() => {
           time--;
           this.onlyminute = parseInt(time/60);
           this.onlysecond = time % 60;
           if (time <= 0) {
             clearInterval(timer);
-            this.fnSubmitGrade();
-            // this.$alert('倒计时结束啦，看看自己的成绩吧！', '测试结束', {
-            //   confirmButtonText: '确定',
-            //   callback: () => {
-            //   }
-            // });
+            this.$alert('倒计时结束啦，看看自己的成绩吧！', '测试结束', {
+              confirmButtonText: '确定',
+              callback: () => {
+                this.fnSubmitGrade();
+              }
+            });
           }
         }, 1000);
       },

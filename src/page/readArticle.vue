@@ -19,7 +19,7 @@
 		},
 		methods: {
 			close() {
-				console.log('close')
+				// console.log('close')
 				this.$router.replace('/home/readpage');
 			},
 			toTest() {
@@ -29,7 +29,7 @@
 		created() {
 
 			this.article = JSON.parse(sessionStorage.getItem('article'))
-			console.log(this.article)
+			// console.log(this.article)
 		}
 	}
 </script>

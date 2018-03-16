@@ -4,12 +4,12 @@
       <div class="topTip">亲爱的同学：您好！为了给您提供更好的学习服务，请您先完善个人信息。</div>
       <div class="infoBar">
       <!--infoImage 默认填写的信息 infoImage2 选填细信息 infoImage3 领金币-->
-        <div class="infoImage infoImage2"></div>
-          <ul class="markList clearfix">
+        <!-- <div class="infoImage infoImage2"></div> -->
+          <!-- <ul class="markList clearfix">
             <li class="left">必填信息</li>
             <li class="center">选填信息</li>
             <li class="right">金币已领</li>
-          </ul>
+          </ul> -->
         </div>
       <!-- 账号信息列表 -->
       <ul class="infoList">
@@ -78,34 +78,34 @@
             </li>
             <li>
               <span>昵称：</span>
-              <input type="text" @blur="checkName" name="name" ref="s_name"/>
+              <input type="text" @blur="checkName" name="name" ref="s_name" :placeholder="userMsg.S_name"/>
               <span  class="red" >{{ errorsName }}</span>
             </li>
             <li class="sex">
               <span>性别：</span>
               <select name="" id="" ref="s_sex">
-                <option value="1"  selected="selected">男</option>
-                <option value="2">女</option>
+                <option value="1"  :selected="userMsg.S_sex == 1 ? 'selected' : '' ">男</option>
+                <option value="2" :selected="userMsg.S_sex == 2 ? 'selected' : '' ">女</option>
               </select>
             </li>
             <li>
               <span>家长手机：</span>
-              <input type="tel" maxlength="14" @blur="checkPhone" name="phone" ref="s_phone"/>
+              <input type="tel" maxlength="14" @blur="checkPhone" name="phone" ref="s_phone" :placeholder="userMsg.S_phone"/>
               <span  class="red" >{{ errorsPhone }}</span>
             </li>
             <li>
               <span>QQ：</span>
-              <input type="text" @blur="checkQQ"  name="qq" placeholder="" ref="s_qq"/>
+              <input type="text" @blur="checkQQ"  name="qq" placeholder="" ref="s_qq" :placeholder="userMsg.S_qq"/>
               <span  class="red" >{{ errorsQQ }}</span>
             </li>
             <li>
               <span>邮箱：</span>
-              <input @blur="checkEmail"  name="email" type="text" placeholder="" ref="s_email"/>
+              <input @blur="checkEmail"  name="email" type="text" :placeholder="userMsg.S_email" ref="s_email"/>
               <span  class="red" >{{errorsEmail}}</span>
              </li>
             <li>
               <span>地址：</span>
-              <input type="text" ref="s_address" />
+              <input type="text" ref="s_address" :placeholder="userMsg.S_address"/>
             </li>
             <li class="msg-box">
               <div class="save-btn" @click="save">
@@ -155,14 +155,14 @@
     },
     methods: {
       checkPwdFomat() {
-        console.log("blur")
+        // console.log("blur")
         let str = this.$refs.newPwd.value
-        console.log(str)
+        // console.log(str)
         let result = /^[a-zA-Z]\w{5,17}$/.test(str)
-        console.log(result)
+        // console.log(result)
         if(!result) {
           this.errorsOldPwd = '以字母开头，长度在6-18之间，只能包含字符、数字和下划线'
-          console.log(this.errorsOldPwd)
+          // console.log(this.errorsOldPwd)
         }else{
           this.errorsOldPwd = ''
         }
@@ -196,9 +196,9 @@
       },
       checkQQ() {
         let str = this.$refs.s_qq.value
-        let result = (str.search(/^[1-9]\d{5,10}$/) != -1)
+        let result = (str.search(/^[1-9]\d{5,11}$/) != -1)
         if(!result) {
-          this.errorsQQ = '必须是5-10位有效QQ号码'
+          this.errorsQQ = '必须是5-11位有效QQ号码'
         }else{
           this.errorsQQ = ''
         }
@@ -207,6 +207,7 @@
         this.s_picurl = index
         this.portrait = '../../static/img/me/'+ index +'.png'
         this.showImgbox = false
+
       },
        changePwd() {
         // console.log("changePwd")
@@ -220,7 +221,7 @@
             newpwd: this.$refs.newPwd.value
           }
         }).then((res) => {
-          console.log(res)
+          // console.log(res)
           let data = res.data
           switch (data.result) {
             case 0:
@@ -282,8 +283,8 @@
             address = this.$refs.s_address.value,
             picurl = this.s_picurl;
 
-            console.log(name, sex, phone, qq, email, address, picurl)
- 
+            // console.log(name, sex, phone, qq, email, address, picurl)
+    
         this.$ajax({
           method: 'GET',
           url: url.url1,
@@ -299,7 +300,7 @@
             S_picurl: picurl
           }
         }).then((res) => {
-          console.log(res)
+          // console.log(res)
           let data = res.data
           switch (data.result) {
             case 0:
@@ -325,15 +326,17 @@
           }
           
         })
+        //动态改变头像
+        this.$bus.$emit('changePic', this.portrait)
       },
       _getPwd() {
         aaa.get(url.url1,)
       }
     },
     created() {
-      console.log(this)
+      // console.log(this)
       this.userMsg = JSON.parse(sessionStorage.getItem('userMsg'))
-      console.log(this.userMsg)
+      this.portrait = this.userMsg.S_picurl
        this.portrait =url.url2 + this.userMsg.S_picurl
 
 
@@ -384,7 +387,7 @@
   /**/
   .infoBar {
     width: 547px;
-    height: 60px;
+    height: 20px;
     margin: 20px auto 0;
     /*border:1px solid red;*/
   }

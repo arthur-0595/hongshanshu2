@@ -6,13 +6,15 @@
 				<div class="question" v-for="question in questions" >
 					<label for="" class="questionText">{{question.question}}</label>
 					<div class="radioItem" v-for="item in question.answers">
-						<input type="radio" :name="question.id" :value="item.answer" @click="checkAnswer(question.id, item)"> {{item.answer}}
+						<label>
+							<input type="radio" :name="question.id" :value="item.answer" @click="checkAnswer(question.id, item)"> {{item.answer}}
+						</label>
 					</div>
 				</div>
 			</form>
 			
 		</div>
-		<div class="closeBtn" @click="close">X</div>
+		<div class="closeBtn" @click="close">x</div>
 		<div class="controlBtn">
 			<div class="btn" @click="sortNewWords">筛选生词</div>
 			<div class="btn" @click="lookArtical">查看文章</div>
@@ -52,7 +54,7 @@
                     }
                 }).then((res) => {
                     this.questions = res.data
-                    console.log(this.questions)
+                    // console.log(this.questions)
                 })
             },
             //数组去重函数
@@ -163,10 +165,13 @@
 	.artical > .content  .question > .radioItem {
 		margin: 6px 0;
 	}
+	.artical > .content  .question > .radioItem label{
+		cursor: pointer;
+	}
 	.artical > .closeBtn {
 		position: absolute;
-		top: 15px;
-		right: 20px;
+		top: 10px;
+		right: 40px;
 		font-size: 36px;
 		font-weight: 100;
 		color: #000;

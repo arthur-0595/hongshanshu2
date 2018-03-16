@@ -88,7 +88,7 @@
 					}
 				}).then((res) => {
 					this.testData = res.data
-					console.log(this.testData)
+					// console.log(this.testData)
 				})
 			},
 			_autoPlayItem() {

@@ -104,7 +104,7 @@
             showArtical(item) {
                 var allow = item.allow
                 if(allow == 1) {
-                    console.log(item);
+                    // console.log(item);
                     var article = JSON.stringify(item);
                     sessionStorage.setItem('article', article)
                     this.$router.replace('/home/readpage/article');
@@ -181,6 +181,9 @@
     line-height: 1.6;
  }
 
+ .content-box > .left .grade .gradeList .gradeItem:hover {
+    color: #008D72;
+ }
  .content-box > .right {
     float: right;
     box-sizing: border-box;
@@ -218,10 +221,14 @@
     cursor: pointer;
 }
 .content-box > .right > .option > .wordbook {
+    /*float: right;*/
     font-size: 14px;
     width: 100px;
-    margin-left: 25px;
+    margin-left: 540px;
     cursor: pointer;
+}
+.content-box > .right > .option > .wordbook:hover{
+    color: #008D72;
 }
 
 .content-box > .right > .book {
@@ -235,6 +242,7 @@
     width: 120px;
     height: 136px;
     border: 2px solid #ccc;
+    cursor: pointer;
 }
 
 .content-box > .right > .book > .book-box > img {

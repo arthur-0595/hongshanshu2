@@ -33,8 +33,8 @@
             <td>跟读</td>
             <td>{{testType.total}}句</td>
             <td class="barBox">
-              <span class="totalPro"><i class="curPro" :style="{width: testType.repeatnumber / testType.total + "%"}"></i></span>
-              <span class="percent">{{testType.repeatnumber / testType.total}} %</span>
+              <span class="totalPro"><i class="curPro" :style="{width: parseInt(testType.repeatnumber / testType.total) + "%"}"></i></span>
+              <span class="percent">{{parseInt(testType.repeatnumber / testType.total)}} %</span>
               <span class="tipNum">{{testType.total - testType.repeatnumber}} 个未录音</span>
             </td>
             <td><span class="study" @click="toSpokeRepeat">开始</span></td>
@@ -43,8 +43,8 @@
             <td>听力理解</td>
             <td>{{testType.total}}句</td>
             <td class="barBox">
-              <span class="totalPro"><i class="curPro" :style="{width: (testType.listennumber / testType.total)*100 + '%'}"></i></span>
-              <span class="percent">{{Math.ceil((testType.listennumber / testType.total)*100)}} %</span>
+              <span class="totalPro"><i class="curPro" :style="{width: parseInt((testType.listennumber / testType.total)*100) + '%'}"></i></span>
+              <span class="percent">{{parseInt((testType.listennumber / testType.total)*100)}} %</span>
               <span class="tipNum">{{testType.total - testType.listennumber}} 个未学习</span>
             </td>
             <td><span class="study" @click="toSpokeListen">开始</span></td>
@@ -53,8 +53,8 @@
             <td>口语表达</td>
             <td>{{testType.total}}句</td>
             <td class="barBox">
-              <span class="totalPro"><i class="curPro" :style="{width: (testType.oralnumber / testType.total)*100 + '%'}"></i></span>
-              <span class="percent">{{Math.ceil((testType.oralnumber / testType.total)*100)}} %</span>
+              <span class="totalPro"><i class="curPro" :style="{width: parseInt((testType.oralnumber / testType.total)*100)+ '%'}"></i></span>
+              <span class="percent">{{parseInt((testType.oralnumber / testType.total)*100)}} %</span>
               <span class="tipNum">{{testType.total - testType.oralnumber}} 个未学习</span>
             </td>
             <td><span class="study" @click="toSpokeExpress">开始</span></td>
@@ -181,6 +181,9 @@
                 type_id: typeId
               }
             }).then((res) => {
+              if(res.data.length <= 1){
+                console.log("请更新数据库数据！")
+              }
               // console.log(res.data)
               this.testData = res.data
             })
@@ -451,6 +454,7 @@
     width: 100%;
     padding: 0 20px;
     box-sizing: border-box;
+    background-color: #fff;
   }
   .conBox h3{
     line-height: 45px;
@@ -519,6 +523,8 @@
     background-color: orange;
   }
   .conBox .typeList tr td.barBox>.tipNum{
-    margin-left: 30px;
+    float: right;
+    display: inline-block;
+    width: 90px;
   }
 </style>

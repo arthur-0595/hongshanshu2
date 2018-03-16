@@ -86,7 +86,7 @@
 				typeItem: {},
 				answerData: [],
 				uncheck: true,
-				styleArr: ['correct', 'error', 'unsel'],
+				styleArr: ['error', 'correct', 'unsel'],
 				audioUrl: '',
 				score: 0,
 				errorNum: 0,
@@ -126,7 +126,7 @@
                 // http://106.15.91.62:8012
                 // this.$url.url2
 				var formatUrl = 'http://106.15.91.62:8012' + url.replace(/\\/g, '/')
-                console.log(formatUrl)
+                // console.log(formatUrl)
 				this.audioUrl = formatUrl
 			},
 			close() {
@@ -138,7 +138,7 @@
 			this.type = JSON.parse(sessionStorage.getItem('selectedSpokeType'))
 			this.typeItem = JSON.parse(sessionStorage.getItem('selectedSpokeTypeItem'))
 			this.answerData = JSON.parse(sessionStorage.getItem('answerArr'))
-			console.log(this.answerData)
+			// console.log(this.answerData)
 			this.computeScore(this.answerData)
 			this._saveCourse(this.typeItem.id, this.score)
 		},
